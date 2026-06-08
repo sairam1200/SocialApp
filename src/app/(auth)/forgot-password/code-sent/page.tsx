@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ForgotPasswordRequestType, VerifyCodeRequestType, VerifyCodeResponseType } from "@/types/auth/forgotPassword.type";
 import { getIpAddress } from "@/utils/ipAddress.util";
 import { getDeviceId } from "@/utils/deviceId.util";
-
+export const dynamic = "force-dynamic";
 const OTP_DURATION = 900;
 const OTP_EXPIRY_KEY = "otpExpiry";
 
