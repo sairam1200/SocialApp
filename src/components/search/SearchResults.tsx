@@ -1,0 +1,183 @@
+"use client";
+
+import React from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { SearchResult } from "@/types/search.types";
+import ContentFeedCard from "@/components/card/ContentFeedCard";
+import ProfileCard from "@/components/card/PorfileCard";
+import { cn } from "@/utils/cn.util";
+
+interface SearchResultsProps {
+    results: SearchResult[];
+    isLoading: boolean;
+    isError: boolean;
+    error?: Error | null;
+    viewType?: "grid" | "list";
+    onRetry?: () => void;
+    className?: string;
+}
+
+/**
+ * Loading Skeleton Component
+ */
+const ResultSkeleton = ({ viewType = "grid" }: { viewType?: "grid" | "list" }) => (
+    <div
+        className={cn(
+            "bg-white rounded-lg border border-[#E6E6E6] p-4 animate-pulse",
+            viewType === "list" ? "h-24" : "h-64"
+        )}
+    >
+        <div className="flex gap-4 h-full">
+            <div className="w-16 h-16 bg-[#F0F0F0] rounded-lg shrink-0"></div>
+            <div className="flex-1 space-y-2">
+                <div className="h-4 bg-[#F0F0F0] rounded w-3/4"></div>
+                <div className="h-3 bg-[#F0F0F0] rounded w-1/2"></div>
+                {viewType === "grid" && (
+                    <>
+                        <div className="h-3 bg-[#F0F0F0] rounded w-2/3"></div>
+                        <div className="h-3 bg-[#F0F0F0] rounded w-1/3"></div>
+                    </>
+                )}
+            </div>
+        </div>
+    </div>
+);
+
+/**
+ * SearchResults Component
+ * Displays search results with loading and error states
+ */
+export const SearchResults = ({
+    results,
+    isLoading,
+    isError,
+    error,
+    viewType = "grid",
+    onRetry,
+    className,
+}: SearchResultsProps) => {
+
+    // Loading State
+    if (isLoading) {
+        return (
+            <div
+                className={cn(
+                    `grid gap-6 ${viewType === "grid"
+                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                        : "grid-cols-1"
+                    }`,
+                    className
+                )}
+            >
+                {[...Array(12)].map((_, i) => (
+                    <ResultSkeleton key={i} viewType={viewType} />
+                ))}
+            </div>
+        );
+    }
+
+    // Error State
+    if (isError) {
+        return (
+            <div className={cn("flex flex-col items-center justify-center py-12", className)}>
+                <div className="rounded-full bg-red-100 p-4 mb-4">
+                    <AlertCircle className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {error?.message || "Search Error"}
+                </h3>
+                <p className="text-gray-600 text-center mb-6 max-w-md">
+                    {error?.message ||
+                        "Unable to fetch results. Please try again later."}
+                </p>
+                {onRetry && (
+                    <button
+                        onClick={onRetry}
+                        className={cn(
+                            "px-6 py-2 bg-black text-white rounded-lg font-medium",
+                            "hover:bg-gray-900 transition-colors"
+                        )}
+                    >
+                        Try Again
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    // Empty State
+    if (!results || !Array.isArray(results) || results.length === 0) {
+        return (
+            <div
+                className={cn(
+                    "flex flex-col items-center justify-center py-12",
+                    className
+                )}
+            >
+                <div className="rounded-full bg-gray-100 p-4 mb-4">
+                    <Loader2 className="w-8 h-8 text-gray-400 opacity-50" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No Results Found
+                </h3>
+                <p className="text-gray-600 text-center">
+                    Try searching with different keywords or filters
+                </p>
+            </div>
+        );
+    }
+
+    // Results Grid/List
+    return (
+        <div
+            className={cn(
+                `grid gap-6 ${viewType === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-1"
+                }`,
+                className
+            )}
+        >
+            {Array.isArray(results) && results.map((result) => {
+                // If result is a profile
+                if (result.type === "profile") {
+                    return (
+                        <ProfileCard
+                            key={result.id}
+                            profilePicSrc={result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
+                            userName={result.author?.name || "Unknown"}
+                            userHandle={result.author?.handle || "@unknown"}
+                            category={result.description || "Content Creator"}
+                            postCount={result.engagement?.views || 0}
+                            followerCount={0}
+                            followingCount={0}
+                            channelIcons={[]}
+                        />
+                    );
+                }
+
+                // If result is a content feed item (post, video, reel)
+                return (
+                    <ContentFeedCard
+                        key={result.id}
+                        imageSrc={result.media?.url || result.media?.thumbnailUrl || "/icons/gaddr-logo-xs.svg"}
+                        profilePicSrc={result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
+                        userName={result.author?.name || "Unknown"}
+                        userHandle={result.author?.handle || "@unknown"}
+                        platformIcon={<div className="text-xs text-gray-600">{result.platform}</div>}
+                        textContent={result.description || result.content || result.title || ""}
+                        date={result.publishedAt ? new Date(result.publishedAt).toLocaleDateString() : ""}
+                        views={result.engagement?.views || 0}
+                        likes={result.engagement?.likes || 0}
+                        comments={result.engagement?.comments || 0}
+                    />
+                );
+            })}
+            {!Array.isArray(results) && (
+                <div className="col-span-full text-center py-8">
+                    <p className="text-red-600 font-semibold">Error: Invalid results format</p>
+                </div>
+            )}
+        </div>
+    );
+};
