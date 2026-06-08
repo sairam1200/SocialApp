@@ -12,8 +12,9 @@ interface CheckboxProps
 export const Checkbox = React.memo(
 	React.forwardRef<HTMLInputElement, CheckboxProps>(
 		({ className, label, icon, checked, id, ...props }, ref) => {
-			
-			const inputId = id || 'checkbox-' + Math.random().toString(36).slice(2);
+
+			const generatedId = React.useId();
+			const inputId = id || generatedId;
 
 			return (
 				<label
