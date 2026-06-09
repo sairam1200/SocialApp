@@ -7,10 +7,9 @@ import { useFormik } from "formik";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ForgotPasswordRequestType, VerifyCodeRequestType, VerifyCodeResponseType } from "@/types/auth/forgotPassword.type";
+import { ForgotPasswordRequestType, VerifyCodeRequestType } from "@/types/auth/forgotPassword.type";
 import { getIpAddress } from "@/utils/ipAddress.util";
 import { getDeviceId } from "@/utils/deviceId.util";
-export const dynamic = "force-dynamic";
 const OTP_DURATION = 900;
 const OTP_EXPIRY_KEY = "otpExpiry";
 
@@ -277,7 +276,7 @@ export default function CodeSentPage() {
       <div className="flex justify-center gap-4 mt-8.5 mb-3 max-md:gap-2">
         {formik.values.code.map((digit, i) => (
           <input
-            key={i}
+            key={`otp-${i}`}
             id={`code-input-${i}`}
             ref={(el) => {
               inputRefs.current[i] = el;
@@ -341,7 +340,7 @@ export default function CodeSentPage() {
       <div className="flex justify-center">
         <p className="text-xs font-semibold text-[#512FB6] py-[11px]">
           Can&apos;t access your email?{" "}
-          <Link href={" "} className="underline">
+          <Link href={"#"} className="underline">
             Contact support
           </Link>
         </p>

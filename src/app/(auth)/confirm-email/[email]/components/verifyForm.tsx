@@ -325,7 +325,7 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
       <div className="flex justify-center">
         <p className="text-xs font-semibold text-[#512FB6] py-[11px]">
           Can&apos;t access your email?{" "}
-          <Link href={" "} className="underline">
+          <Link href={"#"} className="underline">
             Contact support
           </Link>
         </p>
