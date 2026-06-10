@@ -2,7 +2,7 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-
+export const dynamic = "force-dynamic";
 export default function NotificationSettingsPage() {
   const [pushEnabled, setPushEnabled] = useState<boolean>(false);
   const [emailEnabled, setEmailEnabled] = useState<boolean>(false);
