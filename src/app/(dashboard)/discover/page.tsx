@@ -28,7 +28,7 @@ import { useSearch } from "@/hooks/useSearch";
 import { useTrending } from "@/hooks/useTrending";
 import { SearchFilter, TrendingItem } from "@/types/search.types";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
-
+import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
 
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
@@ -80,19 +80,6 @@ const filterSections = [
 	},
 ];
 
-
-/* const cardProps = {
-	profilePicSrc: "/icons/gaddr-logo-xs.svg",
-	userName: "Elena Petrova",
-	userHandle: "@elena.design",
-	category: "UX/UI Designer",
-	postCount: 52,
-	followerCount: 1234,
-	followingCount: 95,
-	// eslint-disable-next-line react/jsx-key
-	channelIcons: [<TwitterIcon />, <FacebookIcon />, <YoutubeIcon />],
-}; */
-
 const DiscoveryPage = () => {
 	const searchParams = useSearchParams();
 	const queryParam = searchParams.get("q") ?? "";
@@ -115,14 +102,55 @@ const DiscoveryPage = () => {
 		profile,
 		contents,
 	} = useYoutubeDiscover();
-
+	//facebook hook
+	const {
+		profile: facebookProfile,
+		contents: facebookContents,
+	} = useFacebookDiscover();
+    console.log("check",facebookContents);
+	console.log("check",facebookProfile);
 	const videoContents = contents.filter(
 
 		(item) =>
-			item.type === "playlist_video" || item.type === "video" || item.type ==="subscription_video"
+			item.type === "playlist_video" || item.type === "video" || item.type === "subscription_video"
 
 
 	);
+	const youtubeFeed = videoContents.map((item) => ({
+		platform: "youtube",
+		id: item.id,
+		title: item.title,
+		description: item.description,
+		image:
+			item.thumbnailUrl ||
+			`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
+		publishedAt: item.publishedAt,
+		views: item.viewCount,
+		likes: item.likeCount,
+		comments: item.commentCount,
+		profileImage: profile?.profileImage || "/icons/gaddr-logo-xs.svg",
+		userName: profile?.name ??
+			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
+		handle: profile?.channel.handle ??
+
+			"@youtube",
+		url: `https://www.youtube.com/watch?v=${item.videoId}`,
+	}));
+	const facebookFeed = facebookContents.map((item) => ({
+		platform: "facebook",
+		id: item.id,
+		title: item.message?.slice(0, 80) || "Facebook Post",
+		description: item.message || "",
+		image: item.thumbnailUrl,
+		publishedAt: item.createdTime,
+		views: 0,
+		likes: item.likeCount,
+		comments: item.commentCount,
+		profileImage: facebookProfile?.profileImage,
+		userName: facebookProfile?.name,
+		handle: facebookProfile?.userName,
+		url: `https://facebook.com/${item.postId}`,
+	}));
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -296,8 +324,8 @@ const DiscoveryPage = () => {
 											profile?.name ??
 											"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />"
 										}
-										userHandle={ profile?.channel.handle??
-											
+										userHandle={profile?.channel.handle ??
+
 											"@youtube"
 										}
 										platformIcon={<YoutubeRedIcon />}
@@ -306,17 +334,17 @@ const DiscoveryPage = () => {
 												<span className="font-semibold block line-clamp-1">
 													{item.title.substring(0, 34)}
 												</span>
-												
+
 												<span className="text-sm text-muted-foreground block line-clamp-2">
 													{item.description}
 												</span>...
 											</>
 										}
 										/* (item.description.match(/Released on:\s*(\d{4}-\d{2}-\d{2})/)?.[1] */
-										date={new Date (item.publishedAt).toLocaleDateString()||"none"}
-										views={item.viewCount||0}
-										likes={item.likeCount||0}
-										comments={item.commentCount|| 0}
+										date={new Date(item.publishedAt).toLocaleDateString() || "none"}
+										views={item.viewCount || 0}
+										likes={item.likeCount || 0}
+										comments={item.commentCount || 0}
 									/>
 								</div>
 							);
