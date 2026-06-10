@@ -45,7 +45,7 @@ export function useFacebookDiscover() {
       setProfile(profileResponse);
 
       const contentsResponse =
-        await apiClient.Integration.getContents<FacebookContentsResponse>(
+        await apiClient.Integration.getMe<FacebookContentsResponse>(
           "facebook"
         );
 
@@ -56,15 +56,9 @@ export function useFacebookDiscover() {
 
       setContents(contentsResponse.contents ?? []);
 
-      const syncResponse =
-        await apiClient.Integration.enableSync(
-          "facebook"
-        );
+      
 
-      console.log(
-        "FACEBOOK SYNC RESPONSE:",
-        syncResponse
-      );
+     
     } catch (error) {
       console.error(
         "FACEBOOK LOAD ERROR:",
