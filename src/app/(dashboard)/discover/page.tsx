@@ -370,7 +370,7 @@ const DiscoveryPage = () => {
 									userHandle={item.handle ?? ""}
 									platformIcon={
 										item.platform === "facebook" ? (
-											<div className="w-6 h-6 bg-blue-600 rounded-full" />
+											<FacebookBlueIcon className="w-5 h-5 text-blue-600" />
 										) : item.platform === "youtube" ? (
 											<YoutubeRedIcon />
 										) : null
