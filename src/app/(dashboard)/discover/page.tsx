@@ -16,6 +16,7 @@ import {
 import TwitterIcon from "@/components/svg/x-icon.svg";
 import YoutubeIcon from "@/components/svg/youtube-black-icon.svg";
 import YoutubeRedIcon from "@/components/svg/Youtube.svg";
+import FacebookBlueIcon from "@/components/svg/facebook-blue.svg"
 import FacebookIcon from "@/components/svg/facebook-black-icon.svg";
 import MenuIcon from "@/components/svg/menu-icon.svg";
 import { Button } from "@/components/ui/button";
@@ -135,7 +136,7 @@ const DiscoveryPage = () => {
 			"@youtube",
 		url: `https://www.youtube.com/watch?v=${item.videoId}`,
 	}));
-	
+
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
 
@@ -153,17 +154,17 @@ const DiscoveryPage = () => {
 
 		image: item.picture,
 
-		publishedAt:item.createdAt ? new Date(item.createdAt) : "",
+		publishedAt: item.createdAt ? new Date(item.createdAt) : "",
 
 		views: 0,
 
-		likes:   0,
+		likes: 0,
 
-		comments:  0,
+		comments: 0,
 
 		profileImage: facebookProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 
-		userName: facebookProfile?.name??
+		userName: facebookProfile?.name ??
 			"Facebook <FacebookIcon className='inline-block size-4 bg-blue-500 text-black' />",
 
 		handle: "",
@@ -368,11 +369,11 @@ const DiscoveryPage = () => {
 									userName={item.userName ?? "Unknown"}
 									userHandle={item.handle ?? ""}
 									platformIcon={
-										item.platform === "youtube" ? (
+										item.platform === "facebook" ? (
+											<FacebookBlueIcon />
+										) : item.platform === "youtube" ? (
 											<YoutubeRedIcon />
-										) : (
-											<FacebookIcon />
-										)
+										) : null
 									}
 									textContent={
 										<>
