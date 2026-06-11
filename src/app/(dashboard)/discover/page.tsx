@@ -135,6 +135,7 @@ const DiscoveryPage = () => {
 			"@youtube",
 		url: `https://www.youtube.com/watch?v=${item.videoId}`,
 	}));
+	
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
 
@@ -150,9 +151,9 @@ const DiscoveryPage = () => {
 			item.message ||
 			"",
 
-		image: item.thumbnailUrl,
+		image: item.picture,
 
-		publishedAt: item.createdTime,
+		publishedAt:item.createdAt ? new Date(item.createdAt) : "",
 
 		views: 0,
 

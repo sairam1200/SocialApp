@@ -26,20 +26,27 @@ export type FacebookProfile = {
 
 export type FacebookContent = {
   id: string;
+
   externalId: string;
-  postId: string;
+  postId?: string;
 
   title?: string;
   description?: string;
-  message: string;
+  message?: string;
 
-  thumbnailUrl?: string;
+  type: string
 
+  picture?: string;
   permalinkUrl?: string;
+  link?: string;
 
-  createdTime: string;
+  story?: string;
 
-  type: string;
+  commentCount?: number;
+  sharesCount?: number;
+
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type FacebookContentsResponse = {
