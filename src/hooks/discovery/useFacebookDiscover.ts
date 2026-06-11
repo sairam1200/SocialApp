@@ -45,7 +45,7 @@ export function useFacebookDiscover() {
       setProfile(profileResponse);
 
       const contentsResponse =
-        await apiClient.Integration.getMe<FacebookContentsResponse>(
+        await apiClient.Integration.getContents<FacebookContentsResponse>(
           "facebook"
         );
 
