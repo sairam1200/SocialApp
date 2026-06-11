@@ -29,9 +29,14 @@ export type FacebookContent = {
   externalId: string;
   postId: string;
 
+  title?: string;
+  description?: string;
+
   message: string;
 
   thumbnailUrl?: string;
+
+  permalinkUrl?: string;
 
   createdTime: string;
 

@@ -107,8 +107,7 @@ const DiscoveryPage = () => {
 		profile: facebookProfile,
 		contents: facebookContents,
 	} = useFacebookDiscover();
-    console.log("check",facebookContents);
-	console.log("check",facebookProfile);
+
 	const videoContents = contents.filter(
 
 		(item) =>
@@ -138,19 +137,66 @@ const DiscoveryPage = () => {
 	}));
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
+
 		id: item.id,
-		title: item.message?.slice(0, 80) || "Facebook Post",
-		description: item.message || "",
+
+		title:
+			item.title ||
+			item.message?.slice(0, 80) ||
+			"Facebook Post",
+
+		description:
+			item.description ||
+			item.message ||
+			"",
+
 		image: item.thumbnailUrl,
+
 		publishedAt: item.createdTime,
+
 		views: 0,
-		likes: item.likeCount,
-		comments: item.commentCount,
+
+		likes: item.likeCount ?? 0,
+
+		comments: item.commentCount ?? 0,
+
 		profileImage: facebookProfile?.profileImage,
+
 		userName: facebookProfile?.name,
+
 		handle: facebookProfile?.userName,
-		url: `https://facebook.com/${item.postId}`,
+
+		url: item.postId
+			? `https://facebook.com/${item.postId}`
+			: undefined,
 	}));
+
+	const combinedFeed = [...youtubeFeed, ...facebookFeed].sort(
+		(a, b) =>
+			new Date(b.publishedAt).getTime() -
+			new Date(a.publishedAt).getTime()
+	);
+	type FeedItem = {
+		platform: "youtube" | "facebook";
+		id: string;
+
+		title: string;
+		description: string;
+
+		image?: string;
+
+		publishedAt: string;
+
+		views: number;
+		likes: number;
+		comments: number;
+
+		profileImage?: string;
+		userName?: string;
+		handle?: string;
+
+		url?: string;
+	};
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -305,50 +351,49 @@ const DiscoveryPage = () => {
 							followingCount={cardProps.followingCount}
 							channelIcons={cardProps.channelIcons}
 						></ProfileCard> */}
-						{videoContents.map((item) => {
-							const videoUrl = `https://www.youtube.com/watch?v=${item.videoId}`;
+						{combinedFeed.map((item) => (
+							<div
+								key={`${item.platform}-${item.id}`}
+								onClick={() => item.url && window.open(item.url, "_blank")}
+								className="cursor-pointer"
+							>
+								<ContentFeedCard
+									imageSrc={item.image}
+									profilePicSrc={
+										item.profileImage ??
+										"/icons/gaddr-logo-xs.svg"
+									}
+									userName={item.userName ?? "Unknown"}
+									userHandle={item.handle ?? ""}
+									platformIcon={
+										item.platform === "youtube" ? (
+											<YoutubeRedIcon />
+										) : (
+											<FacebookIcon />
+										)
+									}
+									textContent={
+										<>
+											<span className="font-semibold block line-clamp-1">
+												{item.title?.substring(0, 34)}
+											</span>
 
-							return (
-								<div
-									key={item.id}
-									onClick={() => window.open(videoUrl, "_blank")}
-									className="cursor-pointer"
-								>
-									<ContentFeedCard
-										imageSrc={`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`}
-										profilePicSrc={
-											profile?.profileImage ??
-											"/icons/gaddr-logo-xs.svg"
-										}
-										userName={
-											profile?.name ??
-											"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />"
-										}
-										userHandle={profile?.channel.handle ??
-
-											"@youtube"
-										}
-										platformIcon={<YoutubeRedIcon />}
-										textContent={
-											<>
-												<span className="font-semibold block line-clamp-1">
-													{item.title.substring(0, 34)}
-												</span>
-
-												<span className="text-sm text-muted-foreground block line-clamp-2">
-													{item.description}
-												</span>...
-											</>
-										}
-										/* (item.description.match(/Released on:\s*(\d{4}-\d{2}-\d{2})/)?.[1] */
-										date={new Date(item.publishedAt).toLocaleDateString() || "none"}
-										views={item.viewCount || 0}
-										likes={item.likeCount || 0}
-										comments={item.commentCount || 0}
-									/>
-								</div>
-							);
-						})}
+											<span className="text-sm text-muted-foreground block line-clamp-2">
+												{item.description}
+											</span>
+										</>
+									}
+									date={
+										item.publishedAt
+											? new Date(item.publishedAt).toLocaleDateString()
+											: "none"
+									}
+									views={item.views ?? 0}
+									likes={item.likes ?? 0}
+									comments={item.comments ?? 0}
+								/>
+							</div>
+						))}
 					</div>
 				</TabPanel>
 				<TabPanel className="space-y-6">For you</TabPanel>
