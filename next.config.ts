@@ -47,6 +47,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'platform-lookaside.fbsbx.com',
       },
+       {
+        protocol: 'https',
+        hostname: 'scontent.fvga2-2.fna.fbcdn.net',
+      }, {
+        protocol: 'https',
+        hostname: 'scontent.fvga2-6.fna.fbcdn.net',
+      },
     ]
 },
 	turbopack: {
