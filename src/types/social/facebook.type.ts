@@ -31,7 +31,6 @@ export type FacebookContent = {
 
   title?: string;
   description?: string;
-
   message: string;
 
   thumbnailUrl?: string;
@@ -41,10 +40,6 @@ export type FacebookContent = {
   createdTime: string;
 
   type: string;
-
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
 };
 
 export type FacebookContentsResponse = {

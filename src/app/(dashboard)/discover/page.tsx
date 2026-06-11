@@ -156,9 +156,9 @@ const DiscoveryPage = () => {
 
 		views: 0,
 
-		likes: item.likeCount ?? 0,
+		likes:   0,
 
-		comments: item.commentCount ?? 0,
+		comments:  0,
 
 		profileImage: facebookProfile?.profileImage,
 
