@@ -161,11 +161,12 @@ const DiscoveryPage = () => {
 
 		comments:  0,
 
-		profileImage: facebookProfile?.profileImage,
+		profileImage: facebookProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 
-		userName: facebookProfile?.name,
+		userName: facebookProfile?.name??
+			"Facebook <FacebookIcon className='inline-block size-4 bg-blue-500 text-black' />",
 
-		handle: facebookProfile?.userName,
+		handle: "",
 
 		url: item.postId
 			? `https://facebook.com/${item.postId}`
