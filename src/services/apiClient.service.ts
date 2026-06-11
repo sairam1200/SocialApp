@@ -33,7 +33,7 @@ authorization: async () => {
     localStorage.getItem(
       "accessToken"
     );
-
+ 
   console.log(
     "[AUTH TOKEN]",
     token

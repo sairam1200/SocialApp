@@ -3,31 +3,32 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "@/services/apiClient.service";
 import { useHttpContext } from "@/providers/HttpContextProvider";
+
 export type YoutubeChannelType = {
-	id: string;
-	title: string;
-	description: string;
+  id: string;
+  title: string;
+  description: string;
   handle: string;
-	viewCount: number;
-	videoCount: number;
-	thumbnail: string;
+  viewCount: number;
+  videoCount: number;
+  thumbnail: string;
 };
 export type YoutubeProfile = {
- id: string;
-	name: string;
-	email: string;
-	userId: string;
-	userName: string;
-	youtubeId: string;
+  id: string;
+  name: string;
+  email: string;
+  userId: string;
+  userName: string;
+  youtubeId: string;
 
-	profileImage: string;
+  profileImage: string;
 
-	followersCount: number;
-	followingCount: number;
+  followersCount: number;
+  followingCount: number;
 
-	allowImport: boolean;
+  allowImport: boolean;
 
-	channel: YoutubeChannelType;
+  channel: YoutubeChannelType;
 };
 export type YoutubeContent = {
   id: string;
@@ -38,7 +39,7 @@ export type YoutubeContent = {
   thumbnailUrl: string;
   publishedAt: string;
   type: string;
-  viewCount : number;
+  viewCount: number;
   likeCount: number;
   commentCount: number;
 };
@@ -52,16 +53,16 @@ export function useYoutubeDiscover() {
   const [profile, setProfile] = useState<YoutubeProfile | null>(null);
   const [contents, setContents] = useState<YoutubeContent[]>([]);
   const [loading, setLoading] = useState(true);
-const { user } = useHttpContext();
-useEffect(() => {
-  if (!user) {
-    setLoading(false);
-    return;
-  }
+  const { user } = useHttpContext();
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
-  loadData();
-}, [user]);
-const loadData = async () => {
+    loadData();
+  }, [user]);
+  const loadData = async () => {
     try {
 
 
@@ -69,7 +70,7 @@ const loadData = async () => {
         await apiClient.Integration.getProfile<YoutubeProfile>(
           "youtube"
         );
-console.log(
+      console.log(
         "YOUTUBE PROFILE RESPONSE:",
         profileResponse
       );
@@ -91,14 +92,21 @@ console.log(
         "YOUTUBE SYNC RESPONSE:",
         profileSyncrequest
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("YOUTUBE LOAD ERROR:", error);
+
+      if (error instanceof Error) {
+        console.log("MESSAGE:", error.message);
+        console.log("NAME:", error.name);
+      }
+
+      console.log("RAW ERROR:", JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }
   };
 
-  
+
 
   return {
     profile,

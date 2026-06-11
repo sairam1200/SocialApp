@@ -41,8 +41,11 @@ export async function getSession() {
     }
 
     const data = await response.json();
-
-    return data.user;
+console.log(
+  "[SESSION RESPONSE]",
+  data
+);
+    return data;
   } catch (error) {
     console.error(
       "[SESSION] ERROR:",

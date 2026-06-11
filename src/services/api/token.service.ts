@@ -11,6 +11,7 @@ export class TokenService {
   })
   @Post<TokenResponseType>("/auth/access-token")
   async loginAsync(@Body() loginPayload: TokenRequestType): Promise<TokenResponseType> { return {} as TokenResponseType }
+  
 @Get<CurrentUserResponseType>("/auth/current")
 async currentAsync(): Promise<CurrentUserResponseType> {
   return {} as CurrentUserResponseType;
