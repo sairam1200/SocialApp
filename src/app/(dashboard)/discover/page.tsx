@@ -109,12 +109,12 @@ const DiscoveryPage = () => {
 		profile: facebookProfile,
 		contents: facebookContents,
 	} = useFacebookDiscover();
-    // Instagram hook
-	const{
+	// Instagram hook
+	const {
 		profile: InstagramProfile,
 		contents: InstagramContent,
 
-	}=useInstagramDiscover();
+	} = useInstagramDiscover();
 
 	const videoContents = contents.filter(
 
@@ -143,17 +143,26 @@ const DiscoveryPage = () => {
 			"@youtube",
 		url: `https://www.youtube.com/watch?v=${item.videoId}`,
 	}));
-const InstagramFeed = InstagramContent.map((item) => ({
+	const InstagramFeed = InstagramContent.map((item) => ({
 		platform: "instagram",
 		id: item.id,
-		title: item.title,
+		title:
+			item.title
+				?.split(" ")
+				.slice(0, 3)
+				.join(" ") ||
+			item.caption
+				?.split(" ")
+				.slice(0, 3)
+				.join(" ") ||
+			"Untitled",
 		description: item.caption,
 		image:
-			item.thumbnailUrl ,
-		publishedAt: item.timestamp? new Date(item.timestamp) : "",
-		views: item.reach??0,
-		likes: item.likeCount??0,
-		comments: item.commentsCount??0,
+			item.thumbnailUrl,
+		publishedAt: item.timestamp ? new Date(item.timestamp) : "",
+		views: item.reach ?? 0,
+		likes: item.likeCount ?? 0,
+		comments: item.commentsCount ?? 0,
 		profileImage: InstagramProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 		userName: InstagramProfile?.userName ??
 			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
@@ -168,8 +177,8 @@ const InstagramFeed = InstagramContent.map((item) => ({
 		id: item.id,
 
 		title:
-			item.title ||
-			item.message?.slice(0, 80) ||
+			item.title?.slice(0, 10) ||
+			item.message?.slice(0, 10) ||
 			"Facebook Post",
 
 		description:
@@ -198,20 +207,20 @@ const InstagramFeed = InstagramContent.map((item) => ({
 			? `https://facebook.com/${item.postId}`
 			: undefined,
 	}));
- const platformFeeds = {
-  youtube: youtubeFeed,
-  facebook: facebookFeed,
-  instagram: InstagramFeed,
-  /* tiktok: tiktokFeed,
-  linkedin: linkedinFeed, */
-};
+	const platformFeeds = {
+		youtube: youtubeFeed,
+		facebook: facebookFeed,
+		instagram: InstagramFeed,
+		/* tiktok: tiktokFeed,
+		linkedin: linkedinFeed, */
+	};
 	const combinedFeed = Object.values(platformFeeds)
-  .flat()
-  .sort(
-    (a, b) =>
-      new Date(b.publishedAt).getTime() -
-      new Date(a.publishedAt).getTime()
-  );
+		.flat()
+		.sort(
+			(a, b) =>
+				new Date(b.publishedAt).getTime() -
+				new Date(a.publishedAt).getTime()
+		);
 	type FeedItem = {
 		platform: "youtube" | "facebook";
 		id: string;
@@ -407,7 +416,7 @@ const InstagramFeed = InstagramContent.map((item) => ({
 										) : item.platform === "youtube" ? (
 											<YoutubeRedIcon />
 										) : item.platform === "instagram" ? (
-											<InstagramColorIcon className="w-5 h-5 text-blue-600"/>
+											<InstagramColorIcon className="w-5 h-5 text-blue-600" />
 										) : null
 									}
 									textContent={
