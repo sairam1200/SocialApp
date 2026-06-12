@@ -151,9 +151,9 @@ const InstagramFeed = InstagramContent.map((item) => ({
 		image:
 			item.thumbnailUrl ,
 		publishedAt: item.timestamp? new Date(item.timestamp) : "",
-		views: 0,
-		likes: item.likeCount,
-		comments: 0,
+		views: item.reach??0,
+		likes: item.likeCount??0,
+		comments: item.commentsCount??0,
 		profileImage: InstagramProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 		userName: InstagramProfile?.userName ??
 			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",

@@ -42,6 +42,10 @@ export type InstagramContent = {
   likeCount?: number;
   commentsCount?: number;
 
+  reach?: number;
+  impressions?: number;
+  saved?: number;
+
   timestamp?: string;
 
   createdAt?: string;
@@ -60,6 +64,10 @@ export type InstagramContentsResponse = {
 export type InstagramMediaInsights = {
   likeCount: number;
   commentsCount: number;
+
+  reach?: number;
+  impressions?: number;
+  saved?: number;
 };
 
 export type InstagramConnectResponse = {
