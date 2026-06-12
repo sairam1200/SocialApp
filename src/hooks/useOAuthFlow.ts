@@ -12,7 +12,7 @@ import {
 } from "@/constants/platforms";
 import { apiClient } from "@/services/apiClient.service";
 import { LinkedAccountType, ManualProfileType } from "@/types/account/profile.type";
-
+import { toast } from "react-hot-toast";
 type UseOAuthFlowParams = {
   username: string;
   onOpenManageDialog: () => void;
@@ -247,11 +247,24 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
     );
 
     try {
-      // await apiClient.Integration.importContent(oauthPlatformId, {});
-    } catch (e) {
-      console.error("Import failed:", e);
-    }
+  await apiClient.Integration.importContent(
+    oauthPlatformId,
+    {}
+  );
+} catch (e: unknown) {
+  const error = e as AxiosError<{ title?: string }>;
 
+  const title =
+    error.response?.data?.title;
+
+  if (title === "INSTAGRAM_RECONNECT_REQUIRED") {
+    toast.error("Instagram connection expired. Please reconnect.");
+    await startOAuthFlow("instagram");
+    return;
+  }
+
+  console.error("Import failed:", error);
+}
     try {
       // const latestLinkedRaw = await apiClient.UserProfile.getLinkedAccounts(
       //   username
