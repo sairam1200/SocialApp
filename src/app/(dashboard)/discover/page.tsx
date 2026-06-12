@@ -16,8 +16,8 @@ import {
 import TwitterIcon from "@/components/svg/x-icon.svg";
 import YoutubeIcon from "@/components/svg/youtube-black-icon.svg";
 import YoutubeRedIcon from "@/components/svg/Youtube.svg";
-import FacebookBlueIcon from "@/components/svg/facebook-blue.svg"
-import FacebookIcon from "@/components/svg/facebook-black-icon.svg";
+import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
+import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
 import MenuIcon from "@/components/svg/menu-icon.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn.util";
@@ -30,6 +30,7 @@ import { useTrending } from "@/hooks/useTrending";
 import { SearchFilter, TrendingItem } from "@/types/search.types";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
+import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
@@ -108,6 +109,12 @@ const DiscoveryPage = () => {
 		profile: facebookProfile,
 		contents: facebookContents,
 	} = useFacebookDiscover();
+    // Instagram hook
+	const{
+		profile: InstagramProfile,
+		contents: InstagramContent,
+
+	}=useInstagramDiscover();
 
 	const videoContents = contents.filter(
 
@@ -136,7 +143,25 @@ const DiscoveryPage = () => {
 			"@youtube",
 		url: `https://www.youtube.com/watch?v=${item.videoId}`,
 	}));
+const InstagramFeed = InstagramContent.map((item) => ({
+		platform: "instagram",
+		id: item.id,
+		title: item.title,
+		description: item.caption,
+		image:
+			item.thumbnailUrl ,
+		publishedAt: item.timestamp? new Date(item.timestamp) : "",
+		views: 0,
+		likes: item.likeCount,
+		comments: 0,
+		profileImage: InstagramProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
+		userName: InstagramProfile?.userName ??
+			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
+		handle: InstagramProfile?.userId ??
 
+			"@Instagram",
+		url: `https://www.youtube.com/watch?v=${item.mediaUrl}`,
+	}));
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
 
@@ -173,12 +198,20 @@ const DiscoveryPage = () => {
 			? `https://facebook.com/${item.postId}`
 			: undefined,
 	}));
-
-	const combinedFeed = [...youtubeFeed, ...facebookFeed].sort(
-		(a, b) =>
-			new Date(b.publishedAt).getTime() -
-			new Date(a.publishedAt).getTime()
-	);
+ const platformFeeds = {
+  youtube: youtubeFeed,
+  facebook: facebookFeed,
+  instagram: InstagramFeed,
+  /* tiktok: tiktokFeed,
+  linkedin: linkedinFeed, */
+};
+	const combinedFeed = Object.values(platformFeeds)
+  .flat()
+  .sort(
+    (a, b) =>
+      new Date(b.publishedAt).getTime() -
+      new Date(a.publishedAt).getTime()
+  );
 	type FeedItem = {
 		platform: "youtube" | "facebook";
 		id: string;
@@ -373,6 +406,8 @@ const DiscoveryPage = () => {
 											<FacebookBlueIcon className="w-5 h-5 text-blue-600" />
 										) : item.platform === "youtube" ? (
 											<YoutubeRedIcon />
+										) : item.platform === "instagram" ? (
+											<InstagramColorIcon />
 										) : null
 									}
 									textContent={
