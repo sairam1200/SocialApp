@@ -3,6 +3,7 @@
 import { use } from "react";
 import YouTubeIntegrationCallback from "./components/YouTubeIntegrationCallback";
 import FacebookIntegrationCallback from "./components/FacebookIntegrationCallback";
+import InstagramIntegrationCallback from "./components/InstagramIntegrationCallback";
 
 interface IntegrationOAuthCallbackPageProps {
   params: Promise<{ platform: string }>;
@@ -18,5 +19,8 @@ export default function IntegrationOAuthCallbackPage({ params }: IntegrationOAut
 
   if (normalizedPlatform === "facebook") {
     return <FacebookIntegrationCallback />;
+  }
+  if (normalizedPlatform === "instagram") {
+    return < InstagramIntegrationCallback/>;
   }
 }

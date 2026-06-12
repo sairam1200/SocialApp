@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/services/apiClient.service";
 import { COOKIE_NAMES } from "@/constants/globals";
 import { setCookie } from "@/utils/cookie.util";
-import { InstagramProfile } from "@/types/social/instagram.type";
+import { InstagramProfileType } from "@/types/account/profile.type";
 
 type CallbackStatus = "loading" | "success" | "error";
 
@@ -105,7 +105,7 @@ export default function InstagramIntegrationCallback() {
         );
 
         const result =
-          await apiClient.Integration.connectCallback<InstagramProfile>(
+          await apiClient.Integration.connectCallback<InstagramProfileType>(
             PLATFORM,
             code,
             state,
