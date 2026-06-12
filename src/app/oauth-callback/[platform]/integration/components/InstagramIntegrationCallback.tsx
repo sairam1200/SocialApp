@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
 import { apiClient } from "@/services/apiClient.service";
-import { InstagramProfileType } from "@/types/account/profile.type";
 import { COOKIE_NAMES } from "@/constants/globals";
 import { setCookie } from "@/utils/cookie.util";
+import { InstagramProfileType } from "@/types/account/profile.type";
 
 type CallbackStatus = "loading" | "success" | "error";
 
@@ -25,17 +26,193 @@ export default function InstagramIntegrationCallback() {
       return;
     }
 
-    async function processCallback() {
-      hasProcessed.current = true;
+    hasProcessed.current = true;
 
-      const code = searchParams.get("code");
-      const state = searchParams.get("state");
+    const processCallback = async () => {
+      try {
+        console.log(
+          "[INSTAGRAM CALLBACK] URL:",
+          window.location.href,
+        );
 
-      const error = searchParams.get("error");
-      const errorDescription =
-        searchParams.get("error_description");
+        const code = searchParams.get("code");
+        const state = searchParams.get("state");
 
-      if (error) {
+        const error = searchParams.get("error");
+        const errorDescription =
+          searchParams.get("error_description");
+
+        console.log(
+          "[INSTAGRAM CALLBACK] Params:",
+          {
+            code,
+            state,
+            error,
+            errorDescription,
+          },
+        );
+
+        if (error) {
+          setStatus("error");
+
+          if (window.opener) {
+            window.opener.dispatchEvent(
+              new CustomEvent("oauth_failed", {
+                detail: {
+                  platform: PLATFORM,
+                  error:
+                    errorDescription ??
+                    error ??
+                    "Instagram connection failed",
+                },
+              }),
+            );
+
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          }
+
+          return;
+        }
+
+        if (!code || !state) {
+          setStatus("error");
+
+          if (window.opener) {
+            window.opener.dispatchEvent(
+              new CustomEvent("oauth_failed", {
+                detail: {
+                  platform: PLATFORM,
+                  error:
+                    !code
+                      ? "Authorization code is missing"
+                      : "Authorization state is missing",
+                },
+              }),
+            );
+
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          }
+
+          return;
+        }
+
+        console.log(
+          "[INSTAGRAM CALLBACK] Calling backend callback...",
+        );
+
+        const result =
+          await apiClient.Integration.connectCallback<InstagramProfileType>(
+            PLATFORM,
+            code,
+            state,
+          );
+
+        console.log(
+          "[INSTAGRAM CALLBACK] Backend response:",
+          result,
+        );
+
+        if (
+          !result ||
+          !result.success ||
+          !result.accessToken
+        ) {
+          setStatus("error");
+
+          if (window.opener) {
+            window.opener.dispatchEvent(
+              new CustomEvent("oauth_failed", {
+                detail: {
+                  platform: PLATFORM,
+                  error:
+                    result?.error ??
+                    "Failed to connect Instagram account",
+                },
+              }),
+            );
+
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          }
+
+          return;
+        }
+
+        const expiresIn =
+          parseInt(
+            String(result.expiresIn),
+            10,
+          ) || DEFAULT_TOKEN_EXPIRY;
+
+        await setCookie(
+          COOKIE_NAMES.INSTAGRAM_ACCESS_TOKEN,
+          result.accessToken,
+          {
+            maxAge: expiresIn,
+          },
+        );
+
+        setStatus("success");
+
+        const draft =
+          sessionStorage.getItem(
+            "onboarding_draft",
+          );
+
+        if (draft) {
+          const onboardingData =
+            JSON.parse(draft);
+
+          onboardingData.connectedAccounts = {
+            ...(onboardingData.connectedAccounts ??
+              {}),
+            instagram: "connected",
+          };
+
+          sessionStorage.setItem(
+            "onboarding_draft",
+            JSON.stringify(onboardingData),
+          );
+        }
+
+        /**
+         * IMPORTANT:
+         * Notify parent window (same pattern used by OAuth popup flow)
+         */
+        if (window.opener) {
+          window.opener.dispatchEvent(
+            new CustomEvent("oauth_success", {
+              detail: {
+                platform: PLATFORM,
+              },
+            }),
+          );
+
+          setTimeout(() => {
+            window.close();
+          }, 1000);
+
+          return;
+        }
+
+        /**
+         * Fallback if opened directly
+         */
+        setTimeout(() => {
+          window.location.href =
+            "/onboarding?provider=instagram&connected=true";
+        }, 1000);
+      } catch (error) {
+        console.error(
+          "[INSTAGRAM CALLBACK] ERROR:",
+          error,
+        );
+
         setStatus("error");
 
         if (window.opener) {
@@ -44,111 +221,19 @@ export default function InstagramIntegrationCallback() {
               detail: {
                 platform: PLATFORM,
                 error:
-                  errorDescription ??
-                  error ??
-                  "Instagram connection failed",
+                  error instanceof Error
+                    ? error.message
+                    : "Instagram connection failed",
               },
             }),
           );
 
-          window.close();
+          setTimeout(() => {
+            window.close();
+          }, 500);
         }
-
-        return;
       }
-
-      if (!code || !state) {
-        setStatus("error");
-
-        if (window.opener) {
-          window.opener.dispatchEvent(
-            new CustomEvent("oauth_failed", {
-              detail: {
-                platform: PLATFORM,
-                error: !code
-                  ? "Authorization code is missing"
-                  : "Authorization state is missing",
-              },
-            }),
-          );
-
-          window.close();
-        }
-
-        return;
-      }
-
-      const result =
-        await apiClient.Integration.connectCallback<InstagramProfileType>(
-          PLATFORM,
-          code,
-          state,
-        );
-
-      if (
-        !result.success ||
-        !result.accessToken
-      ) {
-        setStatus("error");
-
-        if (window.opener) {
-          window.opener.dispatchEvent(
-            new CustomEvent("oauth_failed", {
-              detail: {
-                platform: PLATFORM,
-                error:
-                  result.error ??
-                  "Failed to connect Instagram account",
-              },
-            }),
-          );
-
-          window.close();
-        }
-
-        return;
-      }
-
-      const expiresIn =
-        parseInt(result.expiresIn, 10) ||
-        DEFAULT_TOKEN_EXPIRY;
-
-      await setCookie(
-        COOKIE_NAMES.INSTAGRAM_ACCESS_TOKEN,
-        result.accessToken,
-        {
-          maxAge: expiresIn,
-        },
-      );
-
-      setStatus("success");
-
-      const draft =
-        sessionStorage.getItem(
-          "onboarding_draft",
-        );
-
-      if (draft) {
-        const onboardingData =
-          JSON.parse(draft);
-
-        onboardingData.connectedAccounts = {
-          ...(onboardingData.connectedAccounts ??
-            {}),
-          instagram: "connected",
-        };
-
-        sessionStorage.setItem(
-          "onboarding_draft",
-          JSON.stringify(onboardingData),
-        );
-      }
-
-      setTimeout(() => {
-        window.location.href =
-          "/onboarding?provider=instagram&connected=true";
-      }, 1000);
-    }
+    };
 
     void processCallback();
   }, [searchParams]);
@@ -159,6 +244,7 @@ export default function InstagramIntegrationCallback() {
         {status === "loading" && (
           <>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B42CEA] mx-auto mb-4" />
+
             <p className="text-lg text-gray-700">
               Connecting Instagram account...
             </p>
@@ -176,7 +262,7 @@ export default function InstagramIntegrationCallback() {
             </p>
 
             <p className="text-sm text-gray-500 mt-2">
-              Redirecting...
+              Closing window...
             </p>
           </>
         )}
