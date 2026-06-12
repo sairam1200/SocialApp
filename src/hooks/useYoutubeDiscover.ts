@@ -84,14 +84,14 @@ export function useYoutubeDiscover() {
         contentsResponse
       );
       setContents(contentsResponse.contents ?? []);
-      const profileSyncrequest =
+     /*  const profileSyncrequest =
         await apiClient.Integration.enableSync(
           "youtube"
         );
       console.log(
         "YOUTUBE SYNC RESPONSE:",
         profileSyncrequest
-      );
+      ); */
     } catch (error: unknown) {
       console.error("YOUTUBE LOAD ERROR:", error);
 
