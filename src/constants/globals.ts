@@ -23,6 +23,7 @@ export const COOKIE_NAMES = {
   REFRESH_TOKEN: "refresh_token",
   GOOGLE_ACCESS_TOKEN: "google_access_token",
   FACEBOOK_ACCESS_TOKEN: "facebook_access_token",
+  INSTAGRAM_ACCESS_TOKEN: "instagram_access_token",
 } as const;
 
 export const DEVICE_ID_KEY = "deviceId";
