@@ -54,6 +54,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'scontent.fvga2-6.fna.fbcdn.net',
       },
+      {
+        protocol: "https",
+        hostname: "scontent.cdninstagram.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.cdninstagram.com",
+      },
     ]
 },
 	turbopack: {

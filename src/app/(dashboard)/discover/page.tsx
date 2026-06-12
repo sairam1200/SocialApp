@@ -159,7 +159,7 @@ const InstagramFeed = InstagramContent.map((item) => ({
 			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
 		handle: InstagramProfile?.userId ??
 
-			"@Instagram",
+			"",
 		url: `https://www.youtube.com/watch?v=${item.mediaUrl}`,
 	}));
 	const facebookFeed = facebookContents.map((item) => ({
@@ -407,7 +407,7 @@ const InstagramFeed = InstagramContent.map((item) => ({
 										) : item.platform === "youtube" ? (
 											<YoutubeRedIcon />
 										) : item.platform === "instagram" ? (
-											<InstagramColorIcon />
+											<InstagramColorIcon className="w-5 h-5 text-blue-600"/>
 										) : null
 									}
 									textContent={
