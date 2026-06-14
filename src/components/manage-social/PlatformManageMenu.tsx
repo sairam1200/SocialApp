@@ -74,8 +74,26 @@ export default function PlatformManageMenu({
 			const result = await apiClient.Integration.importContent(platform.id, {});
 			console.log("[IMPORT:UI] Backend response:", result);
 			onImportStatusChange(platform.id, "imported");
-		} catch (err) {
+		} catch (err: unknown) {
 			console.error("[IMPORT:UI] Import failed:", err);
+
+			const error = err as {
+				response?: {
+					data?: {
+						title?: string;
+					};
+				};
+			};
+
+			const title = error.response?.data?.title;
+
+			console.log("IMPORT ERROR TITLE:", title);
+
+			if (title === "RECONNECT_REQUIRED") {
+				onAuthenticate(platform.id, platform.name);
+				return;
+			}
+
 			onImportStatusChange(platform.id, "not_imported");
 		}
 

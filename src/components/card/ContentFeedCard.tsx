@@ -30,7 +30,10 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 }) => {
 	const [currentLikes, setCurrentLikes] = useState(likes);
 	const [isPostLiked, setIsPostLiked] = useState(false);
-
+ const isVideo =
+    imageSrc?.toLowerCase().includes(".mp4") ||
+    imageSrc?.includes("video_dashinit") ||
+    imageSrc?.includes("/video");
 	const handleLikeClick = () => {
 		if (isPostLiked) {
 			setCurrentLikes((prevCount) => prevCount - 1);
@@ -52,14 +55,24 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		<div className={cardClasses}>
 			{/* Thumbnail */}
 			{imageSrc && (
-				<div className="relative w-full h-[200px] ">
-					<Image
-						src={imageSrc}
-						alt="Content Visual"
-						fill
-						sizes="(max-width: 768px) 100vw, 33vw"
-						className="object-cover"
-					/>
+				<div className="relative w-full h-[200px]">
+					{isVideo ? (
+						<video
+							src={imageSrc}
+							className="w-full h-full object-cover"
+							muted
+							playsInline
+							preload="metadata"
+						/>
+					) : (
+						<Image
+							src={imageSrc}
+							alt="Content Visual"
+							fill
+							sizes="(max-width: 768px) 100vw, 33vw"
+							className="object-cover"
+						/>
+					)}
 				</div>
 			)}
 

@@ -137,7 +137,7 @@ const DiscoveryPage = () => {
 		comments: item.commentCount,
 		profileImage: profile?.profileImage || "/icons/gaddr-logo-xs.svg",
 		userName: profile?.name ??
-			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
+			"YouTube User",
 		handle: profile?.channel.handle ??
 
 			"@youtube",
@@ -149,27 +149,30 @@ const DiscoveryPage = () => {
 		title:
 			item.title
 				?.split(" ")
-				.slice(0, 3)
+				.slice(0, 2)
 				.join(" ") ||
 			item.caption
 				?.split(" ")
-				.slice(0, 3)
+				.slice(0, 2)
 				.join(" ") ||
 			"Untitled",
 		description: item.caption,
 		image:
-			item.thumbnailUrl,
+			item.thumbnailUrl &&
+    !item.thumbnailUrl.endsWith(".mp4")
+      ? item.thumbnailUrl
+      : "/images/video-placeholder.jpg",
 		publishedAt: item.timestamp ? new Date(item.timestamp) : "",
 		views: item.reach ?? 0,
 		likes: item.likeCount ?? 0,
 		comments: item.commentsCount ?? 0,
 		profileImage: InstagramProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 		userName: InstagramProfile?.userName ??
-			"YouTube <YoutubeIcon className='inline-block size-4 bg-blue-500 text-black' />",
+			"Instagram User",
 		handle: InstagramProfile?.userId ??
 
 			"",
-		url: `https://www.youtube.com/watch?v=${item.mediaUrl}`,
+		url: item.permalink || item.mediaUrl,
 	}));
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
@@ -177,35 +180,39 @@ const DiscoveryPage = () => {
 		id: item.id,
 
 		title:
-			item.title?.slice(0, 10) ||
-			item.message?.slice(0, 10) ||
+			item.title
+				?.split(" ")
+				.slice(0, 2)
+				.join(" ")  ||
+			item.message
+				?.split(" ")
+				.slice(0, 2)
+				.join(" ") ||
 			"Facebook Post",
 
 		description:
 			item.description ||
 			item.message ||
-			"",
+			"User dont have description.",
 
 		image: item.picture,
 
 		publishedAt: item.createdAt ? new Date(item.createdAt) : "",
 
-		views: 0,
+		views: item.engagement,
 
-		likes: 0,
+		likes: item.reactions|| 0,
 
-		comments: 0,
+		comments: item.commentCount,
 
 		profileImage: facebookProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
 
 		userName: facebookProfile?.name ??
-			"Facebook <FacebookIcon className='inline-block size-4 bg-blue-500 text-black' />",
+			"Facebook User",
 
 		handle: "",
 
-		url: item.postId
-			? `https://facebook.com/${item.postId}`
-			: undefined,
+		url: item.permalinkUrl,
 	}));
 	const platformFeeds = {
 		youtube: youtubeFeed,
@@ -403,6 +410,7 @@ const DiscoveryPage = () => {
 								className="cursor-pointer"
 							>
 								<ContentFeedCard
+								
 									imageSrc={item.image}
 									profilePicSrc={
 										item.profileImage ??

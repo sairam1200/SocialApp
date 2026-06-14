@@ -33,8 +33,8 @@ export type FacebookContent = {
   title?: string;
   description?: string;
   message?: string;
-
-  type: string
+reactions?: number;
+  type: string;
 
   picture?: string;
   permalinkUrl?: string;
@@ -44,6 +44,17 @@ export type FacebookContent = {
 
   commentCount?: number;
   sharesCount?: number;
+
+  // Analytics
+  reach?: number;
+
+  totalReactions?: number;
+
+  reactionsByType?: Record<string, number>;
+
+  engagement?: number;
+
+  engagementRate?: number;
 
   createdAt?: string;
   updatedAt?: string;

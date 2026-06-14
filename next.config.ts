@@ -4,6 +4,10 @@ import bundleAnalyzer from '@next/bundle-analyzer'
 const nextConfig: NextConfig = {
 	/* config options here */
 	images: {
+    domains: [
+      'scontent.fvga2-5.fna.fbcdn.net',
+      'instagram.fvga2-2.fna.fbcdn.net',
+    ],
 	remotePatterns: [
       {
         protocol: 'https',

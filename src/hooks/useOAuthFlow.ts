@@ -238,6 +238,7 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
 
   // IMPORT after success dialog
   async function handleImportFromSuccess(): Promise<void> {
+    console.log("IMPORT BUTTON CLICKED");
     if (!oauthPlatformId) return;
 
     setPlatformsState((prev) =>
