@@ -17,7 +17,7 @@ import { apiClient } from "@/services/apiClient.service";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
-
+import  XIcon  from "@/components/svg/x-icon.svg";
 // Dynamic imports for dialogs and skeleton
 const ProfilePictureDialog = dynamic(() => import("./components/ProfilePictureDialog"), {
 	ssr: false,
@@ -37,6 +37,7 @@ const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 	youtube: YoutubeIcon,
 	instagram: InstagramIcon,
 	facebook: FacebookIcon,
+	twitter: XIcon,
 };
 
 interface ProfilePageProps {
