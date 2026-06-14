@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     domains: [
       'scontent.fvga2-5.fna.fbcdn.net',
       'instagram.fvga2-2.fna.fbcdn.net',
+      'scontent.fvga2-2.fna.fbcdn.net',
     ],
 	remotePatterns: [
       {

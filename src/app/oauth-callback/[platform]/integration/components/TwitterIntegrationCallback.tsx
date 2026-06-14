@@ -13,6 +13,7 @@ const PLATFORM = "twitter";
 const DEFAULT_TOKEN_EXPIRY = 7200;
 
 export default function TwitterIntegrationCallback() {
+     console.log("Twitter callback page rendered");
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<CallbackStatus>("loading");
   const hasProcessed = useRef(false);
