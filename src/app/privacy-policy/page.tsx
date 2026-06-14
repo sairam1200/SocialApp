@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
 
       <p>
         If you have questions regarding this policy, contact:
-        support@yourdomain.com
+        team@gaddr.com
       </p>
     </main>
   );

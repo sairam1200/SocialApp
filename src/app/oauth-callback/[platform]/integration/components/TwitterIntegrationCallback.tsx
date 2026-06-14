@@ -17,8 +17,26 @@ export default function TwitterIntegrationCallback() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<CallbackStatus>("loading");
   const hasProcessed = useRef(false);
+useEffect(() => {
+  console.log(
+    "Callback URL:",
+    window.location.href
+  );
 
-  useEffect(() => {
+  console.log(
+    "code:",
+    searchParams.get("code")
+  );
+
+  console.log(
+    "state:",
+    searchParams.get("state")
+  );
+}, [searchParams]);
+useEffect(() => {
+  console.log("FULL URL:", window.location.href);
+}, []);
+useEffect(() => {
     if (hasProcessed.current) return;
 
     async function processCallback() {
@@ -46,7 +64,7 @@ export default function TwitterIntegrationCallback() {
             }),
           );
 
-          window.close();
+        //  window.close();
         }
 
         return;
@@ -67,7 +85,7 @@ export default function TwitterIntegrationCallback() {
             }),
           );
 
-          window.close();
+        //  window.close();
         }
 
         return;
@@ -95,7 +113,7 @@ export default function TwitterIntegrationCallback() {
             }),
           );
 
-          window.close();
+       //   window.close();
         }
 
         return;
@@ -125,7 +143,7 @@ export default function TwitterIntegrationCallback() {
           }),
         );
 
-        window.close();
+      //  window.close();
       }
     }
 
