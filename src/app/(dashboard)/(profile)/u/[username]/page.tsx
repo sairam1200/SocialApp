@@ -18,6 +18,7 @@ import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
 import  XIcon  from "@/components/svg/x-icon.svg";
+import  PinterestIcon  from "@/components/svg/pinterest.svg";
 // Dynamic imports for dialogs and skeleton
 const ProfilePictureDialog = dynamic(() => import("./components/ProfilePictureDialog"), {
 	ssr: false,
@@ -38,6 +39,7 @@ const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 	instagram: InstagramIcon,
 	facebook: FacebookIcon,
 	twitter: XIcon,
+	pinterest :PinterestIcon,
 };
 
 interface ProfilePageProps {
