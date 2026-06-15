@@ -7,12 +7,14 @@ import { apiClient } from "@/services/apiClient.service";
 import { COOKIE_NAMES } from "@/constants/globals";
 import { setCookie } from "@/utils/cookie.util";
 import { InstagramProfileType } from "@/types/account/profile.type";
-
+import { jwtDecode } from "jwt-decode";
+import type { JwtPayload } from "@/types/jwtPayload.type";
 type CallbackStatus = "loading" | "success" | "error";
 
 const PLATFORM = "instagram";
 const DEFAULT_TOKEN_EXPIRY = 3600;
-
+const token = localStorage.getItem("accessToken");
+let onboardingStep: string | undefined;
 export default function InstagramIntegrationCallback() {
   const searchParams = useSearchParams();
 
@@ -203,9 +205,19 @@ export default function InstagramIntegrationCallback() {
         /**
          * Fallback if opened directly
          */
+        if (token) {
+                const payload = jwtDecode<JwtPayload>(token);
+                onboardingStep = payload.onboardingStep;
+                console.log(payload.onboardingStep);
+              }
         setTimeout(() => {
-          window.location.href =
-            "/onboarding?provider=instagram&connected=true";
+          if (onboardingStep !== "Completed") {
+            window.location.href =
+              "/onboarding?provider=youtube&connected=true";
+            return;
+          }else{
+            window.close();
+          }
         }, 1000);
       } catch (error) {
         console.error(

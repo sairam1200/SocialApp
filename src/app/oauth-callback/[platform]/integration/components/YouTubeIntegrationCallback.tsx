@@ -123,10 +123,14 @@ export default function YouTubeIntegrationCallback() {
       }
 
       setTimeout(() => {
-        window.location.href =
-          onboardingStep === "Completed"
-            ? "/discover"
-            : "/onboarding?provider=youtube&connected=true";
+          if (onboardingStep !== "Completed") {
+            window.location.href =
+              "/onboarding?provider=youtube&connected=true";
+            return;
+          }else{
+            window.close();
+          }
+        
       }, 1000);
     }
 
