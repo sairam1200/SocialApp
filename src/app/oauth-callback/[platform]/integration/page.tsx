@@ -28,7 +28,7 @@ export default function IntegrationOAuthCallbackPage({ params }: IntegrationOAut
   if (normalizedPlatform === "twitter") {
     return < TwitterIntegrationCallback/>;
   }
-  if (normalizedPlatform === "pininterest") {
+  if (normalizedPlatform === "pinterest") {
     return < PinterestIntegrationCallback/>;
   }
 }
