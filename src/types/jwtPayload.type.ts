@@ -3,6 +3,7 @@ import { ClaimTypes } from "@/constants/globals";
 export interface JwtPayload {
   exp: number;
   [key: string]: unknown;
+  onboardingStep?: string;
   [ClaimTypes.Email]: string;
   [ClaimTypes.UserId]: string;
   [ClaimTypes.UserName]: string;
