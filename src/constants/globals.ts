@@ -25,6 +25,7 @@ export const COOKIE_NAMES = {
   FACEBOOK_ACCESS_TOKEN: "facebook_access_token",
   INSTAGRAM_ACCESS_TOKEN: "instagram_access_token",
   TWITTER_ACCESS_TOKEN: "twitter_access_token",
+  PINTEREST_ACCESS_TOKEN:"pinterest_access_token",
 } as const;
 
 export const DEVICE_ID_KEY = "deviceId";

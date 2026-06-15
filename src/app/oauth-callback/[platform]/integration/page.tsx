@@ -5,6 +5,7 @@ import YouTubeIntegrationCallback from "./components/YouTubeIntegrationCallback"
 import FacebookIntegrationCallback from "./components/FacebookIntegrationCallback";
 import InstagramIntegrationCallback from "./components/InstagramIntegrationCallback";
 import TwitterIntegrationCallback from "./components/TwitterIntegrationCallback";
+import PinterestIntegrationCallback from "./components/PinterestIntegrationCallback";
 
 interface IntegrationOAuthCallbackPageProps {
   params: Promise<{ platform: string }>;
@@ -26,5 +27,8 @@ export default function IntegrationOAuthCallbackPage({ params }: IntegrationOAut
   }
   if (normalizedPlatform === "twitter") {
     return < TwitterIntegrationCallback/>;
+  }
+  if (normalizedPlatform === "pininterest") {
+    return < PinterestIntegrationCallback/>;
   }
 }
