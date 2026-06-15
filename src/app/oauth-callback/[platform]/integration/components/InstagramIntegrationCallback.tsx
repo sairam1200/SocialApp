@@ -213,11 +213,14 @@ export default function InstagramIntegrationCallback() {
         setTimeout(() => {
           if (onboardingStep !== "Completed") {
             window.location.href =
-              "/onboarding?provider=youtube&connected=true";
+              "/onboarding?provider=instagram&connected=true";
             return;
-          }else{
-            window.close();
-          }
+          }if (window.opener) {
+          window.opener.location.reload();
+          window.close();
+        } else {
+          window.location.href = "/discover";
+        }
         }, 1000);
       } catch (error) {
         console.error(

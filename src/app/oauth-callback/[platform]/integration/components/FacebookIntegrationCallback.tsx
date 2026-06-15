@@ -6,7 +6,8 @@ import { apiClient } from "@/services/apiClient.service";
 import { FacebookProfileType } from "@/types/account/profile.type";
 import { COOKIE_NAMES } from "@/constants/globals";
 import { setCookie } from "@/utils/cookie.util";
-
+import { jwtDecode } from "jwt-decode";
+import type { JwtPayload } from "@/types/jwtPayload.type";
 type CallbackStatus = "loading" | "success" | "error";
 
 const PLATFORM = "facebook";
@@ -95,18 +96,49 @@ export default function FacebookIntegrationCallback() {
         });
       }
 
+      // After storing the Facebook token
+
       setStatus("success");
-      if (window.opener) {
-        window.opener.dispatchEvent(
-          new CustomEvent("oauth_success", {
-            detail: {
-              platform: PLATFORM,
-              result,
-            },
-          })
+
+      const draft = sessionStorage.getItem("onboarding_draft");
+
+      if (draft) {
+        const onboardingData = JSON.parse(draft);
+
+        onboardingData.connectedAccounts = {
+          ...(onboardingData.connectedAccounts ?? {}),
+          facebook: "connected",
+        };
+
+        sessionStorage.setItem(
+          "onboarding_draft",
+          JSON.stringify(onboardingData)
         );
-        window.close();
       }
+
+      const token = localStorage.getItem("accessToken");
+      let onboardingStep: string | undefined;
+
+      if (token) {
+        const payload = jwtDecode<JwtPayload>(token);
+        onboardingStep = payload.onboardingStep;
+        console.log(payload.onboardingStep);
+      }
+
+      setTimeout(() => {
+        if (onboardingStep !== "Completed") {
+          window.location.href =
+            "/onboarding?provider=facebook&connected=true";
+          return;
+        }
+
+        if (window.opener) {
+          window.opener.location.reload();
+          window.close();
+        } else {
+          window.location.href = "/discover";
+        }
+      }, 1000);
     }
 
     void processCallback();

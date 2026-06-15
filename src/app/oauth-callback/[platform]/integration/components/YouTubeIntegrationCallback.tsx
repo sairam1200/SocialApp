@@ -127,9 +127,12 @@ export default function YouTubeIntegrationCallback() {
             window.location.href =
               "/onboarding?provider=youtube&connected=true";
             return;
-          }else{
-            window.close();
-          }
+          }if (window.opener) {
+          window.opener.location.reload();
+          window.close();
+        } else {
+          window.location.href = "/discover";
+        }
         
       }, 1000);
     }
