@@ -31,6 +31,7 @@ import { SearchFilter, TrendingItem } from "@/types/search.types";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
 import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
+import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
@@ -115,6 +116,11 @@ const DiscoveryPage = () => {
 		contents: InstagramContent,
 
 	} = useInstagramDiscover();
+	//pinterest hook
+	const{
+		profile: PinterestProfile,
+		contents: PinterestContent,
+	} = usePinterestDiscover();
 
 	const videoContents = contents.filter(
 
@@ -214,10 +220,42 @@ const DiscoveryPage = () => {
 
 		url: item.permalinkUrl,
 	}));
+	const PinterestFeed = PinterestContent.map((item) => ({
+  platform: "pinterest",
+  id: item.id,
+  title:
+    item.title ||
+    item.description?.split(" ").slice(0, 2).join(" ") ||
+    "Untitled",
+  description: item.description,
+  image:
+    item.imageUrl ||
+    "/images/image-placeholder.jpg",
+  publishedAt: item.createdAt
+    ? new Date(item.createdAt)
+    : "",
+  views: 0,
+  likes: item.pinCount ?? 0,
+  comments: 0,
+  profileImage:
+    PinterestProfile?.profileImage ||
+    "/icons/gaddr-logo-xs.svg",
+  userName:
+    PinterestProfile?.userName ??
+    "Pinterest User",
+  handle:
+    PinterestProfile?.pinterestId
+      ? `@${PinterestProfile.pinterestId}`
+      : "@pinterest",
+  url:
+    item.link ||
+    `https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
+}));
 	const platformFeeds = {
 		youtube: youtubeFeed,
 		facebook: facebookFeed,
 		instagram: InstagramFeed,
+        pinterest: PinterestFeed,
 		/* tiktok: tiktokFeed,
 		linkedin: linkedinFeed, */
 	};
@@ -228,27 +266,7 @@ const DiscoveryPage = () => {
 				new Date(b.publishedAt).getTime() -
 				new Date(a.publishedAt).getTime()
 		);
-	type FeedItem = {
-		platform: "youtube" | "facebook";
-		id: string;
-
-		title: string;
-		description: string;
-
-		image?: string;
-
-		publishedAt: string;
-
-		views: number;
-		likes: number;
-		comments: number;
-
-		profileImage?: string;
-		userName?: string;
-		handle?: string;
-
-		url?: string;
-	};
+	
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
