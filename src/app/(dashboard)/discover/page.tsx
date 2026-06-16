@@ -32,7 +32,7 @@ import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
 import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
-
+import PinterestIcon from "@/components/svg/pinterest.svg";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -146,7 +146,7 @@ const DiscoveryPage = () => {
 			"YouTube User",
 		handle: profile?.channel.handle ??
 
-			"@youtube",
+			"",
 		url: `https://www.youtube.com/watch?v=${item.videoId}`,
 	}));
 	const InstagramFeed = InstagramContent.map((item) => ({
@@ -224,10 +224,10 @@ const DiscoveryPage = () => {
   platform: "pinterest",
   id: item.id,
   title:
-    item.title ||
+    item.title?.split(" ").slice(0, 2).join(" ") ||
     item.description?.split(" ").slice(0, 2).join(" ") ||
     "Untitled",
-  description: item.description,
+  description: item.description || item.title,
   image:
     item.imageUrl ||
     "/images/image-placeholder.jpg",
@@ -243,10 +243,7 @@ const DiscoveryPage = () => {
   userName:
     PinterestProfile?.userName ??
     "Pinterest User",
-  handle:
-    PinterestProfile?.pinterestId
-      ? `@${PinterestProfile.pinterestId}`
-      : "@pinterest",
+  handle: "",
   url:
     item.link ||
     `https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
@@ -443,6 +440,8 @@ const DiscoveryPage = () => {
 											<YoutubeRedIcon />
 										) : item.platform === "instagram" ? (
 											<InstagramColorIcon className="w-5 h-5 text-blue-600" />
+										) : item.platform === "pinterest" ? (
+											<PinterestIcon className="w-5 h-5 text-blue-600" />
 										) : null
 									}
 									textContent={
