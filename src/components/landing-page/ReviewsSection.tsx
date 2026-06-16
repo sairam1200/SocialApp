@@ -124,6 +124,8 @@ export default function ReviewsSection() {
 				width={300}
 				height={300}
 				className="absolute -top-10 -right-10 w-[120px] sm:w-40 md:w-[220px]"
+				loading="lazy"
+				aria-hidden="true"
 			/>
 
 			<Image
@@ -132,6 +134,8 @@ export default function ReviewsSection() {
 				width={300}
 				height={300}
 				className="absolute -bottom-10 -left-5 w-[120px] sm:w-40 md:w-[220px]"
+				loading="lazy"
+				aria-hidden="true"
 			/>
 		</div>
 	);

@@ -274,6 +274,8 @@ function EditMediaModal({ isEditMediaModal, close, formik, overrideId }: EditMed
 								src={activeMedia?.previewUrl ?? ""}
 								className="w-full h-full object-contain"
 								muted={currentEdit.muted}
+								preload="metadata"
+								playsInline
 								onLoadedMetadata={handleLoadedMetadata}
 								onTimeUpdate={handleTimeUpdate}
 							/>

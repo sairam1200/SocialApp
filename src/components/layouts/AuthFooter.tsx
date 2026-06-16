@@ -15,7 +15,7 @@ const AuthFooter = () => {
         {/* Left: logo + tagline + year */}
         <div className='flex flex-col items-center md:items-start'>
           <div className='flex flex-col items-center md:flex-row md:items-center gap-[12px] mt-5'>
-            <Image src={logo} alt="gaddr logo" />
+            <Image src={logo} alt="gaddr logo" className="h-8 w-auto" />
             <p className='font-opensans text-[12px] text-[#595959] leading-[14.4px] mt-1 md:mt-0 text-center md:text-left'>Your social media, unified.</p>
           </div>
           <p className='font-opensans text-[12px] text-[#595959] leading-[14.4px] mt-[12px] text-center md:text-left'>2025 Gaddr Search & Me. All rights reserved.</p>

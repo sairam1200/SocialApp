@@ -151,7 +151,7 @@ function MediaUpload({
 									/>
 								) : (
 									<div className="w-full h-full bg-black flex items-center justify-center">
-										<video controls={false} preload="metadata" className="w-full h-full">
+										<video controls={false} preload="metadata" playsInline muted className="w-full h-full">
 											<source src={media.previewUrl} type={media.file.type || "video/mp4"} />
 											<span className="text-white">
 												<Play />

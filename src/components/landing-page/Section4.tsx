@@ -29,6 +29,8 @@ export default function Section4() {
 							width={400}
 							height={500}
 							className="absolute md:top-1/2 md:-translate-y-[60%] md:-left-20 md:-translate-x-3 z-0 pointer-events-none select-none"
+							loading="lazy"
+							aria-hidden="true"
 						/>
 
 						<div className="max-w-full md:max-w-4xl relative z-10">
@@ -37,8 +39,9 @@ export default function Section4() {
 								alt="Image of gaddr platform"
 								width={1100}
 								height={720}
-								layout="responsive"
 								className="w-full h-auto relative z-10"
+								sizes="(max-width: 768px) 100vw, 60vw"
+								loading="lazy"
 							/>
 						</div>
 					</div>
@@ -67,6 +70,8 @@ export default function Section4() {
 						width={72}
 						height={72}
 						className="absolute -top-14 left-0 md:-left-5 w-12 h-12 md:w-20 md:h-20"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -75,6 +80,8 @@ export default function Section4() {
 						width={72}
 						height={72}
 						className="absolute -top-14 right-0 md:-right-5 w-12 h-12 md:w-20 md:h-20"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -83,6 +90,8 @@ export default function Section4() {
 						width={72}
 						height={72}
 						className="absolute -bottom-10 left-14 w-12 h-12 md:w-20 md:h-20"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -91,6 +100,8 @@ export default function Section4() {
 						width={72}
 						height={72}
 						className="absolute -bottom-10 right-14 w-12 h-12 md:w-20 md:h-20"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -99,6 +110,8 @@ export default function Section4() {
 						width={60}
 						height={60}
 						className="absolute -left-5 bottom-5"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -107,6 +120,8 @@ export default function Section4() {
 						width={50}
 						height={50}
 						className="absolute -top-20 left-1/3"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -115,6 +130,8 @@ export default function Section4() {
 						width={50}
 						height={50}
 						className="absolute top-1/2 -right-5"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 
 					<Image
@@ -123,6 +140,8 @@ export default function Section4() {
 						width={60}
 						height={60}
 						className="absolute bottom-0 right-1/4"
+						loading="lazy"
+						aria-hidden="true"
 					/>
 				</div>
 			</div>

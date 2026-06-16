@@ -121,6 +121,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-7/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[1]}`}
@@ -128,6 +130,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-5/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 					</div>
 
@@ -139,6 +143,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-3/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[3]}`}
@@ -146,6 +152,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-9/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 					</div>
 
@@ -157,6 +165,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-4/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[5]}`}
@@ -164,6 +174,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-4/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[6]}`}
@@ -171,6 +183,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-4/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 					</div>
 
@@ -184,6 +198,8 @@ export default function Section2() {
 									width={400}
 									height={600}
 									className="translate-y-[4%]"
+									loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 								/>
 							</div>
 							<Image
@@ -192,6 +208,8 @@ export default function Section2() {
 								width={400}
 								height={600}
 								className="h-full w-full object-cover"
+								loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 							/>
 						</div>
 
@@ -201,6 +219,8 @@ export default function Section2() {
 							width={400}
 							height={600}
 							className="h-5/12 w-full object-cover"
+							loading="lazy"
+							sizes="(max-width: 1280px) 25vw, 300px"
 						/>
 					</div>
 				</div>

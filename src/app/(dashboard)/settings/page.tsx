@@ -16,6 +16,8 @@ import InstagramIcon from "@/components/svg/instagram-colored.svg";
 import FacebookIcon from "@/components/svg/facebook-blue.svg";
 import CheckIcon from "@/components/svg/check-circle-gradient.svg";
 import { apiClient } from "@/services/apiClient.service";
+import XIcon from "@/components/svg/x-icon.svg";
+import PinterestIcon from "@/components/svg/pinterest.svg";
 export default function ProfilePage() {
 	const [openManageSocial, setOpenManageSocial] = useState(false);
 	const [data, setData] = useState<UserProfileType | undefined>(undefined);
@@ -29,6 +31,8 @@ export default function ProfilePage() {
 	youtube: YoutubeIcon,
 	instagram: InstagramIcon,
 	facebook: FacebookIcon,
+	twitter: XIcon,
+	pinterest: PinterestIcon,
 };
 useEffect(() => {
   const fetchProfile = async () => {
@@ -116,7 +120,7 @@ useEffect(() => {
 							/>
 						</div>
    
-						<div className="mt-3 flex flex-wrap">
+						<div className="mt-3 flex flex-wrap gap-1">
 							{data?.linkedAccounts?.map((account) => {
 									const Icon = platformIcons[account.platform.toLowerCase()];
 									return (

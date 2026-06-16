@@ -302,7 +302,7 @@ function CustomizeStep({
 										{mediaToPreview.type === "image" ? (
 											<Image src={mediaToPreview.previewUrl} alt="Post preview" fill className="object-cover" />
 										) : (
-											<video controls={true} preload="metadata" className="h-full w-full object-cover">
+											<video controls={true} preload="metadata" playsInline className="h-full w-full object-cover">
 												<source src={mediaToPreview.previewUrl} type={mediaToPreview.file.type || "video/mp4"} />
 											</video>
 										)}
