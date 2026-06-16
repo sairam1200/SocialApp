@@ -17,8 +17,8 @@ import { apiClient } from "@/services/apiClient.service";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
-import  XIcon  from "@/components/svg/x-icon.svg";
-import  PinterestIcon  from "@/components/svg/pinterest.svg";
+import XIcon from "@/components/svg/x-icon.svg";
+import PinterestIcon from "@/components/svg/pinterest.svg";
 // Dynamic imports for dialogs and skeleton
 const ProfilePictureDialog = dynamic(() => import("./components/ProfilePictureDialog"), {
 	ssr: false,
@@ -39,9 +39,16 @@ const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 	instagram: InstagramIcon,
 	facebook: FacebookIcon,
 	twitter: XIcon,
-	pinterest :PinterestIcon,
+	pinterest: PinterestIcon,
 };
-
+/* const platformIconSizes: Record<string, string> = {
+  tikTok: "h-4 w-4",
+  youtube: "h-4 w-4",
+  instagram: "h-4 w-4",
+  facebook: "h-4 w-4",
+  twitter: "h-4 w-4",
+  pinterest: "h-5 w-5", // if Pinterest appears smaller
+}; */
 interface ProfilePageProps {
 	params: Promise<{ username: string }>;
 }
@@ -227,10 +234,12 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 									return (
 										<div key={account.id} className="flex items-center gap-1 text-xs">
 											<div className="relative w-7 h-7 rounded-full flex justify-center items-center bg-secondary mr-2">
-												<Image src={account?.profileImage||"/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
-												{Icon && <Icon className="size-4 absolute -right-2 bottom-0 z-10" />}
+												<Image src={account?.profileImage || "/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
+												{Icon && <div className="absolute -right-1 bottom-0 z-10 flex h-4 w-4 items-center justify-center">
+													<Icon className="w-full h-full" />
+												</div>}
 											</div>
-											<span>{account.username||"@"}</span>
+											<span>{account.username || "@"}</span>
 											{account.isVerified && <CheckIcon />}
 										</div>
 									);
