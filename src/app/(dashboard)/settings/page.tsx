@@ -18,6 +18,7 @@ import CheckIcon from "@/components/svg/check-circle-gradient.svg";
 import { apiClient } from "@/services/apiClient.service";
 import XIcon from "@/components/svg/x-icon.svg";
 import PinterestIcon from "@/components/svg/pinterest.svg";
+import LinkedInIcon from "@/components/svg/linkedin-blue.svg";
 export default function ProfilePage() {
 	const [openManageSocial, setOpenManageSocial] = useState(false);
 	const [data, setData] = useState<UserProfileType | undefined>(undefined);
@@ -33,6 +34,7 @@ export default function ProfilePage() {
 	facebook: FacebookIcon,
 	twitter: XIcon,
 	pinterest: PinterestIcon,
+	linkedin: LinkedInIcon,
 };
 useEffect(() => {
   const fetchProfile = async () => {

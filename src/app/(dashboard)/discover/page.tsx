@@ -33,6 +33,7 @@ import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
 import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 import PinterestIcon from "@/components/svg/pinterest.svg";
+import { useLinkedInDiscover } from "@/hooks/discovery/useLinkedinDiscover";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -121,6 +122,11 @@ const DiscoveryPage = () => {
 		profile: PinterestProfile,
 		contents: PinterestContent,
 	} = usePinterestDiscover();
+	//linkedin hook
+	const{
+		profile: LinkedInProfile,
+		contents: LinkedInContent,
+	} = useLinkedInDiscover();
 
 	const videoContents = contents.filter(
 
@@ -248,11 +254,61 @@ const DiscoveryPage = () => {
     item.link ||
     `https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
 }));
+const LinkedInFeed = LinkedInContent.map((item) => ({
+  platform: "linkedin",
+  id: item.id,
+
+  title:
+    item.title ||
+    item.text
+      ?.split(" ")
+      .slice(0, 4)
+      .join(" ") ||
+    "Untitled",
+
+  description: item.text,
+
+  image:
+    item.author?.image ||
+    LinkedInProfile?.profileImage ||
+    "/icons/gaddr-logo-xs.svg",
+
+  publishedAt: item.created
+    ? new Date(item.created)
+    : "",
+
+  views: item.activity?.impressions ?? 0,
+
+  likes: item.activity?.likes ?? 0,
+
+  comments: item.activity?.comments ?? 0,
+
+  shares: item.activity?.shares ?? 0,
+
+  profileImage:
+    LinkedInProfile?.profileImage ||
+    "/icons/gaddr-logo-xs.svg",
+
+  userName:
+    `${LinkedInProfile?.firstName ?? ""} ${
+      LinkedInProfile?.lastName ?? ""
+    }`.trim() || "LinkedIn User",
+
+  handle:
+    LinkedInProfile?.userName ||
+    LinkedInProfile?.linkedInId ||
+    "",
+
+  url: item.externalId
+    ? `https://www.linkedin.com/feed/update/${item.externalId}`
+    : "#",
+}));
 	const platformFeeds = {
 		youtube: youtubeFeed,
 		facebook: facebookFeed,
 		instagram: InstagramFeed,
         pinterest: PinterestFeed,
+		linkedin: LinkedInFeed,
 		/* tiktok: tiktokFeed,
 		linkedin: linkedinFeed, */
 	};

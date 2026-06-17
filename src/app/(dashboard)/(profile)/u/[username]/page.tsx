@@ -19,6 +19,7 @@ import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
 import XIcon from "@/components/svg/x-icon.svg";
 import PinterestIcon from "@/components/svg/pinterest.svg";
+import LinkedInIcon from "@/components/svg/linkedin-blue.svg";
 // Dynamic imports for dialogs and skeleton
 const ProfilePictureDialog = dynamic(() => import("./components/ProfilePictureDialog"), {
 	ssr: false,
@@ -40,6 +41,7 @@ const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 	facebook: FacebookIcon,
 	twitter: XIcon,
 	pinterest: PinterestIcon,
+	linkedin: LinkedInIcon,
 };
 /* const platformIconSizes: Record<string, string> = {
   tikTok: "h-4 w-4",
