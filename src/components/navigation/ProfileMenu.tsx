@@ -67,7 +67,7 @@ const deviceId = getDeviceIdOrNull();
 							title="Profile"
 						>
 							{user?.[ClaimTypes.ProfileImage] ? (
-								<Image src={user?.[ClaimTypes.ProfileImage] as string} alt="User avatar" width={30} height={30} className="rounded-full" />
+								<Image fetchPriority="high" preload src={user?.[ClaimTypes.ProfileImage] as string} alt="User avatar" width={30} height={30} className="rounded-full" />
 							) : (
 								<AvatarIcon className="scale-75 text-[#0D0D0D]" />
 							)}

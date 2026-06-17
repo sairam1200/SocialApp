@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, DragEvent } from "react";
+import { useState, useRef, DragEvent, useEffect } from "react";
 import DialogContainer from "@/components/dialog/DialogContainer";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, Trash2 } from "lucide-react";
@@ -39,10 +39,13 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
-	const [updatingPrivacyValue, setUpdatingPrivacyValue] = useState<UserPhotoPrivacy | null>(user?.photoPrivacy ?? null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [selectedPrivacy, setSelectedPrivacy] = useState<UserPhotoPrivacy>(
+		user?.photoPrivacy ?? "Everyone"
+	);
 
-
+	const [loadingPrivacy, setLoadingPrivacy] =
+		useState<UserPhotoPrivacy | null>(null);
 	// Handle dropped file
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -59,8 +62,16 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 		setIsDragging(true);
 	};
 
-	const handleDragLeave = () => setIsDragging(false);
-
+	const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+		if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+			setIsDragging(false);
+		}
+	};
+	useEffect(() => {
+		if (user?.photoPrivacy) {
+			setSelectedPrivacy(user.photoPrivacy);
+		}
+	}, [user]);
 	// Handle file selection from computer
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -75,6 +86,10 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 	const handleReset = () => {
 		setSelectedFile(null);
 		setCroppedImage(null);
+
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
 	};
 
 	const handleRemoveImage = () => {
@@ -115,23 +130,35 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 
 	/** Update privacy */
 	const handleUpdatePrivacy = async (value: UserPhotoPrivacy) => {
+		setSelectedPrivacy(value);
+		setLoadingPrivacy(value);
 		setIsUpdatingPrivacy(true);
-		setUpdatingPrivacyValue(value);
+
 		try {
-			const result = await apiClient.User.updateProfileImagePrivacyAsync({ privacy: value });
+			const result = await apiClient.User.updateProfileImagePrivacyAsync({
+				privacy: value,
+			});
+
 			if (result.success) {
 				toast.success("Profile Image Privacy Updated successfully");
 			} else {
 				toast.error(result.error ?? "Failed to update privacy");
+
+				if (user?.photoPrivacy) {
+					setSelectedPrivacy(user.photoPrivacy);
+				}
 			}
 		} catch {
 			toast.error("Failed to update privacy");
+
+			if (user?.photoPrivacy) {
+				setSelectedPrivacy(user.photoPrivacy);
+			}
 		} finally {
 			setIsUpdatingPrivacy(false);
-			setUpdatingPrivacyValue(null);
+			setLoadingPrivacy(null);
 		}
 	};
-
 	return (
 		<DialogContainer
 			open={open}
@@ -173,18 +200,28 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 						>
 							<div className="relative">
 								<div
-									className={`relative w-18 h-18 rounded-full flex justify-center items-center overflow-hidden ${isDragging ? "border border-dashed border-primary bg-secondary/30" : "bg-secondary"
+									className={`relative w-[72px] h-[72px] rounded-full flex justify-center items-center overflow-hidden ${isDragging
+										? "border border-dashed border-primary bg-secondary/30"
+										: "bg-secondary"
 										}`}
 								>
 									{croppedImage ? (
-										<Image src={croppedImage} alt="Preview" fill className="object-cover rounded-full" unoptimized />
-									) : (
 										<Image
-											src={user?.photo ?? "/images/avatar-placeholder.svg"}
-											alt="avatar"
+											src={croppedImage}
+											alt="Preview"
 											fill
-											className="object-cover"
+											sizes="72px"
+											className="object-cover rounded-full"
+											unoptimized
 										/>
+									) : (
+										<div className="relative w-[72px] h-[72px]">
+											<Image
+												src={user?.photo || "/images/avatar-placeholder.svg"}
+												alt="avatar"
+												className="w-full h-full object-cover rounded-full"
+											/>
+										</div>
 									)}
 								</div>
 								{croppedImage && (
@@ -227,7 +264,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 											<input
 												type="radio"
 												name="visibility"
-												checked={updatingPrivacyValue === opt.value || opt.value === "Everyone"}
+												checked={selectedPrivacy === opt.value}
 												onChange={() => handleUpdatePrivacy(opt.value)}
 												disabled={isUpdatingPrivacy}
 												className="gradient-radio mt-1"
@@ -239,9 +276,10 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 												</div>
 												<p className="text-xs text-gray-600 mt-1">{opt.description}</p>
 											</div>
-											{isUpdatingPrivacy && updatingPrivacyValue === opt.value && (
-												<span className="animate-spin w-3 h-3 border-2 border-primary border-t-transparent rounded-full" />
-											)}
+											{isUpdatingPrivacy &&
+												loadingPrivacy === opt.value && (
+													<span className="animate-spin w-3 h-3 border-2 border-primary border-t-transparent rounded-full" />
+												)}
 										</label>
 									);
 								})}

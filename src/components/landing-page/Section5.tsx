@@ -33,6 +33,8 @@ export default function Section3() {
 						alt="Manage your social media from any device"
 						width={567}
 						height={350}
+						loading="lazy"
+						fetchPriority="high"
 						className="w-[324px] md:w-[567px] h-auto"
 						sizes="(min-width: 768px) 567px, 324px"
 					/>

@@ -37,7 +37,7 @@ const LandingFooter = () => {
 				<div className="flex flex-wrap xl:justify-between gap-10 pb-10">
 					{/* Logo + Text */}
 					<div>
-						<Image src="/images/gaddr.svg" alt="gaddr" width={160} height={80} className="mb-4" />
+						<Image loading="eager" fetchPriority="high" src="/images/gaddr.svg" alt="gaddr" width={160} height={80} sizes="160px" className="mb-4" />
 						<p className="text-sm text-[#333] max-w-xs">
 							Discover and stay inspired. All your social content in one place.
 						</p>
@@ -101,12 +101,12 @@ const LandingFooter = () => {
 
 					{/* SOCIAL ICONS */}
 					<div className="flex items-center gap-4">
-						<Image src="/icons/gaddr-icon.svg" width={40} height={40} alt="gaddr" />
-						<Image src="/icons/tiktok.svg" width={40} height={40} alt="tiktok" />
-						<Image src="/icons/instagram.svg" width={40} height={40} alt="instagram" />
-						<Image src="/icons/linkedin.svg" width={40} height={40} alt="linkedin" />
-						<Image src="/icons/gaddr-fb.svg" width={50} height={50} alt="facebook" />
-						<Image src="/icons/twitter.svg" width={40} height={40} alt="twitter" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/gaddr-icon.svg" width={40} height={40} alt="gaddr" sizes="40px" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/tiktok.svg" width={40} height={40} alt="tiktok" sizes="40px" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/instagram.svg" width={40} height={40} alt="instagram" sizes="40px" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/linkedin.svg" width={40} height={40} alt="linkedin" sizes="40px" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/gaddr-fb.svg" width={50} height={50} alt="facebook" sizes="50px" />
+						<Image fetchPriority="low" loading="lazy"  src="/icons/twitter.svg" width={40} height={40} alt="twitter" sizes="40px" />
 					</div>
 				</div>
 			</div>

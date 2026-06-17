@@ -40,8 +40,9 @@ export default function Section4() {
 								width={1100}
 								height={720}
 								className="w-full h-auto relative z-10"
-								sizes="(max-width: 768px) 100vw, 60vw"
+								sizes="(max-width: 768px) 100vw, 100vw"
 								loading="lazy"
+								fetchPriority="auto"
 							/>
 						</div>
 					</div>
@@ -81,6 +82,7 @@ export default function Section4() {
 						height={72}
 						className="absolute -top-14 right-0 md:-right-5 w-12 h-12 md:w-20 md:h-20"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -91,6 +93,7 @@ export default function Section4() {
 						height={72}
 						className="absolute -bottom-10 left-14 w-12 h-12 md:w-20 md:h-20"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -101,6 +104,7 @@ export default function Section4() {
 						height={72}
 						className="absolute -bottom-10 right-14 w-12 h-12 md:w-20 md:h-20"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -111,6 +115,7 @@ export default function Section4() {
 						height={60}
 						className="absolute -left-5 bottom-5"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -121,6 +126,7 @@ export default function Section4() {
 						height={50}
 						className="absolute -top-20 left-1/3"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -131,6 +137,7 @@ export default function Section4() {
 						height={50}
 						className="absolute top-1/2 -right-5"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 
@@ -141,6 +148,7 @@ export default function Section4() {
 						height={60}
 						className="absolute bottom-0 right-1/4"
 						loading="lazy"
+						fetchPriority="low"
 						aria-hidden="true"
 					/>
 				</div>

@@ -41,6 +41,8 @@ export default function Section3() {
 						alt="One Username for all your profiles"
 						width={444}
 						height={294}
+						loading="lazy"
+						fetchPriority="high"
 						className="w-[336px] md:w-[444px] h-auto"
 						sizes="(min-width: 768px) 444px, 336px"
 					/>

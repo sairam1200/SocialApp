@@ -30,7 +30,7 @@ export default function LandingPrimaryNav({ className = "" }: Props) {
 		<div className="text-white flex items-center gap-2 cursor-pointer">
 			<span className={"rounded-full bg-[#F0EBFF]"}>
 				{user?.[ClaimTypes.ProfileImage] ? (
-					<Image src={user?.[ClaimTypes.ProfileImage] as string} alt="User avatar" width={30} height={30} className="rounded-full" />
+					<Image fetchPriority="high" loading="eager" src={user?.[ClaimTypes.ProfileImage] as string} alt="User avatar" width={30} height={30} className="rounded-full" />
 				) : (
 					<AvatarIcon className="scale-75 text-[#0D0D0D]" />
 				)}
