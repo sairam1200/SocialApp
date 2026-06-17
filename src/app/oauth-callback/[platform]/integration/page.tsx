@@ -6,7 +6,7 @@ import FacebookIntegrationCallback from "./components/FacebookIntegrationCallbac
 import InstagramIntegrationCallback from "./components/InstagramIntegrationCallback";
 import TwitterIntegrationCallback from "./components/TwitterIntegrationCallback";
 import PinterestIntegrationCallback from "./components/PinterestIntegrationCallback";
-
+import LinkedInIntegrationCallback from "./components/LinkedinIntegrationCallback";
 interface IntegrationOAuthCallbackPageProps {
   params: Promise<{ platform: string }>;
 }
@@ -30,5 +30,8 @@ export default function IntegrationOAuthCallbackPage({ params }: IntegrationOAut
   }
   if (normalizedPlatform === "pinterest") {
     return < PinterestIntegrationCallback/>;
+  }
+  if (normalizedPlatform === "linkedin"){
+    return <LinkedInIntegrationCallback/>;
   }
 }
