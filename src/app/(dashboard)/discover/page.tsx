@@ -13,8 +13,6 @@ import {
 	MultiSelectValue,
 } from "@/components/ui/multi-select";
 
-import TwitterIcon from "@/components/svg/x-icon.svg";
-import YoutubeIcon from "@/components/svg/youtube-black-icon.svg";
 import YoutubeRedIcon from "@/components/svg/Youtube.svg";
 import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
 import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
