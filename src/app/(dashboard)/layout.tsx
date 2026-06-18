@@ -13,22 +13,6 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   
-
-  const accessToken =
-  (await cookies()).get(
-    COOKIE_NAMES.ACCESS_TOKEN
-  )?.value;
-
-const pathname =
-  (await headers()).get("x-pathname");
-
-const isPublicRoute =
-  pathname?.startsWith("/discover");
-
-if (!accessToken && !isPublicRoute) {
-  redirect("/login");
-}
-
   return (
 		<div className="flex flex-col min-h-screen overflow-hidden">
 			<div className="flex flex-1 p-5 bg-white max-w-7xl w-full mx-auto">
