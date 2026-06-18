@@ -1,5 +1,5 @@
 "use client";
-import { useState ,ComponentType, SVGProps ,useEffect} from "react";
+import { useState, ComponentType, SVGProps, useEffect } from "react";
 import Image from "next/image";
 import ArrowBack from "@/components/svg/arrow_back.svg";
 import PenIcon from "@/components/svg/pen.svg";
@@ -27,28 +27,43 @@ export default function ProfilePage() {
 	const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccountType[]>([]);
 	const [manualProfiles, setManualProfiles] = useState<ManualProfileType[]>([]);
 	const { user } = useHttpContext();
- const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-	tikTok: TiktokIcon,
-	youtube: YoutubeIcon,
-	instagram: InstagramIcon,
-	facebook: FacebookIcon,
-	twitter: XIcon,
-	pinterest: PinterestIcon,
-	linkedin: LinkedInIcon,
-};
-useEffect(() => {
-  const fetchProfile = async () => {
-    const result = await apiClient.User.getUserProfileAsync(
-      user?.[ClaimTypes.UserName] ?? ""
-    );
+	const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+		tikTok: TiktokIcon,
+		youtube: YoutubeIcon,
+		instagram: InstagramIcon,
+		facebook: FacebookIcon,
+		twitter: XIcon,
+		pinterest: PinterestIcon,
+		linkedin: LinkedInIcon,
+	};
+	useEffect(() => {
+		const fetchProfile = async () => {
+			const start = performance.now();
 
-    if (result.success) {
-      setData(result);
-    }
-  };
+			try {
+				const result =
+					await apiClient.User.getUserProfileAsync(
+						user?.[ClaimTypes.UserName] ?? ""
+					);
 
-  fetchProfile();
-}, [user]);
+				console.log("PROFILE RESULT", result);
+
+				if (result.success) {
+					setData(result);
+				}
+			} catch (err) {
+				console.error("PROFILE ERROR", err);
+			}
+			console.log(
+				"Profile fetch ms:",
+				performance.now() - start
+			);
+
+			
+		};
+
+		fetchProfile();
+	}, [user]);
 	return (
 		<div className="space-y-10">
 			{/* Header */}
@@ -76,7 +91,7 @@ useEffect(() => {
 							onClick={() => setOpenPhotoDialog(true)}
 							className="relative w-14 h-14 rounded-full border-4 border-white shadow-md overflow-hidden cursor-pointer group"
 						>
-							<Image src={user?.["http://gaddr.com/claims/profile-picture"]||"/images/avatar.svg"} alt="User avatar" fill className="object-cover" />
+							<Image src={user?.["http://gaddr.com/claims/profile-picture"] || "/images/avatar.svg"} alt="User avatar" fill className="object-cover" />
 
 							<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300 text-white">
 								<Camera size={60} strokeWidth={1} />
@@ -121,21 +136,21 @@ useEffect(() => {
 								username={user?.[ClaimTypes.UserName] ?? ""}
 							/>
 						</div>
-   
+
 						<div className="mt-3 flex flex-wrap gap-1">
 							{data?.linkedAccounts?.map((account) => {
-									const Icon = platformIcons[account.platform.toLowerCase()];
-									return (
-										<div key={account.id} className="flex items-center gap-1 text-xs">
-											<div className="relative w-7 h-7 rounded-full flex justify-center items-center bg-secondary mr-2">
-												<Image src={account?.profileImage||"/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
-												{Icon && <Icon className="size-4 absolute -right-2 bottom-0 z-10" />}
-											</div>
-											<span>{account.username||"@"}</span>
-											{account.isVerified && <CheckIcon />}
+								const Icon = platformIcons[account.platform.toLowerCase()];
+								return (
+									<div key={account.id} className="flex items-center gap-1 text-xs">
+										<div className="relative w-7 h-7 rounded-full flex justify-center items-center bg-secondary mr-2">
+											<Image src={account?.profileImage || "/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
+											{Icon && <Icon className="size-4 absolute -right-2 bottom-0 z-10" />}
 										</div>
-									);
-								})}
+										<span>{account.username || "@"}</span>
+										{account.isVerified && <CheckIcon />}
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				</div>

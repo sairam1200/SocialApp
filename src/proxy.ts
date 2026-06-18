@@ -43,7 +43,7 @@ function isTokenExpired(
 			payload +
 			"=".repeat(
 				(4 - (payload.length % 4)) %
-					4
+				4
 			);
 
 		const json = atob(padded);
@@ -158,16 +158,16 @@ export async function proxy(
 		request.cookies.get(
 			ACCESS_TOKEN_COOKIE
 		)?.value;
-console.log(
-	"ACCESS TOKEN EXISTS:",
-	!!token
-);
-if (token) {
 	console.log(
-		"TOKEN LENGTH:",
-		token.length
+		"ACCESS TOKEN EXISTS:",
+		!!token
 	);
-}
+	if (token) {
+		console.log(
+			"TOKEN LENGTH:",
+			token.length
+		);
+	}
 	const { pathname, search } =
 		request.nextUrl;
 
@@ -220,11 +220,15 @@ if (token) {
 		}
 
 		// Verify backend session
+		const start = Date.now();
+
 		const isValidSession =
-			await verifySession(
-				token,
-				request
-			);
+			await verifySession(token, request);
+
+		console.log(
+			"verifySession ms:",
+			Date.now() - start
+		);
 
 		// Invalid session or backend unreachable
 		if (!isValidSession) {
@@ -236,86 +240,86 @@ if (token) {
 			);
 		}
 	}
-/**
-	 * -----------------------------------------------
-	 * AUTH PAGES
-	 * -----------------------------------------------
-	 */
+	/**
+		 * -----------------------------------------------
+		 * AUTH PAGES
+		 * -----------------------------------------------
+		 */
 
 	if (
-  token &&
-  isAuthPage &&
-  !isTokenExpired(token)
-) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
-      {
-        headers: {
-          cookie:
-            request.headers.get(
-              "cookie"
-            ) || "",
-        },
-        cache: "no-store",
-		
-      }
-    );
-console.log("AUTH PAGE HIT:", pathname);
-console.log("TOKEN EXISTS:", !!token);
-    if (response.ok) {
-      const session =
-        await response.json();
+		token &&
+		isAuthPage &&
+		!isTokenExpired(token)
+	) {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
+				{
+					headers: {
+						cookie:
+							request.headers.get(
+								"cookie"
+							) || "",
+					},
+					cache: "no-store",
 
-      const onboardingStep =
-        session?.user
-          ?.onboardingStep;
+				}
+			);
+			console.log("AUTH PAGE HIT:", pathname);
+			console.log("TOKEN EXISTS:", !!token);
+			if (response.ok) {
+				const session =
+					await response.json();
 
-      if (
-        onboardingStep !==
-        "Completed"
-      ) {
-        return NextResponse.redirect(
-          new URL(
-            "/onboarding",
-            request.url
-          )
-        );
-      }
+				const onboardingStep =
+					session?.user
+						?.onboardingStep;
 
-      return NextResponse.redirect(
-        new URL(
-          "/discover",
-          request.url
-        )
-      );
-    }
-  } catch (error) {
-    console.error(
-      "Session lookup failed",
-      error
-    );
-  }
-}
+				if (
+					onboardingStep !==
+					"Completed"
+				) {
+					return NextResponse.redirect(
+						new URL(
+							"/onboarding",
+							request.url
+						)
+					);
+				}
+
+				return NextResponse.redirect(
+					new URL(
+						"/discover",
+						request.url
+					)
+				);
+			}
+		} catch (error) {
+			console.error(
+				"Session lookup failed",
+				error
+			);
+		}
+	}
 
 	/**
 	 * -----------------------------------------------
 	 * ALLOW REQUEST
 	 * -----------------------------------------------
 	 */
-const requestHeaders = new Headers(
-  request.headers
-);
+	const requestHeaders = new Headers(
+		request.headers
+	);
 
-requestHeaders.set(
-  "x-pathname",
-  request.nextUrl.pathname
-);
+	requestHeaders.set(
+		"x-pathname",
+		request.nextUrl.pathname
+	);
 	return NextResponse.next({
-  request: {
-    headers: requestHeaders,
-  },
-});
+		request: {
+			headers: requestHeaders,
+		},
+	});
 }
 
 /**
@@ -326,7 +330,7 @@ requestHeaders.set(
 
 export const config = {
 	matcher: [
-		 "/discover/:path*",
+		"/discover/:path*",
 		"/settings/:path*",
 		"/profile/:path*",
 
