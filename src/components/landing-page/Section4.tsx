@@ -1,8 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
-
+import { useState } from "react";
 export default function Section4() {
+	const [svgLoaded, setSvgLoaded] = useState(false);
 	return (
 		<>
 			<div className="w-full relative bg-white overflow-hidden py-12 md:py-32">
@@ -33,16 +34,27 @@ export default function Section4() {
 							aria-hidden="true"
 						/>
 
-						<div className="max-w-full md:max-w-4xl relative z-10">
+						<div className="relative max-w-full md:max-w-4xl">
+							{/* Fast WebP placeholder */}
 							<Image
-								src={`/images/platform-image.svg`}
-								alt="Image of gaddr platform"
+								src="/images/platform-image.webp"
+								alt="Platform"
 								width={1100}
 								height={720}
-								className="w-full h-auto relative z-10"
-								sizes="(max-width: 768px) 100vw, 100vw"
-								loading="lazy"
-								fetchPriority="auto"
+								priority
+								className={`absolute inset-0 w-full h-auto transition-opacity duration-500 ${svgLoaded ? "opacity-0" : "opacity-100"
+									}`}
+							/>
+
+							{/* Heavy SVG */}
+							<Image
+								src="/images/platform-image.svg"
+								alt="Platform"
+								width={1100}
+								height={720}
+								onLoad={() => setSvgLoaded(true)}
+								className={`w-full h-auto transition-opacity duration-500 ${svgLoaded ? "opacity-100" : "opacity-0"
+									}`}
 							/>
 						</div>
 					</div>
