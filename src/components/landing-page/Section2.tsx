@@ -15,7 +15,7 @@ const DiscoveryImages = [
 	"discovery-image-5.svg",
 	"discovery-image-6.svg",
 	"discovery-image-7.svg",
-	["discovery-image-8.svg", "discovery-image-8-blured.svg"],
+	["discovery-image-8.svg", "discovery-image-8-blured.webp"],
 	"discovery-image-9.svg",
 ];
 
