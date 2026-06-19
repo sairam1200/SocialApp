@@ -4,11 +4,7 @@ import bundleAnalyzer from '@next/bundle-analyzer'
 const nextConfig: NextConfig = {
 	/* config options here */
 	images: {
-    domains: [
-      'scontent.fvga2-5.fna.fbcdn.net',
-      'instagram.fvga2-2.fna.fbcdn.net',
-      'scontent.fvga2-2.fna.fbcdn.net',
-    ],
+   
 	remotePatterns: [
       {
         protocol: 'https',
@@ -70,6 +66,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.pinimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.fbcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.fna.fbcdn.net",
       },
     ]
 },
