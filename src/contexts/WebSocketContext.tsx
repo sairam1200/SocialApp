@@ -143,9 +143,7 @@ export function WebSocketProvider({
           "connected",
           (data: { connectedUserId: string }) => {
             if (!hasJoinedNotifications) {
-              notifSocket.emit("join", {
-                userId: data.connectedUserId,
-              });
+              notifSocket.emit("join", data.connectedUserId);
 
               hasJoinedNotifications = true;
             }
@@ -184,9 +182,7 @@ export function WebSocketProvider({
           "connected",
           (data: { connectedUserId: string }) => {
             if (!hasJoinedImports) {
-              importSocket.emit("join", {
-                userId: data.connectedUserId,
-              });
+              importSocket.emit("join", data.connectedUserId);
 
               hasJoinedImports = true;
             }
@@ -242,9 +238,7 @@ export function WebSocketProvider({
       socket.on(
         "connected",
         (data: { connectedUserId: string }) => {
-          socket.emit("join", {
-            userId: data.connectedUserId,
-          });
+          socket.emit("join", data.connectedUserId);
         }
       );
 

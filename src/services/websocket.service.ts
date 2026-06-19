@@ -7,106 +7,140 @@ type SocketNamespace = "notifications" | "imports";
 export class WebSocketService {
     private sockets: Map<SocketNamespace, Socket> = new Map();
     private reconnectAttempts: Map<SocketNamespace, number> = new Map();
-    private maxReconnectAttempts = 5;
 
-    constructor(private baseUrl: string) {
-        console.log("[WebSocketService] Initialized with baseUrl:", baseUrl);
+    private readonly maxReconnectAttempts = 5;
+
+    constructor(private readonly baseUrl: string) {
+        console.log("[WebSocketService] Initialized:", baseUrl);
     }
 
-    /**
-     * connect to namespace
-     */
     connect(namespace: SocketNamespace, token?: string): Socket | null {
-        console.log(`[WebSocketService] Attempting to connect to ${namespace}`);
-        
-        // if already connected, return existing socket
-        if (this.sockets.has(namespace)) {
-            const existingSocket = this.sockets.get(namespace)!;
-            if (existingSocket.connected) {
-                console.log(`[WebSocketService:${namespace}] Already connected, returning existing socket`);
-                return existingSocket;
-            }
-            console.log(`[WebSocketService:${namespace}] Existing socket not connected, cleaning up`);
-            existingSocket.disconnect();
-            this.sockets.delete(namespace);
-        }
+        console.log(
+            `[WebSocketService:${namespace}] Starting connection...`
+        );
 
-        // use provided token or try to get from cookies
         if (!token) {
             console.warn(
-                `[WebSocketService:${namespace}] No access token provided, skipping connection`
+                `[WebSocketService:${namespace}] Missing access token`
             );
             return null;
         }
 
+        const existingSocket = this.sockets.get(namespace);
+
+        if (existingSocket) {
+            if (existingSocket.connected) {
+                console.log(
+                    `[WebSocketService:${namespace}] Reusing existing connection`
+                );
+                return existingSocket;
+            }
+
+            existingSocket.removeAllListeners();
+            existingSocket.disconnect();
+
+            this.sockets.delete(namespace);
+        }
+
         try {
-            // Check if baseUrl already has a path - if so, don't append namespace
-            // This handles cases where backend uses query params or different routing
             const socketUrl = `${this.baseUrl}/${namespace}`;
-            console.log(`[WebSocketService:${namespace}] Creating socket connection to:`, socketUrl);
-            console.log(`[WebSocketService:${namespace}] With auth token:`, token ? 'Token provided' : 'No token');
-            
+
+            console.log(
+                `[WebSocketService:${namespace}] Connecting to:`,
+                socketUrl
+            );
+
             const socket = io(socketUrl, {
-                auth: { token },
-                transports: ["websocket", "polling"], // Add polling as fallback
+                auth: {
+                    token,
+                },
+
+                transports: ["websocket", "polling"],
+
+                autoConnect: true,
+
                 reconnection: true,
+                reconnectionAttempts: this.maxReconnectAttempts,
                 reconnectionDelay: 1000,
                 reconnectionDelayMax: 5000,
-                reconnectionAttempts: this.maxReconnectAttempts,
-                // Add these for better debugging
-                autoConnect: true,
-                forceNew: true,
+
+                timeout: 20000,
             });
 
-            console.log(`[WebSocketService:${namespace}] Socket instance created:`, !!socket);
-            
             this.setupSocketListeners(socket, namespace);
+
             this.sockets.set(namespace, socket);
             this.reconnectAttempts.set(namespace, 0);
 
             return socket;
         } catch (error) {
-            console.error(`[WebSocketService:${namespace}] Error creating socket:`, error);
+            console.error(
+                `[WebSocketService:${namespace}] Failed to create socket`,
+                error
+            );
+
             return null;
         }
     }
 
     disconnect(namespace: SocketNamespace): void {
         const socket = this.sockets.get(namespace);
-        if (socket) {
-            socket.disconnect();
-            this.sockets.delete(namespace);
-            this.reconnectAttempts.delete(namespace);
-            console.log(`[WebSocketService:${namespace}] Disconnected`);
+
+        if (!socket) {
+            return;
         }
+
+        socket.removeAllListeners();
+        socket.disconnect();
+
+        this.sockets.delete(namespace);
+        this.reconnectAttempts.delete(namespace);
+
+        console.log(
+            `[WebSocketService:${namespace}] Disconnected successfully`
+        );
     }
 
     disconnectAll(): void {
         this.sockets.forEach((socket, namespace) => {
+            socket.removeAllListeners();
             socket.disconnect();
-            console.log(`[WebSocketService:${namespace}] Disconnected`);
+
+            console.log(
+                `[WebSocketService:${namespace}] Disconnected`
+            );
         });
+
         this.sockets.clear();
         this.reconnectAttempts.clear();
     }
 
     getSocket(namespace: SocketNamespace): Socket | null {
-        return this.sockets.get(namespace) || null;
+        return this.sockets.get(namespace) ?? null;
     }
 
     isConnected(namespace: SocketNamespace): boolean {
         const socket = this.sockets.get(namespace);
-        return socket ? socket.connected : false;
+
+        return socket?.connected ?? false;
     }
 
-    reconnectWithNewToken(namespace: SocketNamespace, token?: string): void {
-        console.log(`[WebSocketService:${namespace}] Reconnecting with new token...`);
+    reconnectWithNewToken(
+        namespace: SocketNamespace,
+        token?: string
+    ): Socket | null {
+        console.log(
+            `[WebSocketService:${namespace}] Reconnecting with new token`
+        );
+
         this.disconnect(namespace);
-        this.connect(namespace, token);
+
+        return this.connect(namespace, token);
     }
 
     reconnectAllWithNewToken(token?: string): void {
         const namespaces = Array.from(this.sockets.keys());
+
         namespaces.forEach((namespace) => {
             this.reconnectWithNewToken(namespace, token);
         });
@@ -117,90 +151,145 @@ export class WebSocketService {
         namespace: SocketNamespace
     ): void {
         socket.on("connect", () => {
-            console.log(`[WebSocketService:${namespace}] Connected successfully (socket.id: ${socket.id})`);
+            console.log(
+                `[WebSocketService:${namespace}] Connected`
+            );
+
+            console.log({
+                socketId: socket.id,
+                connected: socket.connected,
+            });
+
             this.reconnectAttempts.set(namespace, 0);
         });
 
-        socket.on("connected", (data: { connectedUserId: string }) => {
-            console.log(
-                `[WebSocketService:${namespace}] Authenticated as:`,
-                data.connectedUserId
-            );
-        });
+        socket.on(
+            "connected",
+            (data: { connectedUserId: string }) => {
+                console.log(
+                    `[WebSocketService:${namespace}] Authenticated user:`,
+                    data.connectedUserId
+                );
+            }
+        );
 
         socket.on("disconnect", (reason) => {
-            console.log(`[WebSocketService:${namespace}] Disconnected:`, reason);
+            console.warn(
+                `[WebSocketService:${namespace}] Disconnected`,
+                reason
+            );
         });
 
         socket.on("connect_error", (error) => {
-            const attempts = this.reconnectAttempts.get(namespace) || 0;
-            this.reconnectAttempts.set(namespace, attempts + 1);
+            const attempts =
+                this.reconnectAttempts.get(namespace) ?? 0;
+
+            this.reconnectAttempts.set(
+                namespace,
+                attempts + 1
+            );
 
             console.error(
-                `[WebSocketService:${namespace}] Connection error (attempt ${attempts + 1}/${this.maxReconnectAttempts}):`,
-                error.message,
-                '\nFull error:',
+                `[WebSocketService:${namespace}] Connection error (${attempts + 1}/${this.maxReconnectAttempts})`,
                 error
             );
 
-            // Log additional details that might help debug
-            if ('description' in error) {
-                console.error(`[WebSocketService:${namespace}] Error description:`, (error as Record<string, unknown>).description);
-            }
-            if ('context' in error) {
-                console.error(`[WebSocketService:${namespace}] Error context:`, (error as Record<string, unknown>).context);
-            }
-
             if (attempts >= this.maxReconnectAttempts) {
                 console.error(
-                    `[WebSocketService:${namespace}] Max reconnection attempts reached`
+                    `[WebSocketService:${namespace}] Maximum reconnect attempts reached`
                 );
+
                 socket.disconnect();
             }
         });
 
         socket.on("error", (error) => {
-            // ✅ Suppress "Cannot join other user rooms" error until backend fixes it
-            if (error && typeof error === "object" && "message" in error) {
-                const errorMessage = (error as { message?: string }).message;
-                if (errorMessage === "Cannot join other user rooms") {
-                    // Silent ignore - backend needs to fix their join validation
+            if (
+                error &&
+                typeof error === "object" &&
+                "message" in error
+            ) {
+                const message = (error as { message?: string })
+                    .message;
+
+                if (
+                    message ===
+                    "Cannot join other user rooms"
+                ) {
                     return;
                 }
             }
 
-            console.error(`[WebSocketService:${namespace}] Socket error:`, error);
+            console.error(
+                `[WebSocketService:${namespace}] Socket error`,
+                error
+            );
         });
 
-        // Add listener for namespace-specific errors
         socket.io.on("error", (error) => {
-            console.error(`[WebSocketService:${namespace}] Manager error:`, error);
+            console.error(
+                `[WebSocketService:${namespace}] Manager error`,
+                error
+            );
+        });
+
+        /**
+         * Debug listener for ImportGateway
+         */
+        socket.on("new-content", (payload) => {
+            console.log(
+                `[WebSocketService:${namespace}] new-content received`,
+                payload
+            );
+        });
+
+        /**
+         * Catch-all listener
+         * Extremely useful while debugging
+         */
+        socket.onAny((event, ...args) => {
+            console.log(
+                `[WebSocketService:${namespace}] Event: ${event}`,
+                args
+            );
         });
     }
 }
 
-// Singleton instance
 let wsService: WebSocketService | null = null;
 
 export function getWebSocketService(): WebSocketService {
     if (typeof window === "undefined") {
-        throw new Error("WebSocketService can only be used on the client side");
+        throw new Error(
+            "WebSocketService can only be used on the client side"
+        );
     }
 
     if (!wsService) {
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const apiBaseUrl =
+            process.env.NEXT_PUBLIC_API_BASE_URL;
+
         if (!apiBaseUrl) {
-            throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+            throw new Error(
+                "NEXT_PUBLIC_API_BASE_URL is not defined"
+            );
         }
-        
-        // Remove /api/v1 from the base URL for WebSocket connections
-        // Socket.IO typically runs on the root, not under /api/v1
-        const wsBaseUrl = apiBaseUrl.replace(/\/api\/v1\/?$/, '');
-        
-        console.log("[WebSocketService] API Base URL:", apiBaseUrl);
-        console.log("[WebSocketService] WebSocket Base URL:", wsBaseUrl);
-        console.log("[WebSocketService] Creating singleton instance");
-        
+
+        const wsBaseUrl = apiBaseUrl.replace(
+            /\/api\/v1\/?$/,
+            ""
+        );
+
+        console.log(
+            "[WebSocketService] API Base URL:",
+            apiBaseUrl
+        );
+
+        console.log(
+            "[WebSocketService] WebSocket Base URL:",
+            wsBaseUrl
+        );
+
         wsService = new WebSocketService(wsBaseUrl);
     }
 
