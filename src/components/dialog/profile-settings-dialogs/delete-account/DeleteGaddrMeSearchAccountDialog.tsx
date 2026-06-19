@@ -29,7 +29,7 @@ export default function DeleteGaddrAccountDialog({ open, onClose }: Props) {
 
         onClose();
 
-        router.replace("/");
+        router.replace("/login");
     } catch (error) {
        
             console.error(error);
