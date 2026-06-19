@@ -4,7 +4,7 @@ export interface ProfileFormData {
 	fullName: string;
 	email: string;
 	bio: string;
-	  interests: Interest[];
+	  interests: string[];
 	connectedAccounts: Record<string, string>;
 	profileImage?: File | null;
 	profileImagePreview?: string;
