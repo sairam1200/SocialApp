@@ -105,37 +105,29 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 		if (!croppedImage) return;
 
 		setIsUploadingImage(true);
-
 		try {
-			const imgRes = await fetch(croppedImage);
-			const blob = await imgRes.blob();
-
+			// Convert base64 → File
+			const res = await fetch(croppedImage);
+			const blob = await res.blob();
 			const formData = new FormData();
-			formData.append("file", blob, "profile.jpg");
 
-			console.log("FORM DATA FILE", formData.get("file"));
-
-			const uploadResponse = await fetch(
-				"https://socialapp-backend-4sdw.onrender.com/api/v1/account/profile-image",
-				{
-					method: "PATCH",
-					body: formData,
-					credentials: "include",
-				}
+			formData.append(
+				"file",
+				blob,
+				"profile.jpg"
 			);
 
-			console.log("STATUS", uploadResponse.status);
-
-			if (uploadResponse.ok) {
+			const result = await apiClient.User.updateProfileImageAsync(formData);
+			console.log("UPLOAD RESULT", result);
+			if (result.success) {
 				toast.success("Profile Image Updated successfully");
 				setSelectedFile(null);
 				setCroppedImage(null);
 				onClose();
 			} else {
-				toast.error("Upload failed");
+				toast.error(result.error ?? "An error occured.");
 			}
-		} catch (error) {
-			console.error(error);
+		} catch {
 			toast.error("Failed to upload image");
 		} finally {
 			setIsUploadingImage(false);
@@ -232,7 +224,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 									) : (
 										<div className="relative w-[72px] h-[72px]">
 											<Image
-												key={user?.photo}
+											    key={user?.photo}
 												src={user?.photo || "/images/avatar-placeholder.svg"}
 												alt="avatar"
 												className="w-full h-full object-cover rounded-full"
