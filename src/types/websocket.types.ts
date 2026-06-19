@@ -45,6 +45,14 @@ export interface Notification {
   }
   
   export interface NewContentEvent {
-    platform: ImportPlatform;
-    content: ImportContent;
-  }
+  platform: ImportPlatform;
+
+  id: string;
+  title?: string;
+  description?: string;
+  type?: string;
+
+  externalId?: string;
+  thumbnailUrl?: string;
+  publishedAt?: string;
+}

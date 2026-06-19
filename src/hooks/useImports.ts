@@ -13,7 +13,7 @@ export function useImports() {
         if (!importsSocket) return;
 
         const handleNewContent = (data: NewContentEvent) => {
-            console.log("[Imports] New content from:", data.platform, data.content);
+            console.log("[Imports] New content from:", data.platform, data.title);
 
             // add to recent imports
             setRecentImports((prev) => [data, ...prev].slice(0, 50)); // save up to 50 recent imports
