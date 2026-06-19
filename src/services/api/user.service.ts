@@ -24,6 +24,7 @@ export class UserService {
 		return error.message;
 	})
 	@Patch("/account/profile-image")
+	
 	async updateProfileImageAsync(@Body() formData: FormData): Promise<ServiceResponse> {
 		return {} as ServiceResponse;
 	}

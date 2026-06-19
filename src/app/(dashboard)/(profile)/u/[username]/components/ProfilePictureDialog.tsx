@@ -118,6 +118,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 			);
 
 			const result = await apiClient.User.updateProfileImageAsync(formData);
+			console.log("UPLOAD RESULT", result);
 			if (result.success) {
 				toast.success("Profile Image Updated successfully");
 				setSelectedFile(null);
@@ -223,6 +224,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 									) : (
 										<div className="relative w-[72px] h-[72px]">
 											<Image
+											    key={user?.photo}
 												src={user?.photo || "/images/avatar-placeholder.svg"}
 												alt="avatar"
 												className="w-full h-full object-cover rounded-full"
