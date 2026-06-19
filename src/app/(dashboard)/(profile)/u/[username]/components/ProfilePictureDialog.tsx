@@ -11,7 +11,7 @@ import { ImageCrop, ImageCropApply, ImageCropContent, ImageCropReset } from "@/c
 import { UserPhotoPrivacy, UserProfileType } from "@/types/account/profile.type";
 import { apiClient } from "@/services/apiClient.service";
 import { toast } from "react-hot-toast";
-
+import axios from "axios";
 type DialogTypes = {
 	open: boolean;
 	onClose: () => void;
@@ -117,16 +117,18 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 				"profile.jpg"
 			);
 
-			const result = await apiClient.User.updateProfileImageAsync(formData);
-			console.log("UPLOAD RESULT", result);
-			if (result.success) {
-				toast.success("Profile Image Updated successfully");
-				setSelectedFile(null);
-				setCroppedImage(null);
-				onClose();
-			} else {
-				toast.error(result.error ?? "An error occured.");
-			}
+			const token = localStorage.getItem("accessToken");
+
+			return axios.patch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/account/profile-image`,
+				formData,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
 		} catch {
 			toast.error("Failed to upload image");
 		} finally {
@@ -224,7 +226,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 									) : (
 										<div className="relative w-[72px] h-[72px]">
 											<Image
-											    key={user?.photo}
+												key={user?.photo}
 												src={user?.photo || "/images/avatar-placeholder.svg"}
 												alt="avatar"
 												className="w-full h-full object-cover rounded-full"
