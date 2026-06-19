@@ -110,7 +110,12 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 			const res = await fetch(croppedImage);
 			const blob = await res.blob();
 			const formData = new FormData();
-			formData.append("photo", blob, "profile.jpg");
+
+			formData.append(
+				"file",
+				blob,
+				"profile.jpg"
+			);
 
 			const result = await apiClient.User.updateProfileImageAsync(formData);
 			if (result.success) {
@@ -139,7 +144,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 				privacy: value,
 			});
 			console.log("UPLOAD RESULT", result);
-			
+
 			if (result.success) {
 				toast.success("Profile Image Privacy Updated successfully");
 			} else {
