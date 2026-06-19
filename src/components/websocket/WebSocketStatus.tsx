@@ -95,8 +95,8 @@ export default function WebSocketStatus() {
                         {recentImports.slice(0, 3).map((imp, i) => (
                             <div key={i} className="text-xs p-1 bg-gray-50 rounded">
                                 <span className="font-medium">{imp.platform}</span>
-                                {imp.content.title && (
-                                    <span className="text-gray-600">: {imp.content.title}</span>
+                                {imp.title && (
+                                    <span className="text-gray-600">: {imp.title}</span>
                                 )}
                             </div>
                         ))}
