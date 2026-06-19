@@ -29,15 +29,6 @@ authorization: async () => {
     return null;
   }
 
-  const token =
-    localStorage.getItem(
-      "accessToken"
-    );
- 
-  console.log(
-    "[AUTH TOKEN]",
-    token
-  );
 
   return localStorage.getItem(
     "accessToken"

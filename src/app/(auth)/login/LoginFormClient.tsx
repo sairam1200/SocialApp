@@ -8,8 +8,9 @@ import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { getSafeRedirect } from "@/features/auth/lib/safeRedirect";
 import { getDeviceId } from "@/utils/deviceId.util";
+import {setCookie} from "@/utils/cookie.util";
+import {COOKIE_NAMES} from "@/constants/globals";
 import {
 	AuthCard,
 	AuthCheckbox,
@@ -120,10 +121,6 @@ function LoginForm() {
 					ipAddress,
 				});
 
-			console.log(
-				"LOGIN RESPONSE",
-				loginResponse
-			);
 
 			if (!loginResponse?.succeeded) {
 				const errorMessage =
@@ -146,17 +143,23 @@ function LoginForm() {
 					loginResponse.access_token
 				);
 				document.cookie =
-		`access_token=${loginResponse.access_token}; Path=/; SameSite=Lax`;
+					`access_token=${loginResponse.access_token}; Path=/; SameSite=Lax`;
 			}
 
 			// Store refresh token
 			if (loginResponse.refresh_token) {
-				localStorage.setItem(
-					"refreshToken",
-					loginResponse.refresh_token
+				await setCookie(
+					COOKIE_NAMES.REFRESH_TOKEN,
+					loginResponse.refresh_token,
+					{
+						secure:
+							process.env.NODE_ENV ===
+							"production",
+						sameSite: "lax",
+					}
 				);
 				document.cookie =
-		`refresh_token=${loginResponse.refresh_token}; Path=/; SameSite=Lax`;
+					`refresh_token=${loginResponse.refresh_token}; Path=/; Secure; SameSite=Lax`;
 			}
 
 			// Load current user
@@ -167,7 +170,7 @@ function LoginForm() {
 				"CURRENT USER",
 				currentUser
 			);
-			
+
 			if (!currentUser?.id) {
 				throw new Error(
 					"Unable to load current user."
@@ -196,10 +199,10 @@ function LoginForm() {
 				);
 				return;
 			}
-			
+
 			router.replace("/discover");
 			router.refresh();
-			
+
 		} catch (error) {
 			console.error(
 				"LOGIN ERROR",

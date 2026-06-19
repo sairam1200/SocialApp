@@ -83,7 +83,13 @@ export async function setCookies(
 ): Promise<void> {
   if (typeof window !== "undefined") {
     for (const { name, value } of cookieParams) {
-      document.cookie = `${name}=${encodeURIComponent(value)}; path=/`;
+      document.cookie =
+        `${name}=${encodeURIComponent(value)};` +
+        `path=/;` +
+        `SameSite=Lax;` +
+        (location.protocol === "https:"
+          ? "Secure;"
+          : "");
     }
     return;
   }
