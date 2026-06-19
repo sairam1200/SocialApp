@@ -22,9 +22,18 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children, jwtUser, accessToken, isAuthenticated }: AppProvidersProps) {
+  console.log("APP PROVIDERS", {
+  isAuthenticated,
+  jwtUser,
+  accessToken: !!accessToken,
+});
   return (
     <QueryProvider>
       <AccentThemeProvider>
+        <AuthHydrationProvider
+      jwtUser={jwtUser}
+      isAuthenticated={isAuthenticated}
+    >
         <HttpContextProvider user={jwtUser} isAuthenticated={isAuthenticated}>
         <TokenRefreshProvider>
             <WebSocketProvider accessToken={accessToken}>
@@ -41,7 +50,7 @@ export function AppProviders({ children, jwtUser, accessToken, isAuthenticated }
           </TokenRefreshProvider>
           
         </HttpContextProvider>
-       
+       </AuthHydrationProvider>
       </AccentThemeProvider>
     </QueryProvider>
   );

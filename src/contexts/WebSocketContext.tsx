@@ -95,7 +95,18 @@ export function WebSocketProvider({
      * CHANGE:
      * Early return if auth/session not ready.
      */
+    console.log("WS STATE", {
+    isAuthenticated,
+    authUser,
+    accessToken,
+    hasWsService: !!wsServiceRef.current,
+});
     if (!isAuthenticated || !authUser || !accessToken) {
+       console.log("WS BLOCKED", {
+    isAuthenticated,
+    hasUser: !!authUser,
+    hasToken: !!accessToken,
+  });
       return;
     }
 
@@ -114,6 +125,7 @@ export function WebSocketProvider({
      * CHANGE:
      * Delay expensive websocket boot.
      */
+    console.log("WEBSOCKET CONNECT STARTING");
     const timeout = setTimeout(() => {
       console.log(
         "[WebSocket] Delayed auto-connecting after login..."
