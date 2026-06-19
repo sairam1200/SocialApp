@@ -13,9 +13,9 @@ import SocialDialogsManager from "../../(profile)/u/[username]/components/Social
 import ChangeUsernameDialog from "@/components/dialog/profile-settings-dialogs/change-username-email/ChangeUsernameDialog";
 import ChangeEmailDialog from "@/components/dialog/profile-settings-dialogs/change-username-email/ChangeEmailDialog";
 import { LinkedAccountType, ManualProfileType } from "@/types/account/profile.type";
-
 export default function GeneralSettingsPage() {
 	const user = useHttpContextUser();
+	 
 
 	const [openDeleteGaddr, setOpenDeleteGaddr] = useState(false);
 	const [openDeleteAll, setOpenDeleteAll] = useState(false);

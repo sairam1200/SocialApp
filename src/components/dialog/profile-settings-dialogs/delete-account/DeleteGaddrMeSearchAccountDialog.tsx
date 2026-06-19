@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuthUserStore } from "@/store/auth-user.store";
 import { useDeleteAccount } from "@/hooks/api/useDeleteAccount";
 import DeleteAccountDialogBase from "./DeleteAccountDialogBase";
+import {deleteCookie} from "@/utils/cookie.util";
 
 interface Props {
     open: boolean;
@@ -15,12 +16,26 @@ export default function DeleteGaddrAccountDialog({ open, onClose }: Props) {
     const { authUser } = useAuthUserStore();
     const deleteAccount = useDeleteAccount();
 
-    const handleDelete = async () => {
-        if (!authUser?.id) return;
+   const handleDelete = async () => {
+    if (!authUser?.id) return;
+
+    try {
         await deleteAccount.mutateAsync(authUser.id);
+
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("currentUser");
+
+        await deleteCookie("refresh_token");
+
         onClose();
-        router.push("/goodbye");
-    };
+
+        router.replace("/");
+    } catch (error) {
+       
+            console.error(error);
+        
+    }
+};
 
     return (
         <DeleteAccountDialogBase

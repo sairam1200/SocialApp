@@ -96,7 +96,10 @@ export class AccountService {
   async changePasswordAsync(@Body() body: ChangePasswordRequestType): Promise<void> {
     return;
   }
-
+@Post("/account/delete")
+async deleteAccountAsync(): Promise<ServiceResponse> {
+  return {} as ServiceResponse;
+}
   
 }
 

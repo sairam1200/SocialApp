@@ -88,7 +88,7 @@ export async function setCookies(
         `path=/;` +
         `SameSite=Lax;` +
         (location.protocol === "https:"
-          ? "Secure;"
+          ? "Secure;"                                   
           : "");
     }
     return;
