@@ -78,16 +78,16 @@ export function StepTwoInterests({
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 grow overflow-y-auto pr-2 mb-4 scrollbar-thin">
 				{Array.isArray(topics) &&
-	topics.map((topic) => (
-					<InterestItem
-						key={topic.id}
-						interest={topic}
-						checked={selectedTopics.has(
-							topic.id
-						)}
-						onToggle={handleToggle}
-					/>
-				))}
+					topics.map((topic) => (
+						<InterestItem
+							key={topic.id}
+							interest={topic}
+							checked={selectedTopics.has(
+								topic.id
+							)}
+							onToggle={handleToggle}
+						/>
+					))}
 			</div>
 
 			<div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">

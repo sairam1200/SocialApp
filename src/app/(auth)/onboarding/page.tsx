@@ -293,14 +293,14 @@ const handleStep4Submit = async () => {
         if (error) setError('');
     };
 
-    const handleInterestToggle = (interestName: string) => {
-        setFormData(prev => ({
-            ...prev,
-            interests: prev.interests.includes(interestName)
-                ? prev.interests.filter(i => i !== interestName)
-                : [...prev.interests, interestName]
-        }));
-    };
+    const handleInterestToggle = (topicId: string) => {
+    setFormData(prev => ({
+        ...prev,
+        interests: prev.interests.includes(topicId)
+            ? prev.interests.filter(id => id !== topicId)
+            : [...prev.interests, topicId]
+    }));
+};
     const handleImageChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -349,7 +349,7 @@ const handleStep4Submit = async () => {
             {step === 1 && <StepOneAbout formData={formData} handleChange={handleChange} handleImageChange={handleImageChange} onNext={handleStep1Next} />}
             {step === 2 && <StepTwoInterests formData={formData} topics={topics} toggleInterest={handleInterestToggle} onBack={() => setStep(1)} onNext={handleStep2Next} />}
             {step === 3 && <StepThreeSocials formData={formData} setFormData={setFormData} isSubmitting={isSubmitting} onBack={() => setStep(2)} onSubmit={handleStep3Next} />}
-            {step === 4 && <StepFourReview formData={formData} onBack={() => setStep(step - 1)} onEdit={(s) => setStep(s)} onSubmit={handleStep4Submit} isSubmitting={isSubmitting} />}
+            {step === 4 && <StepFourReview formData={formData}  topics={topics} onBack={() => setStep(step - 1)} onEdit={(s) => setStep(s)} onSubmit={handleStep4Submit} isSubmitting={isSubmitting} />}
         </div>
     );
 }

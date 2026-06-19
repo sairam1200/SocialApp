@@ -4,13 +4,27 @@ export interface ProfileFormData {
 	fullName: string;
 	email: string;
 	bio: string;
-	interests: string[];
+	  interests: Interest[];
 	connectedAccounts: Record<string, string>;
 	profileImage?: File | null;
 	profileImagePreview?: string;
 }
 
+export interface Interest {
+  id: string;
+  name: string;
+  description?: string | null;
+  icon?: string | null;
+  isActive?: boolean;
 
+  createdBy?: string | null;
+  createdOn?: string;
+
+  lastModifiedBy?: string | null;
+  lastModifiedOn?: string | null;
+
+  lastRefreshed?: string;
+}
 export interface SocialPlatform {
 	name: string;
 	id: string;

@@ -1,12 +1,10 @@
 // src/app/(dashboard)/layout.tsx
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+
 import SidebarNav from "@/components/navigation/SideBarNav";
 import Footer from "@/components/layouts/Footer";
 import SearchBar from "@/components/layouts/search-bar";
-import { COOKIE_NAMES } from "@/constants/globals";
-import { headers } from "next/headers";
+
 export default async function DashboardLayout({
   children,
 }: {

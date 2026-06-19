@@ -1,11 +1,12 @@
 
 "use client";
 import { Pencil, Share2, User } from "lucide-react";
-import type { ProfileFormData } from "./types";
+import type { ProfileFormData ,Interest } from "./types";
 import Image from "next/image";
 
 interface StepFourReviewProps {
     formData: ProfileFormData;
+    topics: Interest[];
     onBack: () => void;
     onEdit: (step: number) => void;
     onSubmit: () => void;
@@ -14,11 +15,16 @@ interface StepFourReviewProps {
 
 export function StepFourReview({
     formData,
+    topics,
     onBack,
     onEdit,
     onSubmit,
     isSubmitting,
-}: StepFourReviewProps) {
+}: StepFourReviewProps) 
+{
+    const topicMap = Object.fromEntries(
+    topics.map(t => [t.id, t.name])
+);
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white p-8 rounded-4xl border border-indigo-100 shadow-lg w-full max-w-3xl mx-auto mb-10">
             <div className="text-center mb-10">
@@ -68,12 +74,12 @@ export function StepFourReview({
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {formData.interests.length > 0 ? (
-                            formData.interests.map((interest) => (
+                            formData.interests.map((topicId) => (
                                 <span
-                                    key={interest}
+                                    key={topicId}
                                     className="px-4 py-1.5 border border-indigo-200 text-indigo-700 rounded-full text-xs font-medium bg-indigo-50/30"
                                 >
-                                    • {interest}
+                                    • {topicMap[topicId] ?? topicId}
                                 </span>
                             ))
                         ) : (
