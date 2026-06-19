@@ -138,7 +138,8 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 			const result = await apiClient.User.updateProfileImagePrivacyAsync({
 				privacy: value,
 			});
-
+			console.log("UPLOAD RESULT", result);
+			
 			if (result.success) {
 				toast.success("Profile Image Privacy Updated successfully");
 			} else {
