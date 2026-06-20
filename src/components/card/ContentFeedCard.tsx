@@ -113,21 +113,15 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 					</div>
 
 					{/* Content Text */}
-					<div
-						className={`text-gray-700 overflow-hidden break-words ${textFontSize} ${textFontWeight} ${textLineHeight}`}
-						style={{
-							display: "-webkit-box",
-							WebkitBoxOrient: "vertical",
-							WebkitLineClamp: imageSrc ? 3 : 7,
-							overflow: "hidden",
-						}}
-					>
-						{textContent}
+					<div className="flex-1 overflow-y-auto">
+						<div className={`text-gray-700 ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
+							{textContent}
+						</div>
 					</div>
 				</div>
 
 				{/* Date and Stats */}
-				<div className="pt-3 mt-auto ">
+				<div className="pt-1 mt-auto ">
 					<p className="text-gray-400 text-xs">{date}</p>
 
 					{hasStats && (
