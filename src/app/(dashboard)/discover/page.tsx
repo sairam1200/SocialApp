@@ -320,12 +320,12 @@ const DiscoveryPage = () => {
 				new Date(b.publishedAt).getTime() -
 				new Date(a.publishedAt).getTime()
 		);
-   const filteredFeed =
-  selectedPlatforms.length > 0
-    ? combinedFeed.filter((item) =>
-        selectedPlatforms.includes(item.platform)
-      )
-    : combinedFeed;
+	const filteredFeed =
+		selectedPlatforms.length > 0
+			? combinedFeed.filter((item) =>
+				selectedPlatforms.includes(item.platform)
+			)
+			: combinedFeed;
 	const reelsAndShortsFeed = filteredFeed.filter(
 		(item) =>
 			("isShort" in item && item.isShort) ||
@@ -480,8 +480,11 @@ const DiscoveryPage = () => {
 			<TabPanels className="flex-1 mt-5 text-gray-neutral text-sm">
 				<TabPanel className="space-y-6">
 					<div
-						className={`grid gap-6 ${viewType === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-							}`}
+						className="grid gap-6"
+						style={{
+							gridTemplateColumns:
+								"repeat(auto-fit, minmax(320px, 1fr))",
+						}}
 					>
 						{/* <ProfileCard
 							profilePicSrc={cardProps.profilePicSrc}
@@ -522,7 +525,7 @@ const DiscoveryPage = () => {
 									textContent={
 										<>
 											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0,34)}
+												{item.title?.substring(0, 34)}
 											</span>
 
 											<span className="text-sm text-muted-foreground block line-clamp-2">
