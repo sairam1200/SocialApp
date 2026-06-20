@@ -28,7 +28,7 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	likes,
 	comments,
 }) => {
-	const [currentLikes, setCurrentLikes] = useState(likes?? 0);
+	const [currentLikes, setCurrentLikes] = useState(likes ?? 0);
 	const [isPostLiked, setIsPostLiked] = useState(false);
 	const isVideo =
 		imageSrc?.toLowerCase().includes(".mp4") ||
@@ -113,7 +113,7 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 					</div>
 
 					{/* Content Text */}
-					<div className={`text-gray-700 min-h-[60px] max-h-[85px] overflow-hidden ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
+					<div className={`text-gray-700 min-h-[60px] overflow-hidden ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
 						{textContent}
 					</div>
 				</div>
