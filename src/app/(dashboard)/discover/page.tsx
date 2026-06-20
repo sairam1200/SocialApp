@@ -189,7 +189,7 @@ const DiscoveryPage = () => {
 	}));
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
-		isVideo: false,
+		isVideo: item.type === "video",
 		id: item.id,
 
 		title:
