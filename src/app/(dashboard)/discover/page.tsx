@@ -321,9 +321,11 @@ const DiscoveryPage = () => {
 				new Date(a.publishedAt).getTime()
 		);
 	const reelsAndShortsFeed = combinedFeed.filter(
-		(item: { isShort?: boolean; isReel?: boolean; isVideo?:boolean }) =>
-			item.isShort || item.isReel || item.isVideo
-	);
+  (item) =>
+    ("isShort" in item && item.isShort) ||
+    ("isReel" in item && item.isReel) ||
+    ("isVideo" in item && item.isVideo)
+);
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
