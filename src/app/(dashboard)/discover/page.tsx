@@ -483,7 +483,9 @@ const DiscoveryPage = () => {
 						className="grid gap-6"
 						style={{
 							gridTemplateColumns:
-								"repeat(auto-fit, minmax(320px, 1fr))",
+								viewType === "grid"
+									? "repeat(auto-fit, minmax(280px, 1fr))"
+									: "1fr",
 						}}
 					>
 						{/* <ProfileCard
