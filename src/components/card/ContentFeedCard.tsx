@@ -52,7 +52,8 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		(views ?? 0) > 0 ||
 		(currentLikes ?? 0) > 0 ||
 		(comments ?? 0) > 0;
-	const cardClasses = "flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] min-h-[400px] max-h-[400px]";
+	const cardClasses =
+		"flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] h-[420px]";
 
 	return (
 		<div className={cardClasses}>
@@ -72,14 +73,14 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 							src={imageSrc}
 							alt="Content Visual"
 							fill
-							className="object-cover"
+							className="object-contain"
 						/>
 					)}
 				</div>
 			)}
 
-			<div className="p-4 flex flex-col grow">
-				<div className="grow">
+			<div className="p-4 flex flex-col flex-1 min-h-0">
+				<div className="flex-1 min-h-0">
 					{/* User Info */}
 					<div className="flex items-start justify-between mb-3">
 						<div className="flex items-center">
@@ -112,13 +113,20 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 					</div>
 
 					{/* Content Text */}
-					<div className={`text-gray-700 min-h-[60px] overflow-hidden ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
+					<div
+						className={`text-gray-700 overflow-hidden ${textFontSize} ${textFontWeight} ${textLineHeight}`}
+						style={{
+							display: "-webkit-box",
+							WebkitBoxOrient: "vertical",
+							WebkitLineClamp: imageSrc ? 4 : 8,
+						}}
+					>
 						{textContent}
 					</div>
 				</div>
 
 				{/* Date and Stats */}
-				<div className="pt-3">
+				<div className="pt-3 mt-auto">
 					<p className="text-gray-400 text-xs">{date}</p>
 
 					{hasStats && (
