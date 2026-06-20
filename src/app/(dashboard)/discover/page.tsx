@@ -330,8 +330,8 @@ const DiscoveryPage = () => {
 	);
 	const PostsFeed = combinedFeed.filter(
 		(item) =>
-			!("isShort" in item && item.isShort) ||
-			!("isReel" in item && item.isReel) ||
+			!("isShort" in item && item.isShort) &&
+			!("isReel" in item && item.isReel) &&
 			!("isVideo" in item && item.isVideo)
 	);
 
