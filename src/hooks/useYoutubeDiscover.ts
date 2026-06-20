@@ -42,6 +42,7 @@ export type YoutubeContent = {
   viewCount: number;
   likeCount: number;
   commentCount: number;
+  shorts: boolean;
 };
 export type YoutubeContentsResponse = {
   contents: YoutubeContent[];

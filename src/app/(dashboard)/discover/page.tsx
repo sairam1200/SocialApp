@@ -116,12 +116,12 @@ const DiscoveryPage = () => {
 
 	} = useInstagramDiscover();
 	//pinterest hook
-	const{
+	const {
 		profile: PinterestProfile,
 		contents: PinterestContent,
 	} = usePinterestDiscover();
 	//linkedin hook
-	const{
+	const {
 		profile: LinkedInProfile,
 		contents: LinkedInContent,
 	} = useLinkedInDiscover();
@@ -135,6 +135,7 @@ const DiscoveryPage = () => {
 	);
 	const youtubeFeed = videoContents.map((item) => ({
 		platform: "youtube",
+		isShort: item.shorts,
 		id: item.id,
 		title: item.title,
 		description: item.description,
@@ -155,6 +156,7 @@ const DiscoveryPage = () => {
 	}));
 	const InstagramFeed = InstagramContent.map((item) => ({
 		platform: "instagram",
+		isReel: false,
 		id: item.id,
 		title:
 			item.title
@@ -169,9 +171,9 @@ const DiscoveryPage = () => {
 		description: item.caption,
 		image:
 			item.thumbnailUrl &&
-    !item.thumbnailUrl.endsWith(".mp4")
-      ? item.thumbnailUrl
-      : "/images/video-placeholder.jpg",
+				!item.thumbnailUrl.endsWith(".mp4")
+				? item.thumbnailUrl
+				: "/images/video-placeholder.jpg",
 		publishedAt: item.timestamp ? new Date(item.timestamp) : "",
 		views: item.reach ?? 0,
 		likes: item.likeCount ?? 0,
@@ -186,14 +188,14 @@ const DiscoveryPage = () => {
 	}));
 	const facebookFeed = facebookContents.map((item) => ({
 		platform: "facebook",
-
+		isVideo: false,
 		id: item.id,
 
 		title:
 			item.title
 				?.split(" ")
 				.slice(0, 2)
-				.join(" ")  ||
+				.join(" ") ||
 			item.message
 				?.split(" ")
 				.slice(0, 2)
@@ -211,7 +213,7 @@ const DiscoveryPage = () => {
 
 		views: item.engagement,
 
-		likes: item.reactions|| 0,
+		likes: item.reactions || 0,
 
 		comments: item.commentCount,
 
@@ -225,87 +227,88 @@ const DiscoveryPage = () => {
 		url: item.permalinkUrl,
 	}));
 	const PinterestFeed = PinterestContent.map((item) => ({
-  platform: "pinterest",
-  id: item.id,
-  title:
-    item.title?.split(" ").slice(0, 2).join(" ") ||
-    item.description?.split(" ").slice(0, 2).join(" ") ||
-    "Untitled",
-  description: item.description || item.title,
-  image:
-    item.imageUrl ||
-    "/images/image-placeholder.jpg",
-  publishedAt: item.createdAt
-    ? new Date(item.createdAt)
-    : "",
-  views: 0,
-  likes: item.pinCount ?? 0,
-  comments: 0,
-  profileImage:
-    PinterestProfile?.profileImage ||
-    "/icons/gaddr-logo-xs.svg",
-  userName:
-    PinterestProfile?.userName ??
-    "Pinterest User",
-  handle: "",
-  url:
-    item.link ||
-    `https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
-}));
-const LinkedInFeed = LinkedInContent.map((item) => ({
-  platform: "linkedin",
-  id: item.id,
+		platform: "pinterest",
+		isVideo: false,
+		id: item.id,
+		title:
+			item.title?.split(" ").slice(0, 2).join(" ") ||
+			item.description?.split(" ").slice(0, 2).join(" ") ||
+			"Untitled",
+		description: item.description || item.title,
+		image:
+			item.imageUrl ||
+			"/images/image-placeholder.jpg",
+		publishedAt: item.createdAt
+			? new Date(item.createdAt)
+			: "",
+		views: 0,
+		likes: item.pinCount ?? 0,
+		comments: 0,
+		profileImage:
+			PinterestProfile?.profileImage ||
+			"/icons/gaddr-logo-xs.svg",
+		userName:
+			PinterestProfile?.userName ??
+			"Pinterest User",
+		handle: "",
+		url:
+			item.link ||
+			`https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
+	}));
+	const LinkedInFeed = LinkedInContent.map((item) => ({
+		platform: "linkedin",
+		isVideo: false,
+		id: item.id,
 
-  title:
-    item.title ||
-    item.text
-      ?.split(" ")
-      .slice(0, 4)
-      .join(" ") ||
-    "Untitled",
+		title:
+			item.title ||
+			item.text
+				?.split(" ")
+				.slice(0, 4)
+				.join(" ") ||
+			"Untitled",
 
-  description: item.text,
+		description: item.text,
 
-  image:
-    item.author?.image ||
-    LinkedInProfile?.profileImage ||
-    "/icons/gaddr-logo-xs.svg",
+		image:
+			item.author?.image ||
+			LinkedInProfile?.profileImage ||
+			"/icons/gaddr-logo-xs.svg",
 
-  publishedAt: item.created
-    ? new Date(item.created)
-    : "",
+		publishedAt: item.created
+			? new Date(item.created)
+			: "",
 
-  views: item.activity?.impressions ?? 0,
+		views: item.activity?.impressions ?? 0,
 
-  likes: item.activity?.likes ?? 0,
+		likes: item.activity?.likes ?? 0,
 
-  comments: item.activity?.comments ?? 0,
+		comments: item.activity?.comments ?? 0,
 
-  shares: item.activity?.shares ?? 0,
+		shares: item.activity?.shares ?? 0,
 
-  profileImage:
-    LinkedInProfile?.profileImage ||
-    "/icons/gaddr-logo-xs.svg",
+		profileImage:
+			LinkedInProfile?.profileImage ||
+			"/icons/gaddr-logo-xs.svg",
 
-  userName:
-    `${LinkedInProfile?.firstName ?? ""} ${
-      LinkedInProfile?.lastName ?? ""
-    }`.trim() || "LinkedIn User",
+		userName:
+			`${LinkedInProfile?.firstName ?? ""} ${LinkedInProfile?.lastName ?? ""
+				}`.trim() || "LinkedIn User",
 
-  handle:
-    LinkedInProfile?.userName ||
-    LinkedInProfile?.linkedInId ||
-    "",
+		handle:
+			LinkedInProfile?.userName ||
+			LinkedInProfile?.linkedInId ||
+			"",
 
-  url: item.externalId
-    ? `https://www.linkedin.com/feed/update/${item.externalId}`
-    : "#",
-}));
+		url: item.externalId
+			? `https://www.linkedin.com/feed/update/${item.externalId}`
+			: "#",
+	}));
 	const platformFeeds = {
 		youtube: youtubeFeed,
 		facebook: facebookFeed,
 		instagram: InstagramFeed,
-        pinterest: PinterestFeed,
+		pinterest: PinterestFeed,
 		linkedin: LinkedInFeed,
 		/* tiktok: tiktokFeed,
 		linkedin: linkedinFeed, */
@@ -317,7 +320,10 @@ const LinkedInFeed = LinkedInContent.map((item) => ({
 				new Date(b.publishedAt).getTime() -
 				new Date(a.publishedAt).getTime()
 		);
-	
+	const reelsAndShortsFeed = combinedFeed.filter(
+		(item: { isShort?: boolean; isReel?: boolean; isVideo?:boolean }) =>
+			item.isShort || item.isReel || item.isVideo
+	);
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -479,7 +485,7 @@ const LinkedInFeed = LinkedInContent.map((item) => ({
 								className="cursor-pointer"
 							>
 								<ContentFeedCard
-								
+
 									imageSrc={item.image}
 									profilePicSrc={
 										item.profileImage ??
@@ -525,7 +531,61 @@ const LinkedInFeed = LinkedInContent.map((item) => ({
 				<TabPanel className="space-y-6">For you</TabPanel>
 				<TabPanel className="space-y-6">Profiles</TabPanel>
 				<TabPanel className="space-y-6">Posts</TabPanel>
-				<TabPanel className="space-y-6">Reels & Videos</TabPanel>
+				<TabPanel className="space-y-6">
+  <div
+    className={`grid gap-6 ${
+      viewType === "grid"
+        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        : "grid-cols-1"
+    }`}
+  >
+    {reelsAndShortsFeed.map((item) => (
+      <div
+        key={`${item.platform}-${item.id}`}
+        onClick={() => item.url && window.open(item.url, "_blank")}
+        className="cursor-pointer"
+      >
+        <ContentFeedCard
+          imageSrc={item.image}
+          profilePicSrc={
+            item.profileImage ?? "/icons/gaddr-logo-xs.svg"
+          }
+          userName={item.userName ?? "Unknown"}
+          userHandle={item.handle ?? ""}
+          platformIcon={
+            item.platform === "facebook" ? (
+              <FacebookBlueIcon className="w-5 h-5" />
+            ) : item.platform === "youtube" ? (
+              <YoutubeRedIcon />
+            ) : item.platform === "instagram" ? (
+              <InstagramColorIcon className="w-5 h-5" />
+            ) : item.platform === "pinterest" ? (
+              <PinterestIcon className="w-5 h-5" />
+            ) : null
+          }
+          textContent={
+            <>
+              <span className="font-semibold block line-clamp-1">
+                {item.title?.substring(0, 34)}
+              </span>
+              <span className="text-sm text-muted-foreground block line-clamp-2">
+                {item.description}
+              </span>
+            </>
+          }
+          date={
+            item.publishedAt
+              ? new Date(item.publishedAt).toLocaleDateString()
+              : "none"
+          }
+          views={item.views ?? 0}
+          likes={item.likes ?? 0}
+          comments={item.comments ?? 0}
+        />
+      </div>
+    ))}
+  </div>
+</TabPanel>
 			</TabPanels>
 		);
 	};
