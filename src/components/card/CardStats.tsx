@@ -3,7 +3,7 @@ import { Eye, ThumbsUp, MessageCircle } from 'lucide-react';
 
 interface CardStatsProps {
     views?: number;
-    likes: number;
+    likes?: number;
     comments?: number;
     isLiked: boolean;
     onLikeClick: () => void;
@@ -44,7 +44,7 @@ const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, 
 
     return (
         <div className="flex gap-4 py-2">
-            {views !== undefined && views> 0&&(
+            {views && views > 0 && (
                 <StatItem
                     icon={<Eye size={16} />}
                     count={views}
@@ -52,21 +52,23 @@ const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, 
                 />
             )}
 
-            <StatItem
-                icon={
-                    <ThumbsUp
-                        size={16}
-                        fill={isLiked ? "#6b7280" : "none"}
-                        stroke={thumbStrokeColor}
-                    />
-                }
-                count={likes}
-                clickable={true}
-                color={baseColorClass}
-                onClick={onLikeClick}
-            />
+            {likes && likes > 0 && (
+                <StatItem
+                    icon={
+                        <ThumbsUp
+                            size={16}
+                            fill={isLiked ? "#6b7280" : "none"}
+                            stroke={thumbStrokeColor}
+                        />
+                    }
+                    count={likes}
+                    clickable
+                    color={baseColorClass}
+                    onClick={onLikeClick}
+                />
+            )}
 
-            {comments !== undefined && comments >0&& (
+            {comments && comments > 0 && (
                 <StatItem
                     icon={<MessageCircle size={16} />}
                     count={comments}

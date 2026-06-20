@@ -12,7 +12,7 @@ interface ContentFeedCardProps {
 	textContent: React.ReactNode;
 	date?: string;
 	views?: number;
-	likes: number;
+	likes?: number;
 	comments?: number;
 }
 
@@ -28,12 +28,12 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	likes,
 	comments,
 }) => {
-	const [currentLikes, setCurrentLikes] = useState(likes);
+	const [currentLikes, setCurrentLikes] = useState(likes?? 0);
 	const [isPostLiked, setIsPostLiked] = useState(false);
- const isVideo =
-    imageSrc?.toLowerCase().includes(".mp4") ||
-    imageSrc?.includes("video_dashinit") ||
-    imageSrc?.includes("/video");
+	const isVideo =
+		imageSrc?.toLowerCase().includes(".mp4") ||
+		imageSrc?.includes("video_dashinit") ||
+		imageSrc?.includes("/video");
 	const handleLikeClick = () => {
 		if (isPostLiked) {
 			setCurrentLikes((prevCount) => prevCount - 1);
@@ -48,7 +48,10 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	const textFontSize = hasThumbnail ? "text-sm" : "text-base";
 	const textFontWeight = hasThumbnail ? "font-normal" : "font-semibold";
 	const textLineHeight = hasThumbnail ? "leading-relaxed" : "leading-tight";
-
+	const hasStats =
+		(views ?? 0) > 0 ||
+		(currentLikes ?? 0) > 0 ||
+		(comments ?? 0) > 0;
 	const cardClasses = "flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] min-h-[400px] max-h-[400px]";
 
 	return (
@@ -119,13 +122,15 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 				<div className="pt-3">
 					<p className="text-gray-400 text-xs">{date}</p>
 
-					<CardStats
-						views={views}
-						likes={currentLikes}
-						comments={comments}
-						isLiked={isPostLiked}
-						onLikeClick={handleLikeClick}
-					/>
+					{hasStats && (
+						<CardStats
+							views={views}
+							likes={currentLikes}
+							comments={comments}
+							isLiked={isPostLiked}
+							onLikeClick={handleLikeClick}
+						/>
+					)}
 				</div>
 			</div>
 		</div>
