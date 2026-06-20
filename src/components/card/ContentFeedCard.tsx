@@ -58,7 +58,7 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		<div className={cardClasses}>
 			{/* Thumbnail */}
 			{imageSrc && (
-				<div className="relative w-full h-[200px]">
+				<div className="relative w-full h-[200px] bg-gray-100">
 					{isVideo ? (
 						<video
 							src={imageSrc}
@@ -72,7 +72,6 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 							src={imageSrc}
 							alt="Content Visual"
 							fill
-							sizes="(max-width: 768px) 100vw, 33vw"
 							className="object-cover"
 						/>
 					)}
