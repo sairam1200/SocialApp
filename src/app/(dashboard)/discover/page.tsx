@@ -204,7 +204,6 @@ const DiscoveryPage = () => {
 			"Facebook Post",
 
 		description:
-			item.description ||
 			item.message ||
 			"User dont have description.",
 
@@ -523,7 +522,7 @@ const DiscoveryPage = () => {
 									textContent={
 										<>
 											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0, 34)}
+												{item.title?.substring(0,34)}
 											</span>
 
 											<span className="text-sm text-muted-foreground block line-clamp-2">
@@ -581,7 +580,7 @@ const DiscoveryPage = () => {
 									textContent={
 										<>
 											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0, 34)}
+												{item.title?.substring(0, 50)}
 											</span>
 
 											<span className="text-sm text-muted-foreground block line-clamp-2">
