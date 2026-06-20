@@ -133,7 +133,7 @@ const DiscoveryPage = () => {
 
 
 	);
-	
+
 	const youtubeFeed = videoContents.map((item) => ({
 		platform: "youtube",
 		isShort: item.shorts,
@@ -323,12 +323,18 @@ const DiscoveryPage = () => {
 		);
 
 	const reelsAndShortsFeed = combinedFeed.filter(
-  (item) =>
-    ("isShort" in item && item.isShort) ||
-    ("isReel" in item && item.isReel) ||
-    ("isVideo" in item && item.isVideo)
-);
-console.log("reels length", reelsAndShortsFeed.length);
+		(item) =>
+			("isShort" in item && item.isShort) ||
+			("isReel" in item && item.isReel) ||
+			("isVideo" in item && item.isVideo)
+	);
+	const PostsFeed = combinedFeed.filter(
+		(item) =>
+			!("isShort" in item && item.isShort) ||
+			!("isReel" in item && item.isReel) ||
+			!("isVideo" in item && item.isVideo)
+	);
+
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -535,62 +541,116 @@ console.log("reels length", reelsAndShortsFeed.length);
 				</TabPanel>
 				<TabPanel className="space-y-6">For you</TabPanel>
 				<TabPanel className="space-y-6">Profiles</TabPanel>
-				<TabPanel className="space-y-6">Posts</TabPanel>
 				<TabPanel className="space-y-6">
-  <div
-    className={`grid gap-6 ${
-      viewType === "grid"
-        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-        : "grid-cols-1"
-    }`}
-  > 
-    {reelsAndShortsFeed.map((item) => (
-      <div
-        key={`${item.platform}-${item.id}`}
-        onClick={() => item.url && window.open(item.url, "_blank")}
-        className="cursor-pointer"
-      >
-        <ContentFeedCard
-          imageSrc={item.image}
-          profilePicSrc={
-            item.profileImage ?? "/icons/gaddr-logo-xs.svg"
-          }
-          userName={item.userName ?? "Unknown"}
-          userHandle={item.handle ?? ""}
-          platformIcon={
-            item.platform === "facebook" ? (
-              <FacebookBlueIcon className="w-5 h-5" />
-            ) : item.platform === "youtube" ? (
-              <YoutubeRedIcon />
-            ) : item.platform === "instagram" ? (
-              <InstagramColorIcon className="w-5 h-5" />
-            ) : item.platform === "pinterest" ? (
-              <PinterestIcon className="w-5 h-5" />
-            ) : null
-          }
-          textContent={
-            <>
-              <span className="font-semibold block line-clamp-1">
-                {item.title?.substring(0, 34)}
-              </span>
-              <span className="text-sm text-muted-foreground block line-clamp-2">
-                {item.description}
-              </span>
-            </>
-          }
-          date={
-            item.publishedAt
-              ? new Date(item.publishedAt).toLocaleDateString()
-              : "none"
-          }
-          views={item.views ?? 0}
-          likes={item.likes ?? 0}
-          comments={item.comments ?? 0}
-        />
-      </div>
-    ))}
-  </div>
-</TabPanel>
+					<div
+						className={`grid gap-6 ${viewType === "grid"
+							? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+							: "grid-cols-1"
+							}`}
+					>
+						{PostsFeed.map((item) => (
+							<div
+								key={`${item.platform}-${item.id}`}
+								onClick={() => item.url && window.open(item.url, "_blank")}
+								className="cursor-pointer"
+							>
+								<ContentFeedCard
+									imageSrc={item.image}
+									profilePicSrc={
+										item.profileImage ??
+										"/icons/gaddr-logo-xs.svg"
+									}
+									userName={item.userName ?? "Unknown"}
+									userHandle={item.handle ?? ""}
+									platformIcon={
+										item.platform === "facebook" ? (
+											<FacebookBlueIcon className="w-5 h-5" />
+										) : item.platform === "youtube" ? (
+											<YoutubeRedIcon />
+										) : item.platform === "instagram" ? (
+											<InstagramColorIcon className="w-5 h-5" />
+										) : item.platform === "pinterest" ? (
+											<PinterestIcon className="w-5 h-5" />
+										) : null
+									}
+									textContent={
+										<>
+											<span className="font-semibold block line-clamp-1">
+												{item.title?.substring(0, 34)}
+											</span>
+
+											<span className="text-sm text-muted-foreground block line-clamp-2">
+												{item.description}
+											</span>
+										</>
+									}
+									date={
+										item.publishedAt
+											? new Date(item.publishedAt).toLocaleDateString()
+											: "none"
+									}
+									views={item.views ?? 0}
+									likes={item.likes ?? 0}
+									comments={item.comments ?? 0}
+								/>
+							</div>
+						))}
+					</div>
+				</TabPanel>
+				<TabPanel className="space-y-6">
+					<div
+						className={`grid gap-6 ${viewType === "grid"
+							? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+							: "grid-cols-1"
+							}`}
+					>
+						{reelsAndShortsFeed.map((item) => (
+							<div
+								key={`${item.platform}-${item.id}`}
+								onClick={() => item.url && window.open(item.url, "_blank")}
+								className="cursor-pointer"
+							>
+								<ContentFeedCard
+									imageSrc={item.image}
+									profilePicSrc={
+										item.profileImage ?? "/icons/gaddr-logo-xs.svg"
+									}
+									userName={item.userName ?? "Unknown"}
+									userHandle={item.handle ?? ""}
+									platformIcon={
+										item.platform === "facebook" ? (
+											<FacebookBlueIcon className="w-5 h-5" />
+										) : item.platform === "youtube" ? (
+											<YoutubeRedIcon />
+										) : item.platform === "instagram" ? (
+											<InstagramColorIcon className="w-5 h-5" />
+										) : item.platform === "pinterest" ? (
+											<PinterestIcon className="w-5 h-5" />
+										) : null
+									}
+									textContent={
+										<>
+											<span className="font-semibold block line-clamp-1">
+												{item.title?.substring(0, 34)}
+											</span>
+											<span className="text-sm text-muted-foreground block line-clamp-2">
+												{item.description}
+											</span>
+										</>
+									}
+									date={
+										item.publishedAt
+											? new Date(item.publishedAt).toLocaleDateString()
+											: "none"
+									}
+									views={item.views ?? 0}
+									likes={item.likes ?? 0}
+									comments={item.comments ?? 0}
+								/>
+							</div>
+						))}
+					</div>
+				</TabPanel>
 			</TabPanels>
 		);
 	};

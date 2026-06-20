@@ -7,13 +7,13 @@ interface ContentFeedCardProps {
 	imageSrc?: string;
 	profilePicSrc: string;
 	userName: string;
-	userHandle: string;
+	userHandle?: string;
 	platformIcon: React.ReactNode;
 	textContent: React.ReactNode;
-	date: string;
-	views: number;
+	date?: string;
+	views?: number;
 	likes: number;
-	comments: number;
+	comments?: number;
 }
 
 const ContentFeedCard: React.FC<ContentFeedCardProps> = ({

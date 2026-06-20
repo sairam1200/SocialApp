@@ -1,10 +1,10 @@
 import React from 'react';
-import {Eye, ThumbsUp, MessageCircle} from 'lucide-react';
+import { Eye, ThumbsUp, MessageCircle } from 'lucide-react';
 
 interface CardStatsProps {
-    views: number;
+    views?: number;
     likes: number;
-    comments: number;
+    comments?: number;
     isLiked: boolean;
     onLikeClick: () => void;
 }
@@ -16,7 +16,7 @@ const formatNumber = (num: number): string => {
     return num.toString();
 };
 
-const CardStats: React.FC<CardStatsProps> = ({views, likes, comments, isLiked, onLikeClick}) => {
+const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, onLikeClick }) => {
 
     const StatItem: React.FC<{
         icon: React.ReactNode;
@@ -24,7 +24,7 @@ const CardStats: React.FC<CardStatsProps> = ({views, likes, comments, isLiked, o
         clickable?: boolean;
         color?: string;
         onClick?: () => void
-    }> = ({icon, count, clickable = false, color, onClick}) => {
+    }> = ({ icon, count, clickable = false, color, onClick }) => {
 
         const baseClasses = `flex items-center text-xs ${color || 'text-gray-500'} ${clickable ? 'cursor-pointer' : ''}`;
 
@@ -44,21 +44,35 @@ const CardStats: React.FC<CardStatsProps> = ({views, likes, comments, isLiked, o
 
     return (
         <div className="flex gap-4 py-2">
-            <StatItem icon={<Eye size={16}/>} count={views} color={baseColorClass} />
+            {views !== undefined && views> 0&&(
+                <StatItem
+                    icon={<Eye size={16} />}
+                    count={views}
+                    color={baseColorClass}
+                />
+            )}
 
             <StatItem
-                icon={<ThumbsUp
-                    size={16}
-                    fill={isLiked ? '#6b7280' : 'none'}
-                    stroke={thumbStrokeColor}
-                />}
+                icon={
+                    <ThumbsUp
+                        size={16}
+                        fill={isLiked ? "#6b7280" : "none"}
+                        stroke={thumbStrokeColor}
+                    />
+                }
                 count={likes}
                 clickable={true}
                 color={baseColorClass}
                 onClick={onLikeClick}
             />
 
-            <StatItem icon={<MessageCircle size={16}/>} count={comments} color={baseColorClass} />
+            {comments !== undefined && comments >0&& (
+                <StatItem
+                    icon={<MessageCircle size={16} />}
+                    count={comments}
+                    color={baseColorClass}
+                />
+            )}
         </div>
     );
 };
