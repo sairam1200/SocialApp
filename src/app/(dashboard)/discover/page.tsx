@@ -484,8 +484,9 @@ const DiscoveryPage = () => {
 						style={{
 							gridTemplateColumns:
 								viewType === "grid"
-									? "repeat(auto-fit, minmax(280px, 1fr))"
+									? "repeat(auto-fit, minmax(240px, 1fr))"
 									: "1fr",
+									maxWidth: "100%",
 						}}
 					>
 						{/* <ProfileCard
@@ -552,10 +553,14 @@ const DiscoveryPage = () => {
 				<TabPanel className="space-y-6">Profiles</TabPanel>
 				<TabPanel className="space-y-6">
 					<div
-						className={`grid gap-6 ${viewType === "grid"
-							? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-							: "grid-cols-1"
-							}`}
+						className="grid gap-6"
+						style={{
+							gridTemplateColumns:
+								viewType === "grid"
+									? "repeat(auto-fit, minmax(240px, 1fr))"
+									: "1fr",
+									maxWidth: "100%",
+						}}
 					>
 						{PostsFeed.map((item) => (
 							<div
@@ -608,10 +613,14 @@ const DiscoveryPage = () => {
 				</TabPanel>
 				<TabPanel className="space-y-6">
 					<div
-						className={`grid gap-6 ${viewType === "grid"
-							? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-							: "grid-cols-1"
-							}`}
+						className="grid gap-6"
+						style={{
+							gridTemplateColumns:
+								viewType === "grid"
+									? "repeat(auto-fit, minmax(240px, 1fr))"
+									: "1fr",
+									maxWidth: "100%",
+						}}
 					>
 						{reelsAndShortsFeed.map((item) => (
 							<div
