@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { MoreVertical } from "lucide-react";
 import CardStats from "./CardStats";
-
+import { useEffect } from "react";
 interface ContentFeedCardProps {
 	imageSrc?: string;
 	profilePicSrc: string;
@@ -54,7 +54,19 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		(comments ?? 0) > 0;
 	const cardClasses =
 		"flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] h-[440px]";
+    const [isPortrait, setIsPortrait] = useState(false);
 
+useEffect(() => {
+  if (!imageSrc) return;
+
+  const img = new window.Image();
+
+  img.onload = () => {
+    setIsPortrait(img.height > img.width);
+  };
+
+  img.src = imageSrc;
+}, [imageSrc]);
 	return (
 		<div className={cardClasses}>
 			{/* Thumbnail */}
@@ -73,7 +85,7 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 							src={imageSrc}
 							alt="Content Visual"
 							fill
-							className="object-contain"
+							className={isPortrait ? "object-contain" : "object-cover"}
 						/>
 					)}
 				</div>
