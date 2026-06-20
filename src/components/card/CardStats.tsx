@@ -44,15 +44,15 @@ const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, 
 
     return (
         <div className="flex gap-4 py-2">
-            {views && views > 0 && (
+            {(views ?? 0) > 0 && (
                 <StatItem
                     icon={<Eye size={16} />}
-                    count={views}
+                    count={views!}
                     color={baseColorClass}
                 />
             )}
 
-            {likes && likes > 0 && (
+            {(likes ?? 0) > 0 && (
                 <StatItem
                     icon={
                         <ThumbsUp
@@ -61,17 +61,17 @@ const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, 
                             stroke={thumbStrokeColor}
                         />
                     }
-                    count={likes}
+                    count={likes!}
                     clickable
                     color={baseColorClass}
                     onClick={onLikeClick}
                 />
             )}
 
-            {comments && comments > 0 && (
+            {(comments ?? 0) > 0 && (
                 <StatItem
                     icon={<MessageCircle size={16} />}
-                    count={comments}
+                    count={comments!}
                     color={baseColorClass}
                 />
             )}
