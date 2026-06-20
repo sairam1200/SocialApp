@@ -133,6 +133,7 @@ const DiscoveryPage = () => {
 
 
 	);
+	
 	const youtubeFeed = videoContents.map((item) => ({
 		platform: "youtube",
 		isShort: item.shorts,
@@ -156,7 +157,7 @@ const DiscoveryPage = () => {
 	}));
 	const InstagramFeed = InstagramContent.map((item) => ({
 		platform: "instagram",
-		isReel: false,
+		isReel: item.mediaType === "VIDEO",
 		id: item.id,
 		title:
 			item.title
