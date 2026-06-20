@@ -321,14 +321,19 @@ const DiscoveryPage = () => {
 				new Date(b.publishedAt).getTime() -
 				new Date(a.publishedAt).getTime()
 		);
-
-	const reelsAndShortsFeed = combinedFeed.filter(
+   const filteredFeed =
+  selectedPlatforms.length > 0
+    ? combinedFeed.filter((item) =>
+        selectedPlatforms.includes(item.platform)
+      )
+    : combinedFeed;
+	const reelsAndShortsFeed = filteredFeed.filter(
 		(item) =>
 			("isShort" in item && item.isShort) ||
 			("isReel" in item && item.isReel) ||
 			("isVideo" in item && item.isVideo)
 	);
-	const PostsFeed = combinedFeed.filter(
+	const PostsFeed = filteredFeed.filter(
 		(item) =>
 			!("isShort" in item && item.isShort) &&
 			!("isReel" in item && item.isReel) &&
@@ -489,7 +494,7 @@ const DiscoveryPage = () => {
 							followingCount={cardProps.followingCount}
 							channelIcons={cardProps.channelIcons}
 						></ProfileCard> */}
-						{combinedFeed.map((item) => (
+						{filteredFeed.map((item) => (
 							<div
 								key={`${item.platform}-${item.id}`}
 								onClick={() => item.url && window.open(item.url, "_blank")}
