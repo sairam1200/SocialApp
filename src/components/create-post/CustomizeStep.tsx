@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FormikProps, getIn } from "formik";
-import { CreatePostFormValues, PlatformOverrideValues } from "@/types/media.types";
+import {
+	CreatePostFormValues,
+	PlatformOverrideValues,
+	MediaFile,
+	PLATFORM_POST_TYPES,
+} from "@/types/media.types";
 import { PlatformId, platformMap } from "@/constants/platforms";
 import { cn } from "@/utils/cn.util";
 import { Textarea } from "../ui/textarea";
@@ -11,7 +16,11 @@ import IconWand from "@/components/svg/icon_wand_pink.svg";
 import Image from "next/image";
 import { Tab, TabGroup, TabList } from "@headlessui/react";
 import MediaUpload from "./MediaUpload";
-
+import PlatformPreview from "./PlatformPreview";
+import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
+import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
+import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
+import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 type CustomizeStepProps = {
 	formik: FormikProps<CreatePostFormValues>;
 	setActiveSearchModal: React.Dispatch<React.SetStateAction<"location" | "sound" | null>>;
@@ -25,6 +34,7 @@ const normalizeTag = (value: string) => {
 	return cleaned.startsWith("@") ? cleaned : `@${cleaned}`;
 };
 
+
 function CustomizeStep({
 	formik,
 	setActiveSearchModal,
@@ -37,7 +47,19 @@ function CustomizeStep({
 	const activePlatformId = customizePlatformId ?? selectedPlatforms[0];
 	const base = formik.values.baseContent;
 	const activeOverride = formik.values.platformOverrides?.[activePlatformId];
-
+    
+	const {
+		profile
+	} = useYoutubeDiscover();
+		const {
+		profile: facebookProfile,
+	} = useFacebookDiscover();
+    const{ 
+		profile: instagramProfile,
+	} =useInstagramDiscover();
+	const{
+		profile: PinterestProfile,
+	}=usePinterestDiscover();
 	const effectiveValues = {
 		caption: activeOverride?.caption ?? base.caption,
 		mediaFiles: activeOverride?.mediaFiles ?? base.mediaFiles,
@@ -46,8 +68,37 @@ function CustomizeStep({
 		sound: activeOverride?.sound ?? base.sound,
 		postType: activeOverride?.postType ?? "",
 	};
-	const [mediaToPreview, setMediaToPreview] = useState(effectiveValues.mediaFiles[0]);
+	const [mediaToPreview, setMediaToPreview] = useState<
+		MediaFile | undefined
+	>(effectiveValues.mediaFiles[0]);
 
+	const postTypeOptions = PLATFORM_POST_TYPES[activePlatformId].map(
+		(type) => ({
+			value: type,
+			label: type.charAt(0).toUpperCase() + type.slice(1),
+		})
+	);
+	const previewProfiles = {
+  youtube: {
+    name: profile?.name ?? "",
+    profileImage: profile?.profileImage ?? "",
+  },
+
+  instagram: {
+    name: instagramProfile?.userName ?? "",
+    profileImage: instagramProfile?.profileImage ?? "",
+  },
+
+  facebook: {
+    name: facebookProfile?.name ?? "",
+    profileImage: facebookProfile?.profileImage ?? "",
+  },
+
+  pinterest: {
+    name: PinterestProfile?.userName ?? "",
+    profileImage: PinterestProfile?.profileImage ?? "",
+  },
+};
 	const addTag = (raw?: string) => {
 		const tag = normalizeTag(raw ?? tagInputValue);
 		if (!tag) return;
@@ -84,10 +135,10 @@ function CustomizeStep({
 	}, [selectedPlatforms, setCustomizePlatformId]);
 
 	useEffect(() => {
-		if (effectiveValues?.mediaFiles?.length) {
-			setMediaToPreview(effectiveValues.mediaFiles[0]);
-		}
-	}, [effectiveValues?.mediaFiles]);
+		setMediaToPreview(
+			effectiveValues.mediaFiles[0] ?? undefined
+		);
+	}, [effectiveValues.mediaFiles]);
 
 	useEffect(() => {
 		if (!formik.values.platformOverrides && selectedPlatforms.length > 0) {
@@ -133,8 +184,8 @@ function CustomizeStep({
 					</TabList>
 				</TabGroup>
 
-				<div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-3 text-black-default">
-					<div className="space-y-3 overflow-y-auto pr-2 max-h-[450px]">
+				<div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-3 text-black-default items-start">
+					<div className="min-w-0 space-y-3 overflow-y-auto pr-2 max-h-[450px]">
 						{/* Media Selection Area */}
 						<div className="space-y-2">
 							<label className="font-bold text-sm block">Media</label>
@@ -174,15 +225,13 @@ function CustomizeStep({
 								onValueChange={(value) => formik.setFieldValue(`platformOverrides.${activePlatformId}.postType`, value)}
 								error={
 									getIn(formik.touched, `platformOverrides.${activePlatformId}.postType`) &&
-									getIn(formik.errors, `platformOverrides.${activePlatformId}.postType`)
+										getIn(formik.errors, `platformOverrides.${activePlatformId}.postType`)
 										? getIn(formik.errors, `platformOverrides.${activePlatformId}.postType`)
 										: ""
 								}
-								options={[
-									{ value: "feed", label: "Feed" },
-									{ value: "story", label: "Story" },
-									{ value: "reel", label: "Reel" },
-								]}
+								options={
+									postTypeOptions
+								}
 							/>
 						</div>
 
@@ -201,7 +250,7 @@ function CustomizeStep({
 								className="min-h-24 resize-none"
 								error={
 									getIn(formik.touched, `platformOverrides.${activePlatformId}.caption`) &&
-									getIn(formik.errors, `platformOverrides.${activePlatformId}.caption`)
+										getIn(formik.errors, `platformOverrides.${activePlatformId}.caption`)
 										? getIn(formik.errors, `platformOverrides.${activePlatformId}.caption`)
 										: ""
 								}
@@ -281,55 +330,15 @@ function CustomizeStep({
 
 					{/* RIGHT: PREVIEW SECTION */}
 
-					<div className="bg-[#D4D4D6] rounded-lg p-3 flex items-start justify-center border border-[#D4D4D4] w-full">
+					<div className="min-w-0 bg-[#D4D4D6] rounded-lg p-3 border border-[#D4D4D4]">
 						<div className="bg-white rounded-lg overflow-hidden shadow-sm w-full flex flex-col text-[#101828]">
-							{/* Header */}
-							<div className="p-3 flex items-center justify-between">
-								<div className="flex items-center gap-3">
-									<div className="size-6 rounded-full bg-linear-to-tr from-[#C27AFF] to-[#FB64B6]" />
-									<div className="flex flex-col">
-										<span className="text-xs font-semibold">Username</span>
-										<span className="text-[10px] text-[#6A7282]">Just now</span>
-									</div>
-								</div>
-								<Ellipsis className="size-5" />
-							</div>
-
-							{/* Media Container */}
-							<div className="relative aspect-square w-full bg-gray-100 flex items-center justify-center">
-								{effectiveValues?.mediaFiles?.length ? (
-									<>
-										{mediaToPreview.type === "image" ? (
-											<Image src={mediaToPreview.previewUrl} alt="Post preview" fill className="object-cover" />
-										) : (
-											<video controls={true} preload="metadata" playsInline className="h-full w-full object-cover">
-												<source src={mediaToPreview.previewUrl} type={mediaToPreview.file.type || "video/mp4"} />
-											</video>
-										)}
-									</>
-								) : (
-									<div className="text-gray-400 text-xs">No media selected</div>
-								)}
-							</div>
-
-							{/* Footer / Actions */}
-							<div className="p-4 flex flex-col gap-3">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-4">
-										<Heart className="size-5" />
-										<MessageCircle className="size-5" />
-										<Send className="size-5" />
-									</div>
-									<BookmarkIcon className="size-5" />
-								</div>
-
-								<div className="flex flex-col gap-1">
-									<span className="text-xs text-[#364153]">1,234 likes</span>
-									<div className="text-xs flex gap-2">
-										<span className="font-semibold">Username</span>
-										<span className="text-[#364153] line-clamp-2">{effectiveValues?.caption || "Something here"}</span>
-									</div>
-								</div>
+							<div className="flex justify-center overflow-x-auto">
+								<PlatformPreview
+									platform={activePlatformId}
+									values={effectiveValues}
+									media={mediaToPreview}
+									profiles={previewProfiles}
+								/>
 							</div>
 						</div>
 					</div>

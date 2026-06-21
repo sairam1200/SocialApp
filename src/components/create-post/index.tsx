@@ -10,6 +10,7 @@ import CustomizeStep from "./CustomizeStep";
 import SettingsStep from "./SettingsStep";
 import { SearchSelectionModal } from "./SearchSelectionModal";
 import { PlatformId } from "@/constants/platforms";
+import { PLATFORM_POST_TYPES } from "@/types/media.types";
 
 const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
 	file: Yup.mixed<File>().required("File is required"),
@@ -36,22 +37,46 @@ const createBaseContentSchema = (platforms: PlatformId[]) =>
 		sound: Yup.object().nullable().notRequired(),
 	});
 
-const createPlatformOverrideSchema = (platforms: PlatformId[]) =>
+const createPlatformOverrideSchema = (
+	platform: PlatformId,
+	selectedPlatforms: PlatformId[]
+) =>
 	Yup.object({
 		caption: Yup.string().trim().nullable().optional(),
+
 		mediaFiles: Yup.array()
 			.of(mediaFileSchema)
 			.optional()
-			.test("instagram-media", "Instagram posts require at least one media file", (value, context) => {
-				if (platforms.includes("instagram")) {
-					return (value?.length ?? 0) > 0 || (context?.options?.context?.baseContent?.mediaFiles?.length ?? 0) > 0;
+			.test(
+				"platform-media",
+				`${platform} requires media`,
+				(value, context) => {
+					const baseFiles =
+						context?.options?.context?.baseContent?.mediaFiles ?? [];
+
+					const totalFiles = (value?.length ?? 0) + baseFiles.length;
+
+					if (platform === "instagram") {
+						return totalFiles > 0;
+					}
+
+					if (platform === "youtube") {
+						return totalFiles > 0;
+					}
+
+					return true;
 				}
-				return true;
-			}),
+			),
+
 		tags: Yup.array().of(Yup.string()).optional(),
+
 		location: Yup.object().nullable().optional(),
+
 		sound: Yup.object().nullable().optional(),
-		postType: Yup.string().trim().required("Post type is required"),
+
+		postType: Yup.string()
+			.oneOf(PLATFORM_POST_TYPES[platform])
+			.required("Post type is required"),
 	});
 
 const createPostStepSchema = (step: number, platforms: PlatformId[]) => {
@@ -68,10 +93,16 @@ const createPostStepSchema = (step: number, platforms: PlatformId[]) => {
 					if (!value) return Yup.object().nullable();
 
 					return Yup.object(
-						Object.keys(value).reduce<Record<string, Yup.AnySchema>>((acc, platform) => {
-							acc[platform] = createPlatformOverrideSchema(platforms);
-							return acc;
-						}, {})
+						Object.keys(value).reduce<Record<string, Yup.AnySchema>>(
+							(acc, platform) => {
+								acc[platform] = createPlatformOverrideSchema(
+									platform as PlatformId,
+									platforms
+								);
+								return acc;
+							},
+							{}
+						)
 					).nullable();
 				}),
 			});

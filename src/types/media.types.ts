@@ -68,3 +68,16 @@ export interface SoundData {
 	duration: string;
 	previewUrl?: string;
 }
+export const PLATFORM_POST_TYPES = {
+	instagram: ["post", "reel", "story"],
+	facebook: ["post", "reel", "story"],
+	youtube: ["video", "short"],
+	tiktok: ["video"],
+	linkedin: ["post", "article"],
+	twitter: ["post"],
+	pinterest: ["pin"],
+	behance: ["project"],
+	discord: ["message"],
+	reddit: ["post"],
+	spotify: ["track"],
+} as const;

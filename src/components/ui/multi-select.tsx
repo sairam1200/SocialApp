@@ -273,6 +273,7 @@ export function MultiSelectItem({
 	value: string;
 } & Omit<ComponentPropsWithoutRef<typeof CommandItem>, "value">) {
 	const { toggleValue, selectedValues, onItemAdded } = useMultiSelectContext();
+
 	const isSelected = selectedValues.has(value);
 
 	useEffect(() => {
@@ -289,13 +290,13 @@ export function MultiSelectItem({
 			}}
 		>
 			{children}
+
 			<input
 				type="checkbox"
 				checked={isSelected}
-				onChange={(e) => e.preventDefault()}
+				readOnly
 				className="w-4 h-4 border border-black-default rounded cursor-pointer accent-black-default"
 			/>
-			{/* <CheckIcon className={cn("mr-2 size-4", isSelected ? "opacity-100" : "opacity-0")} /> */}
 		</CommandItem>
 	);
 }

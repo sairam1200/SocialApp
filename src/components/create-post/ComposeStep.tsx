@@ -16,7 +16,7 @@ import { CreatePostFormValues } from "@/types/media.types";
 import { FormikProps } from "formik";
 import { cn } from "@/utils/cn.util";
 import MediaUpload from "./MediaUpload";
-
+import { PlatformId } from "@/constants/platforms";
 type ComposeStepProps = {
 	formik: FormikProps<CreatePostFormValues>;
 	setActiveSearchModal: React.Dispatch<React.SetStateAction<"location" | "sound" | null>>;
@@ -28,7 +28,15 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 
 	const selectedLocation = baseContent.location;
 	const selectedSound = baseContent.sound;
-
+	const PLATFORM_CHARACTER_LIMITS: Partial<Record<PlatformId, number>> = {
+		facebook: 6300,
+		instagram: 2200,
+		twitter: 280,
+		linkedin: 3000,
+		youtube: 5000,
+		reddit: 40000,
+		pinterest: 2000,
+	};
 	return (
 		<div className="space-y-5 text-black-default">
 			<div>
@@ -90,9 +98,19 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 				<div className="flex items-center justify-between gap-4 text-xs text-gray-neutral">
 					<div className="flex items-center gap-2">
 						<p>Character limits by platform:</p>
-						<span className="flex items-center gap-1">
-							<facebookPlatform.icon className="size-3" /> 6300
-						</span>
+
+						<div className="flex items-center gap-3">
+							{formik.values.platforms.map((platformId) => {
+								const platform = platformMap[platformId];
+
+								return (
+									<span key={platformId} className="flex items-center gap-1">
+										<platform.icon className="size-3" />
+										{PLATFORM_CHARACTER_LIMITS[platformId]}
+									</span>
+								);
+							})}
+						</div>
 					</div>
 					<p>{baseContent.caption.length}/2200</p>
 				</div>
