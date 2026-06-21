@@ -20,7 +20,7 @@ export type PlatformPreviewProps = {
     platform: PlatformId;
     values: PreviewValues;
     media?: MediaFile;
-    profiles?:PreviewProfile;
+    profiles?:PreviewProfiles;
 };
 export type PreviewProfile = {
   name: string;
