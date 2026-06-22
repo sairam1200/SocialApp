@@ -131,7 +131,7 @@ export class IntegrationsService {
 
   /** YouTube: Upload video */
   @Post<YoutubeUploadResponse>("/integrations/youtube/upload")
-  async uploadYoutubeVideo(
+  async uploadMedia(
     @Body() body: YoutubeUploadRequest
   ): Promise<YoutubeUploadResponse> {
     return {} as YoutubeUploadResponse;
