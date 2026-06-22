@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Get, Post, Path, Body, Query } from "restfit";
+import { Get, Post, Path, Body, Query ,Delete} from "restfit";
 import {
   ConnectResponse,
   ConnectCallbackResponseType,
@@ -116,7 +116,7 @@ export class IntegrationsService {
   }
 
   //delete
-  @Post("/integrations/{platform}/disconnect")
+  @Delete("/integrations/{platform}/disconnect")
   async disconnect(
     @Path("platform") platform: string
   ): Promise<{
