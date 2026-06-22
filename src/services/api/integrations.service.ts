@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Get, Post, Path, Body, Query, Delete } from "restfit";
+import { Get, Post, Path, Body, Query ,Delete} from "restfit";
 import {
   ConnectResponse,
   ConnectCallbackResponseType,
   ImportRequestBody,
 } from "@/types/integrations.types";
+import {
+  YoutubeUploadRequest,
+  YoutubeUploadResponse,
+  YoutubeStatsResponse,
+  YoutubeSyncResponse,
+  YoutubeProfileResponse,
+} from "@/types/social/youtube.type";
 
 export class IntegrationsService {
   /** OAuth */
@@ -122,8 +129,34 @@ export class IntegrationsService {
     };
   }
 
+  /** YouTube: Upload video */
+  @Post<YoutubeUploadResponse>("/youtube/upload")
+  async uploadYoutubeVideo(
+    @Body() body: YoutubeUploadRequest
+  ): Promise<YoutubeUploadResponse> {
+    return {} as YoutubeUploadResponse;
+  }
+
+  /** YouTube: Get channel stats */
+  @Get<YoutubeStatsResponse>("/youtube/get-stats")
+  async getYoutubeStats(): Promise<YoutubeStatsResponse> {
+    return {} as YoutubeStatsResponse;
+  }
+
+  /** YouTube: Sync content */
+  @Post<YoutubeSyncResponse>("/youtube/sync")
+  async syncYoutube(): Promise<YoutubeSyncResponse> {
+    return { success: false, message: "" };
+  }
+
+  /** YouTube: Get profile (extended) */
+  @Get<YoutubeProfileResponse>("/youtube/get-profile")
+  async getYoutubeProfile(): Promise<YoutubeProfileResponse> {
+    return {} as YoutubeProfileResponse;
+  }
+
   /** Upload a media file and return its URL */
-  @Post<{ url: string }>("/media/upload")
+  @Post<{ url: string }>("/integrations/{platform}/upload")
   async uploadMedia(@Body() body: FormData): Promise<{ url: string }> {
     return { url: "" };
   }
