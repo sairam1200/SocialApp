@@ -1,30 +1,47 @@
+
 import Image from "next/image";
 import { PreviewProps } from "@/components/create-post/previews/types";
-import { BookmarkIcon, Ellipsis, Heart, MessageCircle, Send, X } from "lucide-react";
+import {
+    BookmarkIcon,
+    Ellipsis,
+    Heart,
+    MessageCircle,
+    Send,
+} from "lucide-react";
 import { cn } from "@/utils/cn.util";
+
 export default function InstagramPreview({
     values,
     media,
-    profile
+    profile,
 }: PreviewProps) {
     const isReel = values.postType === "reel";
     const isStory = values.postType === "story";
+
     const mediaClass = isStory
         ? "w-[180px] h-[320px]"
         : isReel
-            ? "w-[230px] h-[285px]"
-            : "w-full h-[180px]"
+            ? "aspect-[9/16] max-w-[230px] mx-auto"
+            : "w-full h-[180px]";
+
+    const profileImage =
+        profile?.profileImage || "/images/avatar-placeholder.svg";
+console.log(profileImage);
+    const profileName = profile?.name || "Username";
+    const isMetaImage =
+        profileImage.includes("fbcdn.net") ||
+        profileImage.includes("cdninstagram.com");
     // Story Preview
     if (isStory) {
         return (
             <div className="bg-[#D4D4D6] rounded-lg p-3 flex justify-center">
-                <div className="relative aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black">
+                <div className="relative w-[260px] h-[462px] overflow-hidden rounded-xl bg-black">
                     {media ? (
                         media.type === "image" ? (
                             <Image
                                 src={media.previewUrl}
                                 fill
-                                alt=""
+                                alt={`${profileName} story`}
                                 className="object-cover"
                             />
                         ) : (
@@ -41,26 +58,27 @@ export default function InstagramPreview({
                     )}
 
                     {/* Story Header */}
-                    <div className="absolute top-0 left-0 right-0 p-3 flex items-center gap-2 bg-gradient-to-b from-black/60 to-transparent">
-                        <div className="size-8 rounded-full bg-linear-to-tr from-[#C27AFF] to-[#FB64B6]" />
-                        <div>
-                            <Image
-                                src={
-                                    profile?.profileImage ||
-                                    "/images/avatar-placeholder.png"
-                                }
-                                alt={profile?.name || "Profile"}
-                                width={32}
-                                height={32}
-                                className="size-8 rounded-full object-cover border border-white"
-                            />
+                    <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent">
+                        <div className="flex items-center gap-2">
+                            <div className="relative size-8 overflow-hidden rounded-full border border-white">
+                                <Image
+                                    src={profileImage}
+                                    alt={profileName}
+                                    width={32}
+                                    height={32}
+                                    unoptimized={isMetaImage}
+                                />
+                            </div>
 
-                            <p className="text-white text-xs font-medium">
-                                {profile?.name || "Username"}
-                            </p>
-                            <p className="text-white/70 text-[10px]">
-                                Just now
-                            </p>
+                            <div>
+                                <p className="text-white text-xs font-medium">
+                                    {profileName}
+                                </p>
+
+                                <p className="text-white/70 text-[10px]">
+                                    Just now
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -82,11 +100,21 @@ export default function InstagramPreview({
                 {/* Header */}
                 <div className="p-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="size-6 rounded-full bg-linear-to-tr from-[#C27AFF] to-[#FB64B6]" />
+                        <div className="size-8 rounded-full p-[2px] bg-linear-to-tr from-[#C27AFF] to-[#FB64B6]">
+                            <Image
+                                src={profileImage}
+                                alt={profileName}
+                                width={32}
+                                height={32}
+                                unoptimized={isMetaImage}
+                            />
+                        </div>
+
                         <div className="flex flex-col">
                             <span className="text-xs font-semibold">
-                                Username
+                                {profileName}
                             </span>
+
                             <span className="text-[10px] text-[#6A7282]">
                                 Just now
                             </span>
@@ -108,7 +136,7 @@ export default function InstagramPreview({
                             <Image
                                 src={media.previewUrl}
                                 fill
-                                alt=""
+                                alt={`${profileName} post`}
                                 className="object-cover"
                             />
                         ) : (
@@ -152,12 +180,11 @@ export default function InstagramPreview({
 
                         <div className="text-xs flex gap-2">
                             <span className="font-semibold">
-                                Username
+                                {profileName}
                             </span>
 
                             <span className="text-[#364153] line-clamp-2">
-                                {values.caption ||
-                                    "Something here"}
+                                {values.caption || "Something here"}
                             </span>
                         </div>
 
