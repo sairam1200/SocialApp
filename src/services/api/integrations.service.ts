@@ -130,7 +130,7 @@ export class IntegrationsService {
   }
 
   /** YouTube: Upload video */
-  @Post<YoutubeUploadResponse>("/youtube/upload")
+  @Post<YoutubeUploadResponse>("/integrations/youtube/upload")
   async uploadYoutubeVideo(
     @Body() body: YoutubeUploadRequest
   ): Promise<YoutubeUploadResponse> {
@@ -156,8 +156,8 @@ export class IntegrationsService {
   }
 
   /** Upload a media file and return its URL */
-  @Post<{ url: string }>("/integrations/youtube/upload")
+/*   @Post<{ url: string }>("/integrations/youtube/upload")
   async uploadMedia(@Body() body: FormData): Promise<{ url: string }> {
     return { url: "" };
-  }
+  } */
 }
