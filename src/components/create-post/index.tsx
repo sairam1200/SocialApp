@@ -13,6 +13,7 @@ import { PlatformId } from "@/constants/platforms";
 import { PLATFORM_POST_TYPES } from "@/types/media.types";
 import { apiClient } from "@/services/apiClient.service";
 import { YoutubeUploadRequest } from "@/types/social/youtube.type";
+import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import toast from "react-hot-toast";
 
 const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
@@ -177,6 +178,7 @@ const steps = [
 const TOTAL_STEPS = steps.length;
 
 function CreatePostDialog({ close, open }: CreatePostProps) {
+	const { profile: youtubeProfile } = useYoutubeDiscover();
 	const [activeStep, setActiveStep] = useState(0);
 	const [activeSearchModal, setActiveSearchModal] = useState<"location" | "sound" | null>(null);
 	const [customizePlatformId, setCustomizePlatformId] = useState<PlatformId | null>(null);
@@ -228,6 +230,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 
 				const override = values.platformOverrides?.[youtubePlatform];
 				const base = values.baseContent;
+				const youtubeAccountId = youtubeProfile?.channel?.id ?? youtubeProfile?.id ?? "";
 
 				try {
 					const videoFile = override?.mediaFiles?.[0] ?? base.mediaFiles[0];
@@ -249,7 +252,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 					}
 
 					const request: YoutubeUploadRequest = {
-						accountId: values.platformPrivacy?.youtube ?? "",
+						accountId: youtubeAccountId,
 						videoUrl,
 						thumbnailUrl: thumbnailUrl || undefined,
 						title: override?.title ?? "",

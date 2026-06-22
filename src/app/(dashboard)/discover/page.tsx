@@ -532,7 +532,7 @@ const DiscoveryPage = () => {
 							maxWidth: "100%",
 						}}
 					>
-						{profiles.filter(Boolean).map((account) => (
+						{/* 						{profiles.filter((a): a is NonNullable<typeof a> => a != null).map((account) => (
 							<ProfileCard
 								key={account.id}
 								profilePicSrc={account.profileImage ?? "/icons/gaddr-logo-xs.svg"}
@@ -544,7 +544,7 @@ const DiscoveryPage = () => {
 								followingCount={account.followingCount ?? 0}
 								channelIcons={[]}
 							/>
-						))}
+						))} */}
 						{filteredFeed.map((item) => (
 							<div
 								key={`${item.platform}-${item.id}`}
