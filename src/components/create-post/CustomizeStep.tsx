@@ -80,8 +80,8 @@ function CustomizeStep({
 	);
 	const previewProfiles = {
   youtube: {
-    name: profile?.name ?? "",
-    profileImage: profile?.profileImage ?? "",
+    name: profile?.channel?.title ?? "",
+    profileImage: profile?.channel.thumbnail ?? "",
   },
 
   instagram: {
@@ -90,7 +90,7 @@ function CustomizeStep({
   },
 
   facebook: {
-    name: facebookProfile?.name ?? "",
+    name: facebookProfile?.userName ?? "",
     profileImage: facebookProfile?.profileImage ?? "",
   },
 

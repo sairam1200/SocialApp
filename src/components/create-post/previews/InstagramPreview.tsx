@@ -26,7 +26,6 @@ export default function InstagramPreview({
 
     const profileImage =
         profile?.profileImage || "/images/avatar-placeholder.svg";
-console.log(profileImage);
     const profileName = profile?.name || "Username";
     const isMetaImage =
         profileImage.includes("fbcdn.net") ||
@@ -107,6 +106,7 @@ console.log(profileImage);
                                 width={32}
                                 height={32}
                                 unoptimized={isMetaImage}
+                                className="object-cover rounded-full"
                             />
                         </div>
 

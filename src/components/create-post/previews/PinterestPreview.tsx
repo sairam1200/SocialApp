@@ -4,19 +4,22 @@ import { PreviewProps } from "./types";
 export default function PinterestPreview({
     values,
     media,
+    profile
 }: PreviewProps) {
     const isVideo =
         media?.type === "video" ||
         values.postType?.toLowerCase() === "video";
-
+    const profileImage =
+        profile?.profileImage || "/images/avatar-placeholder.svg";
+    const profileName = profile?.name || "Username";
     return (
-        <div className="bg-[#E9E9E9] p-4 rounded-xl flex justify-center">
-            <div className="w-[320px]">
+        
+            <div className="w-80 bg-[#D4D4D6]">
                 {/* =====================
             VIDEO PIN
         ====================== */}
                 {isVideo ? (
-                    <div className="relative overflow-hidden rounded-[28px] bg-black">
+                    <div className="overflow-hidden rounded-[28px] bg-black">
                         <div className="relative flex justify-center bg-black rounded-[28px] overflow-hidden">
                             {media?.type === "video" ? (
                                 <video
@@ -25,7 +28,7 @@ export default function PinterestPreview({
                                     className="max-h-[550px] w-auto max-w-full object-contain"
                                 />
                             ) : (
-                                <div className="relative aspect-[4/5] w-full">
+                                <div className="relative aspect-[3/5] w-auto">
                                     <Image
                                         src={media?.previewUrl ?? ""}
                                         fill
@@ -52,7 +55,7 @@ export default function PinterestPreview({
                             {/* Caption */}
                             <div className="absolute bottom-14 left-4 text-white">
                                 <p className="font-semibold">
-                                    Pinterest Creator
+                                    {profileName}
                                 </p>
 
                                 <p className="text-sm line-clamp-2">
@@ -122,16 +125,22 @@ export default function PinterestPreview({
                             </p>
 
                             <div className="mt-3 flex items-center gap-2">
-                                <div className="size-8 rounded-full bg-gray-300" />
+                                <Image
+                                                                      src={profileImage}
+                                                                      alt={profileName}
+                                                                      width={32}
+                                                                      height={32}
+                                                                      className="overflow-hidden rounded-full"
+                                                                  />
 
                                 <span className="text-sm font-medium">
-                                    Pinterest Creator
+                                   {profileName}
                                 </span>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
-        </div>
+        
     );
 }

@@ -4,9 +4,15 @@ import { cn } from "@/utils/cn.util";
 export default function FacebookPreview({
     values,
     media,
+    profile,
 }: PreviewProps) {
     const postType = values.postType?.toLowerCase();
-
+    const profileImage =
+        profile?.profileImage || "/images/avatar-placeholder.svg";
+    const profileName = profile?.name || "Username";
+    const isMetaImage =
+        profileImage.includes("fbcdn.net") ||
+        profileImage.includes("cdninstagram.com");
     const renderMedia = (
         className: string,
         showControls = false
@@ -51,11 +57,18 @@ export default function FacebookPreview({
                     </div>
 
                     <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
-                        <div className="size-8 rounded-full bg-blue-500" />
 
+                        <Image
+                            src={profileImage}
+                            alt={profileName}
+                            width={32}
+                            height={32}
+                            unoptimized={isMetaImage}
+                            className="overflow-hidden rounded-full"
+                        />
                         <div>
                             <p className="text-white text-xs font-medium">
-                                Facebook User
+                                {profileName}
                             </p>
 
                             <p className="text-white/70 text-[10px]">
@@ -79,50 +92,57 @@ export default function FacebookPreview({
     // ========================
     if (postType === "reel") {
         return (
-            <div className="bg-black rounded-lg p-4 flex justify-center">
-                <div className="relative w-[240px] h-[420px] rounded-xl overflow-hidden bg-black">
-                    <div className="absolute inset-0">
-                        {renderMedia("h-full w-full object-cover")}
+
+            <div className="relative w-[260px] h-[420px] rounded-xl overflow-hidden bg-black">
+                <div className="absolute inset-0">
+                    {renderMedia("h-full w-full object-cover")}
+                </div>
+
+                {/* Actions */}
+                <div className="absolute right-3 bottom-8 flex flex-col gap-5 text-white items-center">
+                    <div className="text-center">
+                        👍
+                        <div className="text-xs">81.7K</div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="absolute right-3 bottom-8 flex flex-col gap-5 text-white items-center">
-                        <div className="text-center">
-                            👍
-                            <div className="text-xs">81.7K</div>
-                        </div>
-
-                        <div className="text-center">
-                            💬
-                            <div className="text-xs">382</div>
-                        </div>
-
-                        <div className="text-center">
-                            ↗
-                            <div className="text-xs">833</div>
-                        </div>
-
-                        <div className="text-center">
-                            ⋯
-                        </div>
+                    <div className="text-center">
+                        💬
+                        <div className="text-xs">382</div>
                     </div>
 
-                    {/* Creator */}
-                    <div className="absolute left-4 bottom-4 text-white">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="size-8 rounded-full bg-blue-500" />
+                    <div className="text-center">
+                        ↗
+                        <div className="text-xs">833</div>
+                    </div>
 
-                            <span className="font-medium">
-                                Facebook User
-                            </span>
-                        </div>
-
-                        <p className="text-sm line-clamp-2">
-                            {values.caption}
-                        </p>
+                    <div className="text-center">
+                        ⋯
                     </div>
                 </div>
+
+                {/* Creator */}
+                <div className="absolute left-4 bottom-4 text-white">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Image
+                            src={profileImage}
+                            alt={profileName}
+                            width={32}
+                            height={32}
+                            unoptimized={isMetaImage}
+                            className="overflow-hidden rounded-full bg-blue"
+                        />
+
+                        <span className="font-medium">
+                            {profileName}
+                        </span>
+                    </div>
+
+                    <p className="text-sm line-clamp-2">
+                        {values.caption}
+                    </p>
+                </div>
             </div>
+
         );
     }
 
@@ -130,14 +150,21 @@ export default function FacebookPreview({
     // NORMAL POST
     // ========================
     return (
-        <div className="bg-white rounded-lg overflow-hidden border shadow-sm">
+        <div className="bg-white relative w-240 rounded-lg overflow-hidden border shadow-sm">
             {/* Header */}
             <div className="p-4 flex items-center gap-3">
-                <div className="size-10 rounded-full bg-blue-500" />
+                <Image
+                    src={profileImage}
+                    alt={profileName}
+                    width={32}
+                    height={32}
+                    unoptimized={isMetaImage}
+                    className="overflow-hidden rounded-full bg-blue"
+                />
 
                 <div>
                     <p className="font-semibold text-sm">
-                        Facebook User
+                        {profileName}
                     </p>
 
                     <p className="text-xs text-gray-500">
@@ -148,7 +175,7 @@ export default function FacebookPreview({
 
             {/* Caption */}
             <div className="px-4 pb-3">
-                <p className="text-sm">
+                <p className="text-sm break-words whitespace-pre-wrap overflow-hidden">
                     {values.caption || "What's on your mind?"}
                 </p>
             </div>
@@ -162,11 +189,12 @@ export default function FacebookPreview({
             <div className="px-4 py-2 border-b text-xs text-gray-500 flex justify-between">
                 <span>5.5K react...</span>
 
-                <span>232 com... • 1K shares</span>
+                <span>232 com... </span>
+                <span>• 1K shares</span>
             </div>
 
             {/* Actions */}
-            
+
         </div>
     );
 }

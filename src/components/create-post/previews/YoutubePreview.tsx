@@ -5,9 +5,12 @@ import { cn } from "@/utils/cn.util";
 export default function YoutubePreview({
   values,
   media,
+  profile,
 }: PreviewProps) {
   const isShort = values.postType === "short";
-
+  const profileImage =
+        profile?.profileImage || "/images/avatar-placeholder.svg";
+    const profileName = profile?.name || "Username";
   return (
     <div
       className={cn(
@@ -80,7 +83,13 @@ export default function YoutubePreview({
       {/* Normal YouTube Video Info */}
       {!isShort && (
         <div className="p-3 flex gap-3">
-          <div className="size-10 rounded-full bg-red-500 shrink-0" />
+          <Image
+                                      src={profileImage}
+                                      alt={profileName}
+                                      width={32}
+                                      height={32}
+                                      className="overflow-hidden rounded-full"
+                                  />
 
           <div className="flex-1">
             <h3 className="font-semibold text-sm line-clamp-2">
@@ -88,7 +97,7 @@ export default function YoutubePreview({
             </h3>
 
             <p className="text-xs text-gray-500 mt-1">
-              Channel Name ✓
+              {profileName||"Channel Name"} ✓
             </p>
 
             <p className="text-xs text-gray-500">
