@@ -1,4 +1,4 @@
-import { TokenService, AccountService, UserService, SearchService } from "./api";
+import { TokenService, AccountService, UserService, SearchService, YoutubeService } from "./api";
 import { interceptors } from "@/interceptors";
 import { createApiService } from 'restfit';
 import { IntegrationsService } from "./api/integrations.service";
@@ -7,6 +7,7 @@ type ApiServiceMap = {
   Token: typeof TokenService;
   Account: typeof AccountService;
   Integration: typeof IntegrationsService;
+  Youtube: typeof YoutubeService;
   User: typeof UserService;
   Search: typeof SearchService;
   Onboarding: typeof OnboardingService;
@@ -40,6 +41,7 @@ authorization: async () => {
     Token: TokenService,
     Account: AccountService,
     Integration: IntegrationsService,
+    Youtube: YoutubeService,
     User: UserService,
     Search: SearchService,
     Onboarding: OnboardingService,

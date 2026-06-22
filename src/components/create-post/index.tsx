@@ -265,7 +265,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 						request.publishAt = values.postScheduleDate.toISOString();
 					}
 
-					const result = await apiClient.Integration.uploadYoutubeVideo(request);
+					const result = await apiClient.Youtube.uploadVideo(request);
 
 					if (result.status === "published") {
 						toast.success("Video published to YouTube successfully");

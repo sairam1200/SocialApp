@@ -20,14 +20,14 @@ export const youtubeKeys = {
 export function useYoutubeProfile() {
   return useQuery<YoutubeProfileResponse>({
     queryKey: youtubeKeys.profile(),
-    queryFn: () => apiClient.Integration.getYoutubeProfile(),
+    queryFn: () => apiClient.Integration.getProfile<YoutubeProfileResponse>("youtube"),
   });
 }
 
 export function useYoutubeStats() {
   return useQuery<YoutubeStatsResponse>({
     queryKey: youtubeKeys.stats(),
-    queryFn: () => apiClient.Integration.getYoutubeStats(),
+    queryFn: () => apiClient.Youtube.getStats(),
   });
 }
 
@@ -35,7 +35,7 @@ export function useUploadYoutubeVideo() {
   const queryClient = useQueryClient();
 
   return useMutation<YoutubeUploadResponse, Error, YoutubeUploadRequest>({
-    mutationFn: (data) => apiClient.Integration.uploadYoutubeVideo(data),
+    mutationFn: (data) => apiClient.Youtube.uploadVideo(data),
     onSuccess: (result) => {
       if (result.status === "published") {
         toast.success("Video published to YouTube successfully");
@@ -55,7 +55,7 @@ export function useSyncYoutube() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => apiClient.Integration.syncYoutube(),
+    mutationFn: () => apiClient.Youtube.sync(),
     onSuccess: (result) => {
       if (result.success) {
         toast.success("YouTube sync completed successfully");
