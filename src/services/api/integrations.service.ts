@@ -156,7 +156,7 @@ export class IntegrationsService {
   }
 
   /** Upload a media file and return its URL */
-  @Post<{ url: string }>("/integrations/{platform}/upload")
+  @Post<{ url: string }>("/integrations/youtube/upload")
   async uploadMedia(@Body() body: FormData): Promise<{ url: string }> {
     return { url: "" };
   }
