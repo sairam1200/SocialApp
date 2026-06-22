@@ -32,6 +32,7 @@ import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import { useLinkedInDiscover } from "@/hooks/discovery/useLinkedinDiscover";
+import { useProfileCardProps } from "@/hooks/useProfileCard";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -99,6 +100,7 @@ const DiscoveryPage = () => {
 	// Initialize search and trending hooks with mock data enabled (for now)
 	const searchState = useSearch({ debounceMs: 120, useMockData: true });
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
+
 	// YouTube discover hook
 	const {
 		profile,
@@ -338,7 +340,48 @@ const DiscoveryPage = () => {
 			!("isReel" in item && item.isReel) &&
 			!("isVideo" in item && item.isVideo)
 	);
-
+	const profiles = [
+		profile && {
+			id: profile.id,
+			profileImage: profile.profileImage,
+			username: profile.userName || profile.name,
+			platform: "youtube",
+			followersCount: profile.followersCount,
+			followingCount: profile.followingCount,
+		},
+		facebookProfile && {
+			id: facebookProfile.id,
+			profileImage: facebookProfile.profileImage,
+			username: facebookProfile.name,
+			platform: "facebook",
+			followersCount: facebookProfile.followersCount,
+			followingCount: facebookProfile.followingCount,
+		},
+		InstagramProfile && {
+			id: InstagramProfile.id,
+			profileImage: InstagramProfile.profileImage,
+			username: InstagramProfile.userName,
+			platform: "instagram",
+			followersCount: InstagramProfile.followersCount,
+			followingCount: InstagramProfile.followingCount,
+		},
+		PinterestProfile && {
+			id: PinterestProfile.id,
+			profileImage: PinterestProfile.profileImage,
+			username: PinterestProfile.userName,
+			platform: "pinterest",
+			followersCount: PinterestProfile.followersCount,
+			followingCount: PinterestProfile.followingCount,
+		},
+		LinkedInProfile && {
+			id: LinkedInProfile.id,
+			profileImage: LinkedInProfile.profileImage,
+			username: LinkedInProfile.userName,
+			platform: "linkedin",
+			followersCount: LinkedInProfile.followersCount,
+			followingCount: LinkedInProfile.followingCount,
+		},
+	].filter(Boolean);
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -486,19 +529,22 @@ const DiscoveryPage = () => {
 								viewType === "grid"
 									? "repeat(auto-fit, minmax(240px, 1fr))"
 									: "1fr",
-									maxWidth: "100%",
+							maxWidth: "100%",
 						}}
 					>
-						{/* <ProfileCard
-							profilePicSrc={cardProps.profilePicSrc}
-							userName={cardProps.userName}
-							userHandle={cardProps.userHandle}
-							category={cardProps.category}
-							postCount={cardProps.postCount}
-							followerCount={cardProps.followerCount}
-							followingCount={cardProps.followingCount}
-							channelIcons={cardProps.channelIcons}
-						></ProfileCard> */}
+						{profiles.filter(Boolean).map((account) => (
+							<ProfileCard
+								key={account.id}
+								profilePicSrc={account.profileImage ?? "/icons/gaddr-logo-xs.svg"}
+								userName={account.username ?? "Unknown User"}
+								userHandle={`@${account.username ?? "unknown"}`}
+								category={account.platform}
+								postCount={0}
+								followerCount={account.followersCount ?? 0}
+								followingCount={account.followingCount ?? 0}
+								channelIcons={[]}
+							/>
+						))}
 						{filteredFeed.map((item) => (
 							<div
 								key={`${item.platform}-${item.id}`}
@@ -559,7 +605,7 @@ const DiscoveryPage = () => {
 								viewType === "grid"
 									? "repeat(auto-fit, minmax(240px, 1fr))"
 									: "1fr",
-									maxWidth: "100%",
+							maxWidth: "100%",
 						}}
 					>
 						{PostsFeed.map((item) => (
@@ -619,7 +665,7 @@ const DiscoveryPage = () => {
 								viewType === "grid"
 									? "repeat(auto-fit, minmax(240px, 1fr))"
 									: "1fr",
-									maxWidth: "100%",
+							maxWidth: "100%",
 						}}
 					>
 						{reelsAndShortsFeed.map((item) => (
@@ -804,8 +850,8 @@ const DiscoveryPage = () => {
 													/>
 													<span className="text-gray-neutral text-sm">{option.label}</span>
 												</label>
-											))}
-										</div>
+						))}
+					</div>
 									</div>
 								))}
 							</div>

@@ -230,14 +230,22 @@ function SettingsStep({ formik }: SettingsStepProps) {
 									<div className="w-[200px] bg-white">
 										<Select
 											placeholder="Select visibility"
-											value={formik.values.platformPrivacy?.[platformId] || "everyone"}
+											value={formik.values.platformPrivacy?.[platformId] || (platformId === "youtube" ? "public" : "everyone")}
 											onValueChange={(value) => formik.setFieldValue(`platformPrivacy.${platformId}`, value)}
-											options={[
-												{ value: "everyone", label: "Everyone" },
-												{ value: "friends", label: "Friends" },
-												{ value: "only_me", label: "Only Me" },
-												{ value: "verified", label: "Verified Accounts only" },
-											]}
+											options={
+												platformId === "youtube"
+													? [
+														{ value: "public", label: "Public" },
+														{ value: "private", label: "Private" },
+														{ value: "unlisted", label: "Unlisted" },
+													]
+													: [
+														{ value: "everyone", label: "Everyone" },
+														{ value: "friends", label: "Friends" },
+														{ value: "only_me", label: "Only Me" },
+														{ value: "verified", label: "Verified Accounts only" },
+													]
+											}
 										/>
 									</div>
 								</div>

@@ -22,6 +22,9 @@ export type PlatformOverrideValues = {
 	location?: LocationData | null;
 	sound?: SoundData | null;
 	postType: string;
+	title?: string;
+	thumbnailFile?: MediaFile;
+	visibility?: "public" | "private" | "unlisted";
 };
 
 export type PlatformContentType = Record<PlatformId, PlatformOverrideValues>;

@@ -11,6 +11,9 @@ import SettingsStep from "./SettingsStep";
 import { SearchSelectionModal } from "./SearchSelectionModal";
 import { PlatformId } from "@/constants/platforms";
 import { PLATFORM_POST_TYPES } from "@/types/media.types";
+import { apiClient } from "@/services/apiClient.service";
+import { YoutubeUploadRequest } from "@/types/social/youtube.type";
+import toast from "react-hot-toast";
 
 const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
 	file: Yup.mixed<File>().required("File is required"),
@@ -23,7 +26,16 @@ const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
 
 const createBaseContentSchema = (platforms: PlatformId[]) =>
 	Yup.object({
-		caption: Yup.string().trim().nullable().notRequired(),
+		caption: Yup.string()
+			.trim()
+			.nullable()
+			.notRequired()
+			.test("youtube-caption-length", "YouTube description must be 5000 characters or less", (value) => {
+				if (platforms.includes("youtube") && value && value.length > 5000) {
+					return false;
+				}
+				return true;
+			}),
 		mediaFiles: Yup.array()
 			.of(mediaFileSchema)
 			.defined()
@@ -77,6 +89,25 @@ const createPlatformOverrideSchema = (
 		postType: Yup.string()
 			.oneOf(PLATFORM_POST_TYPES[platform])
 			.required("Post type is required"),
+
+		title: Yup.string()
+			.trim()
+			.when([], {
+				is: () => platform === "youtube",
+				then: (schema) =>
+					schema
+						.max(100, "YouTube title must be 100 characters or less")
+						.required("YouTube title is required"),
+				otherwise: (schema) => schema.notRequired(),
+			}),
+
+		visibility: Yup.string()
+			.oneOf(["public", "private", "unlisted"])
+			.when([], {
+				is: () => platform === "youtube",
+				then: (schema) => schema.required("Visibility is required"),
+				otherwise: (schema) => schema.notRequired(),
+			}),
 	});
 
 const createPostStepSchema = (step: number, platforms: PlatformId[]) => {
@@ -180,19 +211,77 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 				privacy: "public",
 				platformPrivacy: {},
 			}}
+			onSubmit={async (values, { setSubmitting }) => {
+				if (activeStep < TOTAL_STEPS - 1) {
+					goNext();
+					setSubmitting(false);
+					return;
+				}
+
+				const youtubePlatform = values.platforms.find((p) => p === "youtube");
+
+				if (!youtubePlatform) {
+					console.log("Form submitted:", values);
+					setSubmitting(false);
+					return;
+				}
+
+				const override = values.platformOverrides?.[youtubePlatform];
+				const base = values.baseContent;
+
+				try {
+					const videoFile = override?.mediaFiles?.[0] ?? base.mediaFiles[0];
+					let videoUrl = "";
+
+					if (videoFile) {
+						const videoFormData = new FormData();
+						videoFormData.append("file", videoFile.file);
+						const videoResult = await apiClient.Integration.uploadMedia(videoFormData);
+						videoUrl = videoResult.url;
+					}
+
+					let thumbnailUrl = "";
+					if (override?.thumbnailFile) {
+						const thumbFormData = new FormData();
+						thumbFormData.append("file", override.thumbnailFile.file);
+						const thumbResult = await apiClient.Integration.uploadMedia(thumbFormData);
+						thumbnailUrl = thumbResult.url;
+					}
+
+					const request: YoutubeUploadRequest = {
+						accountId: values.platformPrivacy?.youtube ?? "",
+						videoUrl,
+						thumbnailUrl: thumbnailUrl || undefined,
+						title: override?.title ?? "",
+						description: override?.caption ?? base.caption,
+						tags: override?.tags,
+						visibility: (values.platformPrivacy?.youtube as "public" | "private" | "unlisted") ?? "public",
+					};
+
+					if (values.postSchedule && values.postScheduleDate) {
+						request.publishAt = values.postScheduleDate.toISOString();
+					}
+
+					const result = await apiClient.Integration.uploadYoutubeVideo(request);
+
+					if (result.status === "published") {
+						toast.success("Video published to YouTube successfully");
+					} else if (result.status === "scheduled") {
+						toast.success("Video scheduled on YouTube successfully");
+					}
+
+					close();
+				} catch {
+					toast.error("Failed to publish to YouTube. Please try again.");
+				} finally {
+					setSubmitting(false);
+				}
+			}}
 			validationSchema={Yup.lazy((values: CreatePostFormValues) =>
 				createPostStepSchema(activeStep, values?.platforms || [])
 			)}
 			validateOnMount
 			validateOnChange
-			onSubmit={(values) => {
-				if (activeStep < TOTAL_STEPS - 1) {
-					goNext();
-				} else {
-					console.log("Form submitted:", values);
-					// TODO: call post API
-				}
-			}}
 		>
 			{(formik) => (
 				<DialogContainer

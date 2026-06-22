@@ -391,10 +391,38 @@ return (
 								toast.error(result.error ?? "Failed to disconnect account");
 							}
 						} else {
-							console.log(
-								"[DISCONNECT] OAuth disconnect requested (no API yet):",
-								disconnectTarget
-							);
+							try {
+								const result = await apiClient.Integration.disconnect(
+									platformName.toLowerCase()
+								);
+								if (result.success) {
+									setLinkedAccounts((prev) =>
+										prev.filter(
+											(la) =>
+												la.platform.toLowerCase() !== platformName.toLowerCase()
+										)
+									);
+									setPlatformsState((prev) =>
+										prev.map((p) =>
+											p.id.toLowerCase() === platformName.toLowerCase()
+												? {
+													...p,
+													connected: false,
+													connectionMethod: undefined,
+													importStatus: "not_imported" as const,
+												}
+												: p
+										)
+									);
+									toast.success(`${platformName} disconnected successfully`);
+								} else {
+									toast.error(
+										result.message ?? `Failed to disconnect ${platformName}`
+									);
+								}
+							} catch {
+								toast.error(`Failed to disconnect ${platformName}`);
+							}
 						}
 					} finally {
 						setIsDisconnecting(false);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormikProps, getIn } from "formik";
 import {
 	CreatePostFormValues,
@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn.util";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Select } from "../ui/select";
-import { BookmarkIcon, Ellipsis, Heart, MessageCircle, Send, X } from "lucide-react";
+import { BookmarkIcon, Ellipsis, Heart, ImagePlus, MessageCircle, Send, X } from "lucide-react";
 import IconWand from "@/components/svg/icon_wand_pink.svg";
 import Image from "next/image";
 import { Tab, TabGroup, TabList } from "@headlessui/react";
@@ -60,13 +60,18 @@ function CustomizeStep({
 	const{
 		profile: PinterestProfile,
 	}=usePinterestDiscover();
+	const isYoutube = activePlatformId === "youtube";
+
 	const effectiveValues = {
 		caption: activeOverride?.caption ?? base.caption,
 		mediaFiles: activeOverride?.mediaFiles ?? base.mediaFiles,
 		tags: activeOverride?.tags ?? [],
 		location: activeOverride?.location ?? base.location,
 		sound: activeOverride?.sound ?? base.sound,
-		postType: activeOverride?.postType ?? "",
+		postType: activeOverride?.postType ?? (isYoutube ? "video" : ""),
+		title: activeOverride?.title ?? "",
+		thumbnailFile: activeOverride?.thumbnailFile ?? undefined,
+		visibility: activeOverride?.visibility ?? "public",
 	};
 	const [mediaToPreview, setMediaToPreview] = useState<
 		MediaFile | undefined
@@ -81,7 +86,7 @@ function CustomizeStep({
 	const previewProfiles = {
   youtube: {
     name: profile?.channel?.title ?? "",
-    profileImage: profile?.channel.thumbnail ?? "",
+    profileImage: profile?.profileImage ?? "",
   },
 
   instagram: {
@@ -143,10 +148,19 @@ function CustomizeStep({
 	useEffect(() => {
 		if (!formik.values.platformOverrides && selectedPlatforms.length > 0) {
 			const overrides = selectedPlatforms.reduce<Record<PlatformId, PlatformOverrideValues>>((acc, platform) => {
-				acc[platform] = {
-					postType: "",
-					tags: [],
-				};
+				if (platform === "youtube") {
+					acc[platform] = {
+						postType: "video",
+						tags: [],
+						title: "",
+						visibility: "public",
+					};
+				} else {
+					acc[platform] = {
+						postType: "",
+						tags: [],
+					};
+				}
 				return acc;
 			}, {} as Record<PlatformId, PlatformOverrideValues>);
 			formik.setFieldValue("platformOverrides", overrides);
@@ -235,6 +249,81 @@ function CustomizeStep({
 							/>
 						</div>
 
+						{/* YouTube: Title */}
+						{isYoutube && (
+							<div className="space-y-2">
+								<label className="font-bold text-sm block">
+									Video Title <span className="text-destructive">*</span>
+								</label>
+								<Input
+									placeholder="Enter your video title..."
+									value={effectiveValues.title}
+									onChange={(e) => formik.setFieldValue(`platformOverrides.${activePlatformId}.title`, e.target.value)}
+									error={
+										getIn(formik.touched, `platformOverrides.${activePlatformId}.title`) &&
+											getIn(formik.errors, `platformOverrides.${activePlatformId}.title`)
+											? getIn(formik.errors, `platformOverrides.${activePlatformId}.title`)
+											: ""
+									}
+								/>
+								<div className="text-right text-xs text-gray-neutral">{effectiveValues.title.length}/100</div>
+							</div>
+						)}
+
+						{/* YouTube: Thumbnail */}
+						{isYoutube && (
+							<div className="space-y-2">
+								<label className="font-bold text-sm block">Thumbnail Image</label>
+								<div className="flex items-center gap-3">
+									{effectiveValues.thumbnailFile ? (
+										<div className="relative size-20 rounded-lg overflow-hidden shrink-0 border border-[#E6E6E6]">
+											<Image
+												src={effectiveValues.thumbnailFile.previewUrl}
+												alt="Thumbnail"
+												fill
+												className="object-cover"
+											/>
+											<button
+												type="button"
+												onClick={() => formik.setFieldValue(`platformOverrides.${activePlatformId}.thumbnailFile`, undefined)}
+												className="absolute top-0.5 right-0.5 size-4 bg-[#E61301] rounded-full flex items-center justify-center"
+											>
+												<X className="size-3 text-white" />
+											</button>
+										</div>
+									) : (
+										<button
+											type="button"
+											onClick={() => document.getElementById("youtube-thumbnail-input")?.click()}
+											className="flex items-center gap-2 text-sm text-primary border border-dashed border-primary rounded-lg px-4 py-2 hover:bg-primary/5"
+										>
+											<ImagePlus className="size-4" />
+											Upload Thumbnail
+										</button>
+									)}
+									<input
+										id="youtube-thumbnail-input"
+										type="file"
+										accept="image/jpeg,image/png,image/webp"
+										className="hidden"
+										onChange={(e) => {
+											const file = e.target.files?.[0];
+											if (!file) return;
+											const newMedia: MediaFile = {
+												file,
+												previewUrl: URL.createObjectURL(file),
+												type: "image",
+												id: `thumb-${Date.now()}`,
+											};
+											formik.setFieldValue(`platformOverrides.${activePlatformId}.thumbnailFile`, newMedia);
+											e.target.value = "";
+										}}
+									/>
+									<span className="text-xs text-gray-neutral">Recommended: 1280×720. JPEG, PNG, or WebP.</span>
+								</div>
+							</div>
+						)}
+
 						{/* Caption Area */}
 						<div className="space-y-2">
 							<div className="flex justify-between items-center">
@@ -255,7 +344,7 @@ function CustomizeStep({
 										: ""
 								}
 							/>
-							<div className="text-right text-xs text-gray-neutral">{effectiveValues?.caption?.length}/2200</div>
+							<div className="text-right text-xs text-gray-neutral">{effectiveValues?.caption?.length}/{isYoutube ? 5000 : 2200}</div>
 						</div>
 
 						{/* Tags & Mentions */}
