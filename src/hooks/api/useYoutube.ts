@@ -37,7 +37,7 @@ export function useUploadYoutubeVideo() {
   return useMutation<YoutubeUploadResponse, Error, YoutubeUploadRequest>({
     mutationFn: (data) => apiClient.Youtube.uploadVideo(data),
     onSuccess: (result) => {
-      if (result.status === "published") {
+      if (result.status === "queued" || result.status === "published") {
         toast.success("Video published to YouTube successfully");
       } else if (result.status === "scheduled") {
         toast.success("Video scheduled on YouTube successfully");

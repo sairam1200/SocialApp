@@ -267,7 +267,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 
 					const result = await apiClient.Youtube.uploadVideo(request);
 
-					if (result.status === "published") {
+					if (result.status === "queued" || result.status === "published") {
 						toast.success("Video published to YouTube successfully");
 					} else if (result.status === "scheduled") {
 						toast.success("Video scheduled on YouTube successfully");
