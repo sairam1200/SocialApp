@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getDeviceId } from "@/utils/deviceId.util";
 import {setCookie} from "@/utils/cookie.util";
 import {COOKIE_NAMES} from "@/constants/globals";
@@ -49,6 +49,7 @@ function LoginForm() {
 	const [isFacebookLoading, setIsFacebookLoading] = useState(false);
 	const [apiError, setApiError] = useState<string | null>(null);
 	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+	const turnstileRef = useRef<TurnstileInstance>(null);
 
 	// Adjust challenge size for smaller screens.
 	const [tsSize, setTsSize] = useState<
@@ -119,7 +120,7 @@ function LoginForm() {
 						navigator.userAgent,
 					deviceId,
 					ipAddress,
-				});
+				}, turnstileToken);
 
 
 			if (!loginResponse?.succeeded) {
@@ -132,6 +133,7 @@ function LoginForm() {
 				toast.error(errorMessage);
 
 				setTurnstileToken(null);
+				turnstileRef.current?.reset();
 
 				return;
 			}
@@ -219,6 +221,7 @@ function LoginForm() {
 			//toast.error(errorMessage);
 
 			setTurnstileToken(null);
+			turnstileRef.current?.reset();
 		} finally {
 			setIsLoginLoading(false);
 
@@ -333,6 +336,7 @@ function LoginForm() {
 
 					<div className="mt-4 mb-4 flex justify-center">
 						<Turnstile
+							ref={turnstileRef}
 							siteKey={
 								process.env
 									.NEXT_PUBLIC_TURNSTILE_SITE_KEY!
@@ -406,6 +410,7 @@ function LoginForm() {
 						}
 						className="w-full h-13 bg-[#512FB6] my-6 text-base"
 						loading={isLoginLoading}
+						disabled={!turnstileToken}
 					/>
 				</form>
 

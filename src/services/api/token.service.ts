@@ -10,7 +10,7 @@ export class TokenService {
     return error.message;
   })
   @Post<TokenResponseType>("/auth/access-token")
-  async loginAsync(@Body() loginPayload: TokenRequestType): Promise<TokenResponseType> { return {} as TokenResponseType }
+  async loginAsync(@Body() loginPayload: TokenRequestType, @Header("x-turnstile-token") turnstileToken?: string): Promise<TokenResponseType> { return {} as TokenResponseType }
   
 @Get<CurrentUserResponseType>("/auth/current")
 async currentAsync(): Promise<CurrentUserResponseType> {

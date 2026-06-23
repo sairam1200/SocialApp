@@ -42,7 +42,6 @@ const filterSections = [
 		type: "checkbox",
 		options: [
 			{ id: "feed_post", label: "Feed Post" },
-			{ id: "story", label: "Story" },
 			{ id: "reels_shorts", label: "Reels/Shorts" },
 			{ id: "partnered", label: "Partnered" },
 			{ id: "live_stream", label: "Live Stream" },
@@ -57,7 +56,6 @@ const filterSections = [
 			{ id: "highest_liked", label: "Highest Liked" },
 			{ id: "most_commented", label: "Most Commented" },
 			{ id: "most_shared", label: "Most Shared" },
-			{ id: "organic_reach", label: "Organic Reach" },
 			{ id: "most_views", label: "Most Views" },
 			{ id: "fastest_growing", label: "Fastest-Growing" },
 		],
@@ -72,7 +70,7 @@ const filterSections = [
 			{ id: "anytime", label: "Anytime" },
 		],
 	},
-	{
+	/* {
 		title: "Monetization",
 		key: "monetization",
 		type: "checkbox",
@@ -80,7 +78,7 @@ const filterSections = [
 			{ id: "contains_ads", label: "Contains Ads" },
 			{ id: "non_monetized", label: "Non-Monetized" },
 		],
-	},
+	}, */
 ];
 
 const DiscoveryPage = () => {
@@ -131,7 +129,7 @@ const DiscoveryPage = () => {
 	const videoContents = contents.filter(
 
 		(item) =>
-			item.type === "playlist_video" || item.type === "video" || item.type === "subscription_video"
+			item.type === "playlist_video" || item.type === "uploaded_video" || item.type === "subscription_video"
 
 
 	);
@@ -400,39 +398,7 @@ const DiscoveryPage = () => {
 			platform: "youtube",
 			followersCount: profile.followersCount,
 			followingCount: profile.followingCount,
-		},
-		facebookProfile && {
-			id: facebookProfile.id,
-			profileImage: facebookProfile.profileImage,
-			username: facebookProfile.name,
-			platform: "facebook",
-			followersCount: facebookProfile.followersCount,
-			followingCount: facebookProfile.followingCount,
-		},
-		InstagramProfile && {
-			id: InstagramProfile.id,
-			profileImage: InstagramProfile.profileImage,
-			username: InstagramProfile.userName,
-			platform: "instagram",
-			followersCount: InstagramProfile.followersCount,
-			followingCount: InstagramProfile.followingCount,
-		},
-		PinterestProfile && {
-			id: PinterestProfile.id,
-			profileImage: PinterestProfile.profileImage,
-			username: PinterestProfile.userName,
-			platform: "pinterest",
-			followersCount: PinterestProfile.followersCount,
-			followingCount: PinterestProfile.followingCount,
-		},
-		LinkedInProfile && {
-			id: LinkedInProfile.id,
-			profileImage: LinkedInProfile.profileImage,
-			username: LinkedInProfile.userName,
-			platform: "linkedin",
-			followersCount: LinkedInProfile.followersCount,
-			followingCount: LinkedInProfile.followingCount,
-		},
+		}
 	].filter(Boolean);
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
