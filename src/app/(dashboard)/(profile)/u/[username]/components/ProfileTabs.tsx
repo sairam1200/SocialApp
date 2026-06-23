@@ -8,6 +8,13 @@ import Image from "next/image";
 
 function MyPostsTab() {
 	const { contents, loading } = useYoutubeDiscover();
+	const videoContents = contents.filter(
+
+		(item) =>
+			 item.type === "uploaded_video" 
+
+
+	);
 
 	if (loading) {
 		return (
@@ -27,7 +34,7 @@ function MyPostsTab() {
 
 	return (
 		<div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
-			{contents.map((item) => (
+			{videoContents.map((item) => (
 				<div
 					key={`${item.type}-${item.id}`}
 					className="flex flex-col rounded-xl border border-[#E6E6E6] bg-white overflow-hidden hover:shadow-md transition-shadow"
