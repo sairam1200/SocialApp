@@ -322,12 +322,64 @@ const DiscoveryPage = () => {
 				new Date(b.publishedAt).getTime() -
 				new Date(a.publishedAt).getTime()
 		);
-	const filteredFeed =
-		selectedPlatforms.length > 0
-			? combinedFeed.filter((item) =>
-				selectedPlatforms.includes(item.platform)
-			)
-			: combinedFeed;
+	const filteredFeed = (() => {
+		let feed =
+			selectedPlatforms.length > 0
+				? combinedFeed.filter((item) =>
+					selectedPlatforms.includes(item.platform)
+				)
+				: combinedFeed;
+
+		const contentType = filters.contentType as string[];
+		if (contentType.length > 0) {
+			feed = feed.filter((item) => {
+				for (const ct of contentType) {
+					if (ct === "reels_shorts") {
+						if (
+							("isShort" in item && item.isShort) ||
+							("isReel" in item && item.isReel)
+						) return true;
+					} else if (ct === "feed_post") {
+						if (
+							!("isShort" in item && item.isShort) &&
+							!("isReel" in item && item.isReel) &&
+							!("isVideo" in item && item.isVideo)
+						) return true;
+					}
+				}
+				return contentType.length === 0;
+			});
+		}
+
+		const datePosted = filters.datePosted as string;
+		if (datePosted && datePosted !== "anytime") {
+			const now = Date.now();
+			const cutoff =
+				datePosted === "past_week"
+					? now - 7 * 24 * 60 * 60 * 1000
+					: now - 30 * 24 * 60 * 60 * 1000;
+			feed = feed.filter((item) => {
+				const ts = item.publishedAt ? new Date(item.publishedAt).getTime() : 0;
+				return ts >= cutoff;
+			});
+		}
+
+		const metrics = filters.metrics as string[];
+		if (metrics.length > 0) {
+			feed = [...feed].sort((a, b) => {
+				for (const m of metrics) {
+					let diff = 0;
+					if (m === "highest_liked") diff = (b.likes ?? 0) - (a.likes ?? 0);
+					else if (m === "most_commented") diff = (b.comments ?? 0) - (a.comments ?? 0);
+					else if (m === "most_views") diff = (b.views ?? 0) - (a.views ?? 0);
+					if (diff !== 0) return diff;
+				}
+				return 0;
+			});
+		}
+
+		return feed;
+	})();
 	const reelsAndShortsFeed = filteredFeed.filter(
 		(item) =>
 			("isShort" in item && item.isShort) ||

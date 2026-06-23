@@ -139,12 +139,12 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
   const handleOAuthSuccess = (platformId: PlatformId) => {
     (async () => {
       try {
-        // const latestLinkedRaw = await apiClient.User.getLinkedAccountsAsync(
-        //   username
-        // );
-        // const latestLinked = latestLinkedRaw ?? [];
+        const latestLinkedRaw = await apiClient.User.getLinkedAccountsAsync(
+          username
+        );
+        const latestLinked = latestLinkedRaw ?? [];
 
-        setLinkedAccounts([]);
+        setLinkedAccounts(latestLinked);
 
         const toRemove = manualProfiles.filter(
           (mp) => mp.platform.toLowerCase() === platformId.toLowerCase()
@@ -152,7 +152,7 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
 
         for (const mp of toRemove) {
           try {
-            // await apiClient.UserProfile.removeManualProfileAsync(mp.id);
+            await apiClient.User.removeManualProfileAsync(mp.id);
           } catch (error) {
             console.warn(
               "Failed to delete manual profile during OAuth promote:",
@@ -169,10 +169,10 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
           );
         }
 
-        // const account =
-        //   latestLinked.find(
-        //     (a) => a.platform.toLowerCase() === platformId.toLowerCase()
-        //   ) ?? null;
+        const account =
+          latestLinked.find(
+            (a) => a.platform.toLowerCase() === platformId.toLowerCase()
+          ) ?? null;
 
         setPlatformsState((prev) =>
           prev.map((p) =>
@@ -181,7 +181,7 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
                 ...p,
                 connected: true,
                 connectionMethod: "import",
-                importStatus: true
+                importStatus: account?.isImported
                   ? "imported"
                   : "not_imported",
               }
@@ -190,7 +190,7 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
         );
 
         setOauthPlatformId(platformId);
-        setOauthAccount(null);
+        setOauthAccount(account);
         setOpenConnectSuccess(true);
       } catch (e) {
         console.error("Failed to refresh after OAuth success:", e);
@@ -267,24 +267,24 @@ export function useOAuthFlow(params: UseOAuthFlowParams): UseOAuthFlowResult {
   console.error("Import failed:", error);
 }
     try {
-      // const latestLinkedRaw = await apiClient.UserProfile.getLinkedAccounts(
-      //   username
-      // );
-      // const latestLinked = latestLinkedRaw ?? [];
+      const latestLinkedRaw = await apiClient.User.getLinkedAccountsAsync(
+        username
+      );
+      const latestLinked = latestLinkedRaw ?? [];
 
-      setLinkedAccounts([]);
+      setLinkedAccounts(latestLinked);
 
       setPlatformsState((prev) =>
         prev.map((p) => {
           if (p.id !== oauthPlatformId) return p;
-          // const acc = latestLinked.find(
-          //   (a) => a.platform.toLowerCase() === p.id.toLowerCase()
-          // );
+          const acc = latestLinked.find(
+            (a) => a.platform.toLowerCase() === p.id.toLowerCase()
+          );
           return {
             ...p,
             connected: true,
-            connectionMethod: true ? "import" : p.connectionMethod,
-            importStatus: true ? "imported" : "not_imported",
+            connectionMethod: "import",
+            importStatus: acc?.isImported ? "imported" : "not_imported",
           };
         })
       );
