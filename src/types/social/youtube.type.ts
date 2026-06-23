@@ -57,9 +57,17 @@ export type YoutubeUploadRequest = {
 
 export type YoutubeUploadResponse = {
   videoId: string;
+  jobId: string;
   videoUrl: string;
   publishAt?: string;
   status: "queued" | "published" | "scheduled" | "uploading" | "failed";
+};
+
+export type YoutubeUploadProgressEvent = {
+  status: string;
+  progress: number;
+  statusMessage?: string;
+  error?: string;
 };
 
 export type YoutubeStatsResponse = {

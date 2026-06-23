@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import DialogContainer from "../dialog/DialogContainer";
 import { Button } from "../ui/button";
 import ComposeStep from "./ComposeStep";
@@ -12,8 +12,9 @@ import { SearchSelectionModal } from "./SearchSelectionModal";
 import { PlatformId } from "@/constants/platforms";
 import { PLATFORM_POST_TYPES } from "@/types/media.types";
 import { apiClient } from "@/services/apiClient.service";
-import { YoutubeUploadRequest } from "@/types/social/youtube.type";
+import { YoutubeUploadRequest, YoutubeUploadProgressEvent } from "@/types/social/youtube.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
+import YoutubeUploadProgress from "./YoutubeUploadProgress";
 import toast from "react-hot-toast";
 
 const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
@@ -182,6 +183,9 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 	const [activeStep, setActiveStep] = useState(0);
 	const [activeSearchModal, setActiveSearchModal] = useState<"location" | "sound" | null>(null);
 	const [customizePlatformId, setCustomizePlatformId] = useState<PlatformId | null>(null);
+	const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "progress" | "complete" | "error">("idle");
+	const [uploadJobId, setUploadJobId] = useState<string | null>(null);
+	const [uploadError, setUploadError] = useState<string>("");
 
 	const goNext = () => {
 		setActiveStep((prev) => Math.min(prev + 1, TOTAL_STEPS - 1));
@@ -190,6 +194,16 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 	const goBack = () => {
 		setActiveStep((prev) => Math.max(prev - 1, 0));
 	};
+
+	const handleUploadComplete = useCallback((_event: YoutubeUploadProgressEvent) => {
+		setUploadPhase("complete");
+		setTimeout(() => close(), 2000);
+	}, [close]);
+
+	const handleUploadError = useCallback((error: string) => {
+		setUploadPhase("error");
+		setUploadError(error);
+	}, []);
 
 	const CurrentStepComponent = {
 		compose: ComposeStep,
@@ -225,8 +239,11 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 				if (!youtubePlatform) {
 					console.log("Form submitted:", values);
 					setSubmitting(false);
+					close();
 					return;
 				}
+
+				setUploadPhase("uploading");
 
 				const override = values.platformOverrides?.[youtubePlatform];
 				const base = values.baseContent;
@@ -266,16 +283,11 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 					}
 
 					const result = await apiClient.Youtube.uploadVideo(request);
-
-					if (result.status === "queued" || result.status === "published") {
-						toast.success("Video published to YouTube successfully");
-					} else if (result.status === "scheduled") {
-						toast.success("Video scheduled on YouTube successfully");
-					}
-
-					close();
+					setUploadJobId(result.jobId);
+					setUploadPhase("progress");
 				} catch {
-					toast.error("Failed to publish to YouTube. Please try again.");
+					setUploadPhase("error");
+					setUploadError("Failed to start upload. Please try again.");
 				} finally {
 					setSubmitting(false);
 				}
@@ -289,52 +301,93 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 			{(formik) => (
 				<DialogContainer
 					open={open}
-					onClose={close}
-					title="Create Post"
+					onClose={uploadPhase === "uploading" ? undefined : close}
+					title={uploadPhase === "idle" ? "Create Post" : "Uploading to YouTube"}
 					closeOnOverlayClick={false}
 					footer={
-						<div className="flex justify-between gap-4">
-							<Button label="Cancel" variant="text" onClick={close} />
-
-							<div className="flex gap-3">
-								<Button variant="secondary" label="Back" hidden={activeStep === 0} onClick={goBack} />
-
-								<Button label={activeStep === TOTAL_STEPS - 1 ? "Publish" : "Next"} onClick={formik.submitForm} />
+						uploadPhase === "idle" ? (
+							<div className="flex justify-between gap-4">
+								<Button label="Cancel" variant="text" onClick={close} />
+								<div className="flex gap-3">
+									<Button variant="secondary" label="Back" hidden={activeStep === 0} onClick={goBack} />
+									<Button label={activeStep === TOTAL_STEPS - 1 ? "Publish" : "Next"} onClick={formik.submitForm} />
+								</div>
 							</div>
-						</div>
+						) : uploadPhase === "uploading" ? (
+							<div className="flex justify-end">
+								<Button label="Please wait..." disabled />
+							</div>
+						) : uploadPhase === "complete" ? (
+							<div className="flex justify-end">
+								<Button label="Close" onClick={close} />
+							</div>
+						) : (
+							<div className="flex justify-end gap-3">
+								<Button label="Try Again" onClick={formik.submitForm} />
+								<Button label="Cancel" variant="text" onClick={close} />
+							</div>
+						)
 					}
 				>
-					{CurrentStepComponent && (
-						<CurrentStepComponent
-							formik={formik}
-							setActiveSearchModal={setActiveSearchModal}
-							setCustomizePlatformId={setCustomizePlatformId}
-							customizePlatformId={customizePlatformId}
-						/>
-					)}
-
-					{/* Steps */}
-					<div className="flex items-center gap-6 mt-5">
-						{steps.map((step, index) => (
-							<div
-								key={step.key}
-								className={cn(
-									"flex items-center gap-2",
-									activeStep === index ? "text-primary font-medium" : "text-[#737373]",
-									activeStep > index && "text-primary font-normal"
-								)}
-							>
-								<div
-									className={cn(
-										"size-3 rounded-full",
-										activeStep === index ? "bg-primary" : "bg-transparent border-2 border-[#737373]",
-										activeStep > index && "border-primary border-2"
-									)}
+					{uploadPhase === "idle" ? (
+						<>
+							{CurrentStepComponent && (
+								<CurrentStepComponent
+									formik={formik}
+									setActiveSearchModal={setActiveSearchModal}
+									setCustomizePlatformId={setCustomizePlatformId}
+									customizePlatformId={customizePlatformId}
 								/>
-								<span>{step.label}</span>
+							)}
+
+							<div className="flex items-center gap-6 mt-5">
+								{steps.map((step, index) => (
+									<div
+										key={step.key}
+										className={cn(
+											"flex items-center gap-2",
+											activeStep === index ? "text-primary font-medium" : "text-[#737373]",
+											activeStep > index && "text-primary font-normal"
+										)}
+									>
+										<div
+											className={cn(
+												"size-3 rounded-full",
+												activeStep === index ? "bg-primary" : "bg-transparent border-2 border-[#737373]",
+												activeStep > index && "border-primary border-2"
+											)}
+										/>
+										<span>{step.label}</span>
+									</div>
+								))}
 							</div>
-						))}
-					</div>
+						</>
+					) : uploadPhase === "uploading" ? (
+						<div className="py-8 space-y-4">
+							<div className="flex items-center justify-center">
+								<div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+							</div>
+							<p className="text-center text-sm text-muted-foreground">Uploading media files...</p>
+						</div>
+					) : uploadPhase === "progress" && uploadJobId ? (
+						<div className="py-4">
+							<YoutubeUploadProgress
+								jobId={uploadJobId}
+								onComplete={handleUploadComplete}
+								onError={handleUploadError}
+							/>
+						</div>
+					) : uploadPhase === "complete" ? (
+						<div className="py-8 text-center space-y-2">
+							<p className="text-lg text-green-600">✅ Upload Complete</p>
+							<p className="text-sm text-muted-foreground">Your video has been uploaded to YouTube.</p>
+						</div>
+					) : (
+						<div className="py-8 text-center space-y-2">
+							<p className="text-lg text-destructive">❌ Upload Failed</p>
+							<p className="text-sm text-muted-foreground">{uploadError || "An unexpected error occurred."}</p>
+						</div>
+					)}
 
 					{activeSearchModal && (
 						<SearchSelectionModal
