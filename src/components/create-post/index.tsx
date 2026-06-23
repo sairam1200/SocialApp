@@ -249,7 +249,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 
 				const override = values.platformOverrides?.[youtubePlatform];
 				const base = values.baseContent;
-				const youtubeAccountId = youtubeProfile?.channel?.id ?? youtubeProfile?.id ?? "";
+				const youtubeAccountId = youtubeProfile?.id ?? "";
 
 				try {
 					const videoFile = override?.mediaFiles?.[0] ?? base.mediaFiles[0];
