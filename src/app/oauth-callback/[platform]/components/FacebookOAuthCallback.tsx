@@ -83,6 +83,28 @@ async function handleAuthSuccess(
   rememberUserFromToken(response.access_token!);
 }
 
+async function handlePostAuthNavigation(
+  router: ReturnType<typeof useRouter>
+): Promise<void> {
+  try {
+    const currentUser = await apiClient.Token.currentAsync();
+    if (currentUser?.id) {
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+
+    const onboardingStep = currentUser?.onboardingStep;
+    if (onboardingStep && onboardingStep !== "Completed") {
+      router.replace("/onboarding");
+    } else {
+      router.replace("/discover");
+    }
+    router.refresh();
+  } catch {
+    router.replace("/discover");
+    router.refresh();
+  }
+}
+
 function handleError(
   error: string,
   setStatus: (status: CallbackStatus) => void,
@@ -96,20 +118,6 @@ function handleError(
   setTimeout(() => {
     router.push("/login");
   }, REDIRECT_DELAY_ERROR);
-}
-
-function handleSuccess(
-  setStatus: (status: CallbackStatus) => void,
-  setMessage: (message: string) => void,
-  router: ReturnType<typeof useRouter>
-): void {
-  setStatus("success");
-  setMessage("Authentication successful!");
-  toast.success("Authentication successful!");
-
-  setTimeout(() => {
-    router.push("/");
-  }, REDIRECT_DELAY_SUCCESS);
 }
 
 export default function FacebookOAuthCallback() {
@@ -176,7 +184,12 @@ export default function FacebookOAuthCallback() {
         }
 
         await handleAuthSuccess(result);
-        handleSuccess(setStatus, setMessage, router);
+
+        setStatus("success");
+        setMessage("Authentication successful!");
+        toast.success("Authentication successful!");
+
+        await handlePostAuthNavigation(router);
       } catch (error) {
         console.error("Facebook OAuth callback error:", error);
         const errorMessage =

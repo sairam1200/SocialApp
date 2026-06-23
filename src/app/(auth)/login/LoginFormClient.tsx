@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getDeviceId } from "@/utils/deviceId.util";
@@ -38,11 +38,6 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-type LoginApiResponse = {
-	success: boolean;
-	message?: string;
-};
-
 function LoginForm() {
 	const [isLoginLoading, setIsLoginLoading] = useState(false);
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -57,7 +52,6 @@ function LoginForm() {
 	>("flexible");
 
 	const router = useRouter();
-	const searchParams = useSearchParams();
 
 	useEffect(() => {
 		const updateSize = () => {
@@ -232,30 +226,38 @@ function LoginForm() {
 		}
 	};
 
-	// OAuth starts from server routes to keep provider config centralized.
-	const handleGoogleSignIn = () => {
-		setIsGoogleLoading(true);
-		const redirect =
-			searchParams.get("redirect");
+	const startOAuthFlow = async (platform: "google" | "facebook") => {
+		const setLoading = platform === "google" ? setIsGoogleLoading : setIsFacebookLoading;
+		setLoading(true);
 
-		window.location.href = redirect
-			? `/api/oauth/google?returnTo=${encodeURIComponent(
-				redirect
-			)}`
-			: "/api/oauth/google";
+		try {
+			const callbackUrl = `${window.location.origin}/oauth-callback/${platform}`;
+			const ipAddress = await getIpAddress();
+
+			const response = await apiClient.Token.connectAsync(
+				platform,
+				deviceId,
+				navigator.userAgent,
+				ipAddress,
+				callbackUrl
+			);
+
+			if (!response?.authorizeURL) {
+				toast.error("Failed to initiate authentication.");
+				setLoading(false);
+				return;
+			}
+
+			window.location.href = response.authorizeURL;
+		} catch (error) {
+			console.error(`${platform} OAuth error:`, error);
+			toast.error(`Failed to sign in with ${platform === "google" ? "Google" : "Facebook"}. Please try again.`);
+			setLoading(false);
+		}
 	};
 
-	const handleFacebookSignIn = () => {
-		setIsFacebookLoading(true);
-		const redirect =
-			searchParams.get("redirect");
-
-		window.location.href = redirect
-			? `/api/oauth/facebook?returnTo=${encodeURIComponent(
-				redirect
-			)}`
-			: "/api/oauth/facebook";
-	};
+	const handleGoogleSignIn = () => startOAuthFlow("google");
+	const handleFacebookSignIn = () => startOAuthFlow("facebook");
 
 	return (
 		<AuthCard width="max-w-[500px]">
@@ -458,30 +460,4 @@ function LoginForm() {
 	);
 }
 
-function LoginFormWithSuspense() {
-	return (
-		<Suspense
-			fallback={
-				<AuthCard width="max-w-[500px]">
-					<div className="px-6 pt-8 pb-[19px] max-sm:pt-6">
-						<div className="mx-auto text-center">
-							<h1 className="font-bold text-2xl">
-								Welcome back! 👋
-							</h1>
-
-							<p className="text-base text-[#595959] mb-4">
-								Loading...
-							</p>
-						</div>
-					</div>
-				</AuthCard>
-			}
-		>
-			<LoginForm />
-		</Suspense>
-	);
-}
-
-export default function LoginPage() {
-	return <LoginFormWithSuspense />;
-}
+export default LoginForm;

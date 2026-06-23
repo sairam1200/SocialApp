@@ -19,7 +19,7 @@ async currentAsync(): Promise<CurrentUserResponseType> {
   @OnError((error) => {
     return error.message;
   })
-  @Get<{ authorizeURL: string }>("/oauth/{platform}/connect")
+  @Get<{ authorizeURL: string }>("/auth/{platform}/connect")
   async connectAsync<T extends { authorizeURL: string } = { authorizeURL: string }>(
     @Path("platform") platform: string,
     @Query("deviceId") deviceId: string,
@@ -52,7 +52,7 @@ async currentAsync(): Promise<CurrentUserResponseType> {
   @OnError((error) => {
     return error.message;
   })
-  @Get<TokenResponseType>("/oauth/{platform}/callback")
+  @Get<TokenResponseType>("/auth/{platform}/connect-callback")
   async callbackAsync<T extends TokenResponseType = TokenResponseType>(
     @Path("platform") platform: string,
     @Query("code") code: string,
