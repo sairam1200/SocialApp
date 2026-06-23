@@ -12,8 +12,9 @@ import { SearchSelectionModal } from "./SearchSelectionModal";
 import { PlatformId } from "@/constants/platforms";
 import { PLATFORM_POST_TYPES } from "@/types/media.types";
 import { apiClient } from "@/services/apiClient.service";
-import { YoutubeUploadRequest, YoutubeUploadProgressEvent } from "@/types/social/youtube.type";
+import { YoutubeVideoStatusResponse } from "@/types/social/youtube.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
+import { useRetryUpload } from "@/hooks/api/useYoutube";
 import YoutubeUploadProgress from "./YoutubeUploadProgress";
 import toast from "react-hot-toast";
 
@@ -184,8 +185,9 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 	const [activeSearchModal, setActiveSearchModal] = useState<"location" | "sound" | null>(null);
 	const [customizePlatformId, setCustomizePlatformId] = useState<PlatformId | null>(null);
 	const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "progress" | "complete" | "error">("idle");
-	const [uploadJobId, setUploadJobId] = useState<string | null>(null);
+	const [uploadVideoId, setUploadVideoId] = useState<string | null>(null);
 	const [uploadError, setUploadError] = useState<string>("");
+	const retryMutation = useRetryUpload();
 
 	const goNext = () => {
 		setActiveStep((prev) => Math.min(prev + 1, TOTAL_STEPS - 1));
@@ -195,7 +197,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 		setActiveStep((prev) => Math.max(prev - 1, 0));
 	};
 
-	const handleUploadComplete = useCallback((_event: YoutubeUploadProgressEvent) => {
+	const handleUploadComplete = useCallback((_status: YoutubeVideoStatusResponse) => {
 		setUploadPhase("complete");
 		setTimeout(() => close(), 2000);
 	}, [close]);
@@ -251,39 +253,29 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 
 				try {
 					const videoFile = override?.mediaFiles?.[0] ?? base.mediaFiles[0];
-					let videoUrl = "";
 
+					const formData = new FormData();
 					if (videoFile) {
-						const videoFormData = new FormData();
-						videoFormData.append("file", videoFile.file);
-						const videoResult = await apiClient.Integration.uploadMedia(videoFormData);
-						videoUrl = videoResult.url;
+						formData.append("video", videoFile.file);
 					}
+					formData.append("accountId", youtubeAccountId);
+					formData.append("title", override?.title ?? "");
+					formData.append("description", override?.caption ?? base.caption ?? "");
+					if (override?.tags?.length) {
+						formData.append("tags", override.tags.join(","));
+					}
+					formData.append("visibility", (values.platformPrivacy?.youtube as string) ?? "public");
 
-					let thumbnailUrl = "";
 					if (override?.thumbnailFile) {
-						const thumbFormData = new FormData();
-						thumbFormData.append("file", override.thumbnailFile.file);
-						const thumbResult = await apiClient.Integration.uploadMedia(thumbFormData);
-						thumbnailUrl = thumbResult.url;
+						formData.append("thumbnail", override.thumbnailFile.file);
 					}
-
-					const request: YoutubeUploadRequest = {
-						accountId: youtubeAccountId,
-						videoUrl,
-						thumbnailUrl: thumbnailUrl || undefined,
-						title: override?.title ?? "",
-						description: override?.caption ?? base.caption,
-						tags: override?.tags,
-						visibility: (values.platformPrivacy?.youtube as "public" | "private" | "unlisted") ?? "public",
-					};
 
 					if (values.postSchedule && values.postScheduleDate) {
-						request.publishAt = values.postScheduleDate.toISOString();
+						formData.append("publishAt", values.postScheduleDate.toISOString());
 					}
 
-					const result = await apiClient.Youtube.uploadVideo(request);
-					setUploadJobId(result.jobId);
+					const result = await apiClient.Youtube.uploadVideo(formData);
+					setUploadVideoId(result.videoId);
 					setUploadPhase("progress");
 				} catch {
 					setUploadPhase("error");
@@ -323,7 +315,14 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 							</div>
 						) : (
 							<div className="flex justify-end gap-3">
-								<Button label="Try Again" onClick={formik.submitForm} />
+								<Button label="Try Again" onClick={() => {
+									if (uploadVideoId) {
+										retryMutation.mutate(uploadVideoId);
+										setUploadPhase("progress");
+									} else {
+										formik.submitForm();
+									}
+								}} />
 								<Button label="Cancel" variant="text" onClick={close} />
 							</div>
 						)
@@ -369,10 +368,10 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 							</div>
 							<p className="text-center text-sm text-muted-foreground">Uploading media files...</p>
 						</div>
-					) : uploadPhase === "progress" && uploadJobId ? (
+					) : uploadPhase === "progress" && uploadVideoId ? (
 						<div className="py-4">
 							<YoutubeUploadProgress
-								jobId={uploadJobId}
+								videoId={uploadVideoId}
 								onComplete={handleUploadComplete}
 								onError={handleUploadError}
 							/>

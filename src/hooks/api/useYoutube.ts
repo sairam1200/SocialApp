@@ -5,8 +5,8 @@ import { apiClient } from "@/services/apiClient.service";
 import {
   YoutubeStatsResponse,
   YoutubeProfileResponse,
-  YoutubeUploadRequest,
   YoutubeUploadResponse,
+  YoutubeVideoStatusResponse,
 } from "@/types/social/youtube.type";
 import toast from "react-hot-toast";
 
@@ -15,6 +15,7 @@ export const youtubeKeys = {
   profile: () => [...youtubeKeys.all, "profile"] as const,
   stats: () => [...youtubeKeys.all, "stats"] as const,
   videos: () => [...youtubeKeys.all, "videos"] as const,
+  uploadStatus: (videoId: string) => [...youtubeKeys.all, "uploadStatus", videoId] as const,
 };
 
 export function useYoutubeProfile() {
@@ -34,11 +35,11 @@ export function useYoutubeStats() {
 export function useUploadYoutubeVideo() {
   const queryClient = useQueryClient();
 
-  return useMutation<YoutubeUploadResponse, Error, YoutubeUploadRequest>({
-    mutationFn: (data) => apiClient.Youtube.uploadVideo(data),
+  return useMutation<YoutubeUploadResponse, Error, FormData>({
+    mutationFn: (formData) => apiClient.Youtube.uploadVideo(formData),
     onSuccess: (result) => {
       if (result.status === "queued" || result.status === "published") {
-        toast.success("Video published to YouTube successfully");
+        toast.success("Video upload job queued");
       } else if (result.status === "scheduled") {
         toast.success("Video scheduled on YouTube successfully");
       }
@@ -46,7 +47,38 @@ export function useUploadYoutubeVideo() {
       queryClient.invalidateQueries({ queryKey: youtubeKeys.stats() });
     },
     onError: () => {
-      toast.error("Failed to upload video to YouTube. Please try again.");
+      toast.error("Failed to upload video. Please try again.");
+    },
+  });
+}
+
+export function useUploadStatus(videoId: string | null) {
+  return useQuery<YoutubeVideoStatusResponse>({
+    queryKey: youtubeKeys.uploadStatus(videoId ?? ""),
+    queryFn: () => apiClient.Youtube.getUploadStatus(videoId!),
+    enabled: !!videoId,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 2000;
+      if (data.status === "completed" || data.status === "published" || data.status === "failed" || data.status === "scheduled") {
+        return false;
+      }
+      return 2000;
+    },
+  });
+}
+
+export function useRetryUpload() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ jobId: string; status: string }, Error, string>({
+    mutationFn: (videoId) => apiClient.Youtube.retryUpload(videoId),
+    onSuccess: () => {
+      toast.success("Upload retry queued");
+      queryClient.invalidateQueries({ queryKey: youtubeKeys.all });
+    },
+    onError: () => {
+      toast.error("Failed to retry upload");
     },
   });
 }

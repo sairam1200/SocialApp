@@ -44,30 +44,12 @@ export type YoutubeContentsResponse = {
   success: boolean;
 };
 
-export type YoutubeUploadRequest = {
-  accountId: string;
-  videoUrl: string;
-  thumbnailUrl?: string;
-  title: string;
-  description?: string;
-  tags?: string[];
-  visibility: "public" | "private" | "unlisted";
-  publishAt?: string;
-};
-
 export type YoutubeUploadResponse = {
   videoId: string;
   jobId: string;
   videoUrl: string;
   publishAt?: string;
   status: "queued" | "published" | "scheduled" | "uploading" | "failed";
-};
-
-export type YoutubeUploadProgressEvent = {
-  status: string;
-  progress: number;
-  statusMessage?: string;
-  error?: string;
 };
 
 export type YoutubeStatsResponse = {
@@ -90,3 +72,13 @@ export type YoutubeSyncResponse = {
 };
 
 export type YoutubeVideoStatus = "published" | "scheduled" | "uploading" | "processing" | "queued" | "failed";
+
+export type YoutubeVideoStatusResponse = {
+  id: string;
+  status: string;
+  progress: number;
+  statusMessage?: string;
+  youtubeVideoId?: string;
+  youtubeUrl?: string;
+  uploadError?: string;
+};

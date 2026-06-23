@@ -1,76 +1,49 @@
-import { useEffect, useRef, useState } from "react";
-import { YoutubeUploadProgressEvent } from "@/types/social/youtube.type";
+import { useEffect } from "react";
+import { YoutubeVideoStatusResponse } from "@/types/social/youtube.type";
+import { useUploadStatus } from "@/hooks/api/useYoutube";
 
 type Props = {
-  jobId: string;
-  onComplete: (event: YoutubeUploadProgressEvent) => void;
+  videoId: string;
+  onComplete: (status: YoutubeVideoStatusResponse) => void;
   onError: (error: string) => void;
 };
 
 const STATUS_MESSAGES: Record<string, string> = {
-  pending: "Preparing upload...",
-  processing: "Processing video...",
+  pending: "Queued...",
+  uploading: "Uploading to YouTube...",
+  processing: "Processing...",
   completed: "Upload complete",
+  published: "Published",
+  scheduled: "Scheduled",
   failed: "Upload failed",
 };
 
-export default function YoutubeUploadProgress({ jobId, onComplete, onError }: Props) {
-  const [event, setEvent] = useState<YoutubeUploadProgressEvent | null>(null);
-  const [connected, setConnected] = useState(false);
-  const sourceRef = useRef<EventSource | null>(null);
+export default function YoutubeUploadProgress({ videoId, onComplete, onError }: Props) {
+  const { data: status } = useUploadStatus(videoId);
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-    const source = new EventSource(`${baseUrl}/integrations/youtube/upload/progress/${jobId}`);
-    sourceRef.current = source;
+    if (!status) return;
+    if (status.status === "completed" || status.status === "published" || status.status === "scheduled") {
+      onComplete(status);
+    } else if (status.status === "failed") {
+      onError(status.uploadError || "Upload failed");
+    }
+  }, [status, onComplete, onError]);
 
-    source.onopen = () => setConnected(true);
-
-    source.onmessage = (msg) => {
-      try {
-        const data: YoutubeUploadProgressEvent = JSON.parse(msg.data);
-        setEvent(data);
-
-        if (data.status === "completed") {
-          source.close();
-          onComplete(data);
-        } else if (data.status === "failed") {
-          source.close();
-          onError(data.error || "Upload failed");
-        }
-      } catch {
-        // ignore parse errors
-      }
-    };
-
-    source.onerror = () => {
-      source.close();
-      onError("Connection lost. Please check the upload status manually.");
-    };
-
-    return () => {
-      source.close();
-    };
-  }, [jobId, onComplete, onError]);
-
-  if (!event) {
+  if (!status) {
     return (
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">
-          {connected ? "Connecting..." : "Initializing upload..."}
-        </p>
-        {connected && (
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "5%" }} />
-          </div>
-        )}
+        <p className="text-sm text-muted-foreground">Checking upload status...</p>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "5%" }} />
+        </div>
       </div>
     );
   }
 
-  const isFailed = event.status === "failed";
-  const isComplete = event.status === "completed";
-  const displayMessage = event.statusMessage || STATUS_MESSAGES[event.status] || event.status;
+  const isFailed = status.status === "failed";
+  const isComplete = status.status === "completed" || status.status === "published" || status.status === "scheduled";
+  const displayMessage = status.statusMessage || STATUS_MESSAGES[status.status] || status.status;
 
   return (
     <div className="space-y-2">
@@ -79,18 +52,18 @@ export default function YoutubeUploadProgress({ jobId, onComplete, onError }: Pr
           {isComplete ? "✅ " : isFailed ? "❌ " : ""}
           {displayMessage}
         </span>
-        <span className="text-muted-foreground tabular-nums">{event.progress}%</span>
+        <span className="text-muted-foreground tabular-nums">{status.progress}%</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             isFailed ? "bg-destructive" : isComplete ? "bg-green-500" : "bg-primary"
           }`}
-          style={{ width: `${event.progress}%` }}
+          style={{ width: `${status.progress}%` }}
         />
       </div>
-      {isFailed && event.error && (
-        <p className="text-xs text-destructive">{event.error}</p>
+      {isFailed && status.uploadError && (
+        <p className="text-xs text-destructive">{status.uploadError}</p>
       )}
     </div>
   );
