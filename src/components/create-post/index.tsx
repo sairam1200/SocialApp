@@ -301,7 +301,7 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 			{(formik) => (
 				<DialogContainer
 					open={open}
-					onClose={uploadPhase === "uploading" ? undefined : close}
+					onClose={uploadPhase === "uploading" ? () => {} : close}
 					title={uploadPhase === "idle" ? "Create Post" : "Uploading to YouTube"}
 					closeOnOverlayClick={false}
 					footer={
