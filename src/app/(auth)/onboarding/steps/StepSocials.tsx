@@ -75,9 +75,10 @@ export function StepThreeSocials({
   providerId: string
 ) => {
   try {
+    const { profileImagePreview: _, ...draftData } = formData;
     sessionStorage.setItem(
       "onboarding_draft",
-      JSON.stringify(formData)
+      JSON.stringify(draftData)
     );
 
     const response =

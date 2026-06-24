@@ -82,43 +82,47 @@ export default function ProfileCreationSystem() {
         }
     };
     useEffect(() => {
-        const savedData =
-            localStorage.getItem("profile_wizard_data");
+        try {
+            const savedData =
+                localStorage.getItem("profile_wizard_data");
 
-        const savedStep =
-            localStorage.getItem("profile_wizard_step");
+            const savedStep =
+                localStorage.getItem("profile_wizard_step");
 
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
 
-                setFormData({
-                    ...DEFAULT_FORM_DATA,
-                    ...parsed,
-                });
-            } catch (error) {
-                console.error(
-                    "Invalid onboarding cache:",
-                    error
-                );
+                    setFormData({
+                        ...DEFAULT_FORM_DATA,
+                        ...parsed,
+                    });
+                } catch (error) {
+                    console.error(
+                        "Invalid onboarding cache:",
+                        error
+                    );
 
-                localStorage.removeItem(
-                    "profile_wizard_data"
-                );
+                    localStorage.removeItem(
+                        "profile_wizard_data"
+                    );
+                }
             }
-        }
 
-        if (savedStep) {
-            const parsedStep =
-                Number(savedStep);
+            if (savedStep) {
+                const parsedStep =
+                    Number(savedStep);
 
-            if (
-                !Number.isNaN(parsedStep) &&
-                parsedStep >= 1 &&
-                parsedStep <= 4
-            ) {
-                setStep(parsedStep);
+                if (
+                    !Number.isNaN(parsedStep) &&
+                    parsedStep >= 1 &&
+                    parsedStep <= 4
+                ) {
+                    setStep(parsedStep);
+                }
             }
+        } catch (error) {
+            console.error("Failed to read onboarding cache:", error);
         }
 
         setIsLoaded(true);
@@ -128,18 +132,19 @@ export default function ProfileCreationSystem() {
         if (!isLoaded) return;
 
         const timer = setTimeout(() => {
-            const dataToSave = {
-                ...formData,
-                profileImage: null,
-            };
-            localStorage.setItem(
-                "profile_wizard_data",
-                JSON.stringify(dataToSave)
-            );
-            localStorage.setItem(
-                "profile_wizard_step",
-                step.toString()
-            );
+            const { profileImagePreview, ...dataToSave } = formData;
+            try {
+                localStorage.setItem(
+                    "profile_wizard_data",
+                    JSON.stringify(dataToSave)
+                );
+                localStorage.setItem(
+                    "profile_wizard_step",
+                    step.toString()
+                );
+            } catch (error) {
+                console.error("Failed to save onboarding progress:", error);
+            }
         }, 300);
 
         return () => clearTimeout(timer);
