@@ -41,6 +41,8 @@ async function storeAuthTokens(
 
   const accessTokenMaxAge = refreshTokenMaxAge ?? accessTokenExpiry;
 
+  localStorage.setItem("accessToken", accessToken);
+
   const cookiePromises = [
     setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, {
       maxAge: accessTokenMaxAge,
