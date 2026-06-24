@@ -14,7 +14,8 @@ import {
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/apiClient.service';
-const API_BASE_URL = '#'; // Replace with your actual API base URL
+import { setCookie } from '@/utils/cookie.util';
+import { COOKIE_NAMES } from '@/constants/globals';
 
 const StepIndicator = ({ step }: { step: number }) => (
     <div className="w-full max-w-4xl mx-auto p-6 flex-none">
@@ -271,11 +272,30 @@ const handleStep4Submit = async () => {
     localStorage.removeItem(
       "profile_wizard_step"
     );
+
+    // Store new JWT with updated onboardingStep claim
+    if (response.accessToken) {
+      localStorage.setItem("accessToken", response.accessToken);
+      setCookie(COOKIE_NAMES.ACCESS_TOKEN, response.accessToken, {
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
+
+    // Refresh stored currentUser with fresh data from backend
+    try {
+      const currentUser = await apiClient.Token.currentAsync();
+      if (currentUser?.id) {
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      }
+    } catch {
+      // non-critical — the new JWT carries the updated onboardingStep
+    }
     
     toast.success(
       "Onboarding completed successfully!"
     );
 
+    router.refresh();
     router.replace("/discover");
   } catch (error) {
     console.error(

@@ -21,4 +21,5 @@ export type CompleteOnboardingResponseType =
 export type OnboardingStatusResponseType = {
   currentStep: string;
   isCompleted: boolean;
+  accessToken?: string;
 };
