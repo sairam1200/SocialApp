@@ -52,14 +52,14 @@ export default function YoutubeUploadProgress({ videoId, onComplete, onError }: 
           {isComplete ? "✅ " : isFailed ? "❌ " : ""}
           {displayMessage}
         </span>
-        <span className="text-muted-foreground tabular-nums">{status.progress}%</span>
+        
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             isFailed ? "bg-destructive" : isComplete ? "bg-green-500" : "bg-primary"
           }`}
-         // style={{ width: `${status.progress}%` }}
+          style={{ width: `${status.progress}%` }}
         />
       </div>
       {isFailed && status.uploadError && (
