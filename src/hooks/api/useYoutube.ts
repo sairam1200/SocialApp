@@ -21,7 +21,7 @@ export const youtubeKeys = {
 export function useYoutubeProfile() {
   return useQuery<YoutubeProfileResponse>({
     queryKey: youtubeKeys.profile(),
-    queryFn: () => apiClient.Integration.getProfile<YoutubeProfileResponse>("youtube"),
+    queryFn: () => apiClient.Integration.getMe<YoutubeProfileResponse>("youtube"),
   });
 }
 

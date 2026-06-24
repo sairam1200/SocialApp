@@ -68,7 +68,7 @@ export function useYoutubeDiscover() {
 
 
       const profileResponse =
-        await apiClient.Integration.getProfile<YoutubeProfile>(
+        await apiClient.Integration.getMe<YoutubeProfile>(
           "youtube"
         );
       console.log(

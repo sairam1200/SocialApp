@@ -33,7 +33,7 @@ export function useFacebookDiscover() {
   const loadData = async () => {
     try {
       const profileResponse =
-        await apiClient.Integration.getProfile<FacebookProfile>(
+        await apiClient.Integration.getMe<FacebookProfile>(
           "facebook"
         );
 

@@ -31,7 +31,7 @@ export function usePinterestDiscover() {
   const loadData = async () => {
     try {
       const profileResponse =
-        await apiClient.Integration.getProfile<PinterestProfile>(
+        await apiClient.Integration.getMe<PinterestProfile>(
           "pinterest"
         );
 

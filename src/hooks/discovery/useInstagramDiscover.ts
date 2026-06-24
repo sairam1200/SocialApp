@@ -31,7 +31,7 @@ export function useInstagramDiscover() {
   const loadData = async () => {
     try {
       const profileResponse =
-        await apiClient.Integration.getProfile<InstagramProfile>(
+        await apiClient.Integration.getMe<InstagramProfile>(
           "instagram"
         );
 

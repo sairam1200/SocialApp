@@ -32,7 +32,7 @@ export function useTwitterDiscover() {
   const loadData = async () => {
     try {
       const profileResponse =
-        await apiClient.Integration.getProfile<TwitterProfile>(
+        await apiClient.Integration.getMe<TwitterProfile>(
           "twitter",
         );
 

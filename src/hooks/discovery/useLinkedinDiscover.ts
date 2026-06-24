@@ -31,7 +31,7 @@ export function useLinkedInDiscover() {
   const loadData = async () => {
     try {
       const profileResponse =
-        await apiClient.Integration.getProfile<LinkedInProfile>(
+        await apiClient.Integration.getMe<LinkedInProfile>(
           "linkedin"
         );
 
