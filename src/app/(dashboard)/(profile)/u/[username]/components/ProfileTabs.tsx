@@ -11,7 +11,7 @@ function MyPostsTab() {
 	const videoContents = contents.filter(
 
 		(item) =>
-			 item.type === "uploaded_video" 
+			 item.type === "uploaded" 
 
 
 	);
