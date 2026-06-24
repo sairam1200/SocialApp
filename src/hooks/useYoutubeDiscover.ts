@@ -50,19 +50,19 @@ export type YoutubeContentsResponse = {
   hasMore: boolean;
   success: boolean;
 };
-export function useYoutubeDiscover() {
+export function useYoutubeDiscover({ enabled = true }: { enabled?: boolean } = {}) {
   const [profile, setProfile] = useState<YoutubeProfile | null>(null);
   const [contents, setContents] = useState<YoutubeContent[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useHttpContext();
   useEffect(() => {
-    if (!user) {
+    if (!user || !enabled) {
       setLoading(false);
       return;
     }
 
     loadData();
-  }, [user]);
+  }, [user, enabled]);
   const loadData = async () => {
     try {
 

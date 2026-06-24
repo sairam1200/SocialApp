@@ -8,7 +8,7 @@ import {
   LinkedInContentsResponse,
 } from "@/types/social/linkedin.type";
 
-export function useLinkedInDiscover() {
+export function useLinkedInDiscover({ enabled = true }: { enabled?: boolean } = {}) {
   const { user } = useHttpContext();
 
   const [profile, setProfile] =
@@ -20,13 +20,13 @@ export function useLinkedInDiscover() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !enabled) {
       setLoading(false);
       return;
     }
 
     loadData();
-  }, [user]);
+  }, [user, enabled]);
 
   const loadData = async () => {
     try {

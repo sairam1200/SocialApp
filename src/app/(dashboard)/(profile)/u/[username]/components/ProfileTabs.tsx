@@ -4,10 +4,12 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import SocialLinksList from "./SocialLinksList";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
+import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 import Image from "next/image";
 
 function MyPostsTab() {
-	const { contents, loading } = useYoutubeDiscover();
+	const { connectedPlatforms } = useConnectedPlatforms();
+	const { contents, loading } = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
 	const videoContents = contents.filter(
 
 		(item) =>

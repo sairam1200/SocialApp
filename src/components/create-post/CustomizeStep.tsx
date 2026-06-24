@@ -21,6 +21,7 @@ import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
 import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
+import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 type CustomizeStepProps = {
 	formik: FormikProps<CreatePostFormValues>;
 	setActiveSearchModal: React.Dispatch<React.SetStateAction<"location" | "sound" | null>>;
@@ -48,18 +49,20 @@ function CustomizeStep({
 	const base = formik.values.baseContent;
 	const activeOverride = formik.values.platformOverrides?.[activePlatformId];
     
+	const { connectedPlatforms } = useConnectedPlatforms();
+
 	const {
 		profile
-	} = useYoutubeDiscover();
+	} = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
 		const {
 		profile: facebookProfile,
-	} = useFacebookDiscover();
+	} = useFacebookDiscover({ enabled: connectedPlatforms.includes('facebook') });
     const{ 
 		profile: instagramProfile,
-	} =useInstagramDiscover();
+	} =useInstagramDiscover({ enabled: connectedPlatforms.includes('instagram') });
 	const{
 		profile: PinterestProfile,
-	}=usePinterestDiscover();
+	}=usePinterestDiscover({ enabled: connectedPlatforms.includes('pinterest') });
 	const isYoutube = activePlatformId === "youtube";
 
 	const effectiveValues = {

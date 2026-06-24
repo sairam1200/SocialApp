@@ -33,6 +33,7 @@ import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import { useLinkedInDiscover } from "@/hooks/discovery/useLinkedinDiscover";
 import { useProfileCardProps } from "@/hooks/useProfileCard";
+import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -99,32 +100,35 @@ const DiscoveryPage = () => {
 	const searchState = useSearch({ debounceMs: 120, useMockData: true });
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
 
+	// Determine which platforms are connected
+	const { connectedPlatforms } = useConnectedPlatforms();
+
 	// YouTube discover hook
 	const {
 		profile,
 		contents,
-	} = useYoutubeDiscover();
+	} = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
 	//facebook hook
 	const {
 		profile: facebookProfile,
 		contents: facebookContents,
-	} = useFacebookDiscover();
+	} = useFacebookDiscover({ enabled: connectedPlatforms.includes('facebook') });
 	// Instagram hook
 	const {
 		profile: InstagramProfile,
 		contents: InstagramContent,
 
-	} = useInstagramDiscover();
+	} = useInstagramDiscover({ enabled: connectedPlatforms.includes('instagram') });
 	//pinterest hook
 	const {
 		profile: PinterestProfile,
 		contents: PinterestContent,
-	} = usePinterestDiscover();
+	} = usePinterestDiscover({ enabled: connectedPlatforms.includes('pinterest') });
 	//linkedin hook
 	const {
 		profile: LinkedInProfile,
 		contents: LinkedInContent,
-	} = useLinkedInDiscover();
+	} = useLinkedInDiscover({ enabled: connectedPlatforms.includes('linkedin') });
 
 	const videoContents = contents.filter(
 

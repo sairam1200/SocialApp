@@ -14,6 +14,7 @@ import { PLATFORM_POST_TYPES } from "@/types/media.types";
 import { apiClient } from "@/services/apiClient.service";
 import { YoutubeVideoStatusResponse } from "@/types/social/youtube.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
+import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 import { useRetryUpload } from "@/hooks/api/useYoutube";
 import { useChunkedUpload } from "@/hooks/upload/useChunkedUpload";
 import YoutubeUploadProgress from "./YoutubeUploadProgress";
@@ -181,7 +182,8 @@ const steps = [
 const TOTAL_STEPS = steps.length;
 
 function CreatePostDialog({ close, open }: CreatePostProps) {
-	const { profile: youtubeProfile } = useYoutubeDiscover();
+	const { connectedPlatforms } = useConnectedPlatforms();
+	const { profile: youtubeProfile } = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
 	const { upload: chunkedUpload, state: uploadState, reset: resetUpload } = useChunkedUpload();
 	const [activeStep, setActiveStep] = useState(0);
 	const [activeSearchModal, setActiveSearchModal] = useState<"location" | "sound" | null>(null);

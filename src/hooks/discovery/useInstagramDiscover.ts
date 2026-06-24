@@ -8,7 +8,7 @@ import {
   InstagramContentsResponse,
 } from "@/types/social/instagram.type";
 
-export function useInstagramDiscover() {
+export function useInstagramDiscover({ enabled = true }: { enabled?: boolean } = {}) {
   const { user } = useHttpContext();
 
   const [profile, setProfile] =
@@ -20,13 +20,13 @@ export function useInstagramDiscover() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !enabled) {
       setLoading(false);
       return;
     }
 
     loadData();
-  }, [user]);
+  }, [user, enabled]);
 
   const loadData = async () => {
     try {

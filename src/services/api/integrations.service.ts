@@ -123,6 +123,12 @@ export class IntegrationsService {
     };
   }
 
+  /** Get connected platform names for the current user */
+  @Get<{ platforms: string[] }>("/integrations/me/linked-accounts")
+  async getLinkedAccounts(): Promise<{ platforms: string[] }> {
+    return { platforms: [] };
+  }
+
   /** Upload a media file and return its URL */
   @Post<{ url: string }>("/integrations/upload")
   async uploadMedia(@Body() body: FormData): Promise<{ url: string }> {

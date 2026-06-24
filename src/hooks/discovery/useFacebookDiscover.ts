@@ -10,7 +10,7 @@ import {
   FacebookContentsResponse,
 } from "@/types/social/facebook.type";
 
-export function useFacebookDiscover() {
+export function useFacebookDiscover({ enabled = true }: { enabled?: boolean } = {}) {
   const { user } = useHttpContext();
 
   const [profile, setProfile] =
@@ -22,13 +22,13 @@ export function useFacebookDiscover() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !enabled) {
       setLoading(false);
       return;
     }
 
     loadData();
-  }, [user]);
+  }, [user, enabled]);
 
   const loadData = async () => {
     try {
