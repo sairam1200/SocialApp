@@ -76,15 +76,20 @@ export function useYoutubeDiscover() {
         profileResponse
       );
       setProfile(profileResponse);
-      const contentsResponse =
-        await apiClient.Integration.getContents<YoutubeContentsResponse>(
-          "youtube"
-        );
-      console.log(
-        "YOUTUBE CONTENTS RESPONSE:",
-        contentsResponse
-      );
-      setContents(contentsResponse.contents ?? []);
+      let allContents: YoutubeContent[] = [];
+      let cursor: string | undefined;
+      let hasMore = true;
+      while (hasMore) {
+        const contentsResponse =
+          await apiClient.Integration.getContents<YoutubeContentsResponse>(
+            "youtube",
+            cursor
+          );
+        allContents = allContents.concat(contentsResponse.contents ?? []);
+        cursor = contentsResponse.nextCursor ?? undefined;
+        hasMore = contentsResponse.hasMore ?? false;
+      }
+      setContents(allContents);
      /*  const profileSyncrequest =
         await apiClient.Integration.enableSync(
           "youtube"

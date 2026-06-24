@@ -46,7 +46,8 @@ export class IntegrationsService {
   /** Imported content */
   @Get("/integrations/{platform}/contents")
   async getContents<T= unknown>(
-    @Path("platform") platform: string
+    @Path("platform") platform: string,
+    @Query("cursor") cursor?: string
   ): Promise<T > {
     return { } as T;
   }

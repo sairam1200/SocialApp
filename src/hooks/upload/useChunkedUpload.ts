@@ -39,14 +39,15 @@ export function useChunkedUpload() {
     progress: 0,
     phase: "idle",
   });
-  const abortRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const upload = useCallback(
     async (
       file: File,
       metadata: ChunkUploadMetadata,
     ): Promise<ChunkedUploadResult> => {
-      abortRef.current = false;
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
       setState({ progress: 0, phase: "initializing" });
 
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
@@ -73,6 +74,7 @@ export function useChunkedUpload() {
             fileName: file.name,
             totalChunks,
           }),
+          signal,
         });
 
         if (!initRes.ok) {
@@ -83,6 +85,9 @@ export function useChunkedUpload() {
         const initData = await initRes.json();
         uploadId = initData.uploadId;
       } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          throw new Error("Upload aborted");
+        }
         const message = err instanceof Error ? err.message : "Upload initialization failed";
         setState({ progress: 0, phase: "error", error: message });
         throw err;
@@ -92,16 +97,6 @@ export function useChunkedUpload() {
       setState({ progress: 0, phase: "uploading" });
 
       for (let i = 0; i < totalChunks; i++) {
-        if (abortRef.current) {
-          try {
-            await fetch(`${baseUrl}/integrations/youtube/upload/abort/${uploadId}`, {
-              method: "POST",
-              headers: authHeaders,
-            });
-          } catch {}
-          throw new Error("Upload aborted");
-        }
-
         const start = i * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, file.size);
         const chunkBlob = file.slice(start, end);
@@ -121,6 +116,7 @@ export function useChunkedUpload() {
                 ...authHeaders,
               },
               body: formData,
+              signal,
             },
           );
 
@@ -146,6 +142,9 @@ export function useChunkedUpload() {
             };
           }
         } catch (err: unknown) {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            break;
+          }
           const message = err instanceof Error ? err.message : "Chunk upload failed";
           setState((prev) => ({
             ...prev,
@@ -156,6 +155,17 @@ export function useChunkedUpload() {
         }
       }
 
+      // Check if upload was aborted
+      if (signal.aborted) {
+        try {
+          await fetch(`${baseUrl}/integrations/youtube/upload/abort/${uploadId}`, {
+            method: "POST",
+            headers: authHeaders,
+          });
+        } catch {}
+        throw new Error("Upload aborted");
+      }
+
       // 3. Finalize (if not already auto-completed)
       setState((prev) => ({ ...prev, phase: "finalizing" }));
       try {
@@ -164,6 +174,7 @@ export function useChunkedUpload() {
           {
             method: "POST",
             headers: authHeaders,
+            signal,
           },
         );
 
@@ -181,6 +192,9 @@ export function useChunkedUpload() {
           publishAt: result.publishAt,
         };
       } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          throw new Error("Upload aborted");
+        }
         const message = err instanceof Error ? err.message : "Upload finalization failed";
         setState({ progress: 0, phase: "error", error: message });
         throw err;
@@ -190,11 +204,13 @@ export function useChunkedUpload() {
   );
 
   const abort = useCallback(() => {
-    abortRef.current = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
   }, []);
 
   const reset = useCallback(() => {
-    abortRef.current = false;
+    abortControllerRef.current = null;
     setState({ progress: 0, phase: "idle" });
   }, []);
 
