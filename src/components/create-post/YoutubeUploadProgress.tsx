@@ -35,7 +35,7 @@ export default function YoutubeUploadProgress({ videoId, onComplete, onError }: 
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Checking upload status...</p>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "5%" }} />
+          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "0%" }} />
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ export default function YoutubeUploadProgress({ videoId, onComplete, onError }: 
           className={`h-full rounded-full transition-all duration-500 ${
             isFailed ? "bg-destructive" : isComplete ? "bg-green-500" : "bg-primary"
           }`}
-          style={{ width: `${status.progress}%` }}
+         // style={{ width: `${status.progress}%` }}
         />
       </div>
       {isFailed && status.uploadError && (
