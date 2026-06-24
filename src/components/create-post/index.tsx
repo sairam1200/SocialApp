@@ -15,6 +15,7 @@ import { apiClient } from "@/services/apiClient.service";
 import { YoutubeVideoStatusResponse } from "@/types/social/youtube.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useRetryUpload } from "@/hooks/api/useYoutube";
+import { useChunkedUpload } from "@/hooks/upload/useChunkedUpload";
 import YoutubeUploadProgress from "./YoutubeUploadProgress";
 import toast from "react-hot-toast";
 
@@ -181,6 +182,7 @@ const TOTAL_STEPS = steps.length;
 
 function CreatePostDialog({ close, open }: CreatePostProps) {
 	const { profile: youtubeProfile } = useYoutubeDiscover();
+	const { upload: chunkedUpload, state: uploadState, reset: resetUpload } = useChunkedUpload();
 	const [activeStep, setActiveStep] = useState(0);
 	const [activeSearchModal, setActiveSearchModal] = useState<"location" | "sound" | null>(null);
 	const [customizePlatformId, setCustomizePlatformId] = useState<PlatformId | null>(null);
@@ -253,33 +255,28 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 
 				try {
 					const videoFile = override?.mediaFiles?.[0] ?? base.mediaFiles[0];
-
-					const formData = new FormData();
-					if (videoFile) {
-						formData.append("video", videoFile.file);
-					}
-					formData.append("accountId", youtubeAccountId);
-					formData.append("title", override?.title ?? "");
-					formData.append("description", override?.caption ?? base.caption ?? "");
-					if (override?.tags?.length) {
-						formData.append("tags", override.tags.join(","));
-					}
-					formData.append("visibility", (values.platformPrivacy?.youtube as string) ?? "public");
-
-					if (override?.thumbnailFile) {
-						formData.append("thumbnail", override.thumbnailFile.file);
+					if (!videoFile) {
+						setUploadPhase("error");
+						setUploadError("No video file selected.");
+						setSubmitting(false);
+						return;
 					}
 
-					if (values.postSchedule && values.postScheduleDate) {
-						formData.append("publishAt", values.postScheduleDate.toISOString());
-					}
-
-					const result = await apiClient.Youtube.uploadVideo(formData);
+					const result = await chunkedUpload(videoFile.file, {
+						accountId: youtubeAccountId,
+						title: override?.title ?? "",
+						description: override?.caption ?? base.caption ?? "",
+						tags: override?.tags,
+						visibility: (values.platformPrivacy?.youtube as string) ?? "public",
+						publishAt: values.postSchedule && values.postScheduleDate
+							? values.postScheduleDate.toISOString()
+							: undefined,
+					});
 					setUploadVideoId(result.videoId);
 					setUploadPhase("progress");
-				} catch {
+				} catch (err: unknown) {
 					setUploadPhase("error");
-					setUploadError("Failed to start upload. Please try again.");
+					setUploadError( "Failed to start upload. Please try again.");
 				} finally {
 					setSubmitting(false);
 				}
@@ -320,6 +317,9 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 										retryMutation.mutate(uploadVideoId);
 										setUploadPhase("progress");
 									} else {
+										resetUpload();
+										setUploadPhase("idle");
+										setUploadError("");
 										formik.submitForm();
 									}
 								}} />
@@ -366,7 +366,25 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 							<div className="flex items-center justify-center">
 								<div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
 							</div>
-							<p className="text-center text-sm text-muted-foreground">Uploading media files...</p>
+							{uploadState.phase === "initializing" && (
+								<p className="text-center text-sm text-muted-foreground">Initializing upload session...</p>
+							)}
+							{uploadState.phase === "uploading" && (
+								<div className="space-y-2">
+									<p className="text-center text-sm text-muted-foreground">
+										Uploading media files... {uploadState.progress}%
+									</p>
+									<div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2 overflow-hidden">
+										<div
+											className="bg-primary h-full rounded-full transition-all duration-300"
+											style={{ width: `${uploadState.progress}%` }}
+										/>
+									</div>
+								</div>
+							)}
+							{uploadState.phase === "finalizing" && (
+								<p className="text-center text-sm text-muted-foreground">Finalizing upload...</p>
+							)}
 						</div>
 					) : uploadPhase === "progress" && uploadVideoId ? (
 						<div className="py-4">
