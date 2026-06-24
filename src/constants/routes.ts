@@ -3,7 +3,11 @@
 export const PROTECTED_ROUTES = [
 	"/settings",
 	"/profile",
+	"/discover",
+	"/messages",
 ];
+
+export const ONBOARDING_INCOMPLETE_REDIRECT = "/onboarding";
 
 export const AUTH_PAGES = [
 	"/login",

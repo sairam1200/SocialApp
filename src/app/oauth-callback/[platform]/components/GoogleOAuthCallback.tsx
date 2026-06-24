@@ -84,6 +84,7 @@ async function handleAuthSuccess(
 }
 
 async function handlePostAuthNavigation(
+  onboardingCompleted: boolean,
   router: ReturnType<typeof useRouter>
 ): Promise<void> {
   try {
@@ -91,18 +92,16 @@ async function handlePostAuthNavigation(
     if (currentUser?.id) {
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
     }
-
-    const onboardingStep = currentUser?.onboardingStep;
-    if (onboardingStep && onboardingStep !== "Completed") {
-      router.replace("/onboarding");
-    } else {
-      router.replace("/discover");
-    }
-    router.refresh();
   } catch {
-    router.replace("/discover");
-    router.refresh();
+    // non-critical
   }
+
+  if (!onboardingCompleted) {
+    router.replace("/onboarding");
+  } else {
+    router.replace("/discover");
+  }
+  router.refresh();
 }
 
 function handleError(
@@ -189,7 +188,7 @@ export default function GoogleOAuthCallback() {
         setMessage("Authentication successful!");
         toast.success("Authentication successful!");
 
-        await handlePostAuthNavigation(router);
+        await handlePostAuthNavigation(result.onboardingCompleted ?? true, router);
       } catch (error) {
         console.error("Google OAuth callback error:", error);
         const errorMessage =

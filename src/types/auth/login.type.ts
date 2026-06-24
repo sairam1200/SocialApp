@@ -16,6 +16,7 @@ export type TokenResponseType = ServiceResponse & {
   refreshTokenExpiryTime?: number;
   isLockedOut: boolean;
   isTwoFARequired: boolean;
+  onboardingCompleted?: boolean;
 }
 export type CurrentUserResponseType = {
   id: string;

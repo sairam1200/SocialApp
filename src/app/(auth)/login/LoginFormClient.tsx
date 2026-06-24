@@ -158,26 +158,22 @@ function LoginForm() {
 					`refresh_token=${loginResponse.refresh_token}; Path=/; Secure; SameSite=Lax`;
 			}
 
-			// Load current user
-			const currentUser =
-				await apiClient.Token.currentAsync();
+			// Determine redirect from login response
+			const onboardingCompleted = loginResponse.onboardingCompleted ?? true;
 
-			console.log(
-				"CURRENT USER",
-				currentUser
-			);
-
-			if (!currentUser?.id) {
-				throw new Error(
-					"Unable to load current user."
-				);
+			// Load current user for localStorage
+			try {
+				const currentUser = await apiClient.Token.currentAsync();
+				if (currentUser?.id) {
+					localStorage.setItem(
+						"currentUser",
+						JSON.stringify(currentUser)
+					);
+				}
+			} catch (e) {
+				console.warn("Failed to fetch current user for localStorage", e);
 			}
 
-			// Save user
-			localStorage.setItem(
-				"currentUser",
-				JSON.stringify(currentUser)
-			);
 			toast.dismiss();
 			toast.success(
 				"Login successful!",
@@ -185,19 +181,12 @@ function LoginForm() {
 
 			reset();
 
-			// Onboarding redirect
-			if (
-				currentUser.onboardingStep !==
-				"Completed"
-			) {
-				router.replace(
-					"/onboarding"
-				);
-				return;
+			if (!onboardingCompleted) {
+				router.replace("/onboarding");
+			} else {
+				router.replace("/discover");
+				router.refresh();
 			}
-
-			router.replace("/discover");
-			router.refresh();
 
 		} catch (error) {
 			console.error(
