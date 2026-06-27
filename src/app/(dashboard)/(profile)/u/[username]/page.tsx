@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ComponentType, SVGProps, useState, use, useEffect } from "react";
-import { Camera, Edit, EllipsisVertical, Mail, UserPlus, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Camera, Edit, EllipsisVertical, Loader2, Mail, RefreshCw, UserPlus } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import TiktokIcon from "@/components/svg/tiktok-black-circle.svg";
@@ -17,6 +17,7 @@ import { apiClient } from "@/services/apiClient.service";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
+import { useFollowUser } from "@/hooks/useFollowUser";
 import XIcon from "@/components/svg/x-icon.svg";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import LinkedInIcon from "@/components/svg/linkedin-blue.svg";
@@ -43,14 +44,7 @@ const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 	pinterest: PinterestIcon,
 	linkedin: LinkedInIcon,
 };
-/* const platformIconSizes: Record<string, string> = {
-  tikTok: "h-4 w-4",
-  youtube: "h-4 w-4",
-  instagram: "h-4 w-4",
-  facebook: "h-4 w-4",
-  twitter: "h-4 w-4",
-  pinterest: "h-5 w-5", // if Pinterest appears smaller
-}; */
+
 interface ProfilePageProps {
 	params: Promise<{ username: string }>;
 }
@@ -67,6 +61,14 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 	const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
 	const [openEditProfileDialog, setOpenEditProfileDialog] = useState(false);
 	const [openManageSocial, setOpenManageSocial] = useState(false);
+	const followState = useFollowUser({
+		userId: data?.id,
+		isFollowing: (data as (UserProfileType & { isFollowing?: boolean }) | undefined)?.isFollowing ?? false,
+		followersCount: data?.followersCount ?? 0,
+		onChange: ({ followersCount }) => {
+			setData((prev) => prev ? { ...prev, followersCount } : prev);
+		},
+	});
 
 	const fetchUserData = React.useCallback(async () => {
 		if (!username) return;
@@ -156,11 +158,22 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 							{isGuest ? (
 								<div className="flex items-center gap-3">
 									<span>
-										<Button variant="secondary" title="Follow" size="icon-sm" className="sm:hidden" onClick={() => { }}>
-											<UserPlus />
+										<Button
+											variant="secondary"
+											title="Follow"
+											size="icon-sm"
+											className="sm:hidden"
+											onClick={followState.toggleFollow}
+											disabled={!followState.canFollow || followState.isPending}
+										>
+											{followState.isPending ? <Loader2 className="animate-spin" /> : <UserPlus />}
 										</Button>
-										<Button className="hidden sm:flex" onClick={() => { }}>
-											Follow
+										<Button
+											className="hidden sm:flex"
+											onClick={followState.toggleFollow}
+											disabled={!followState.canFollow || followState.isPending}
+										>
+											{followState.isPending ? "Updating..." : followState.isFollowing ? "Following" : "Follow"}
 										</Button>
 									</span>
 									<span>
@@ -221,7 +234,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 					</div>
 
 					<p className="text-black-default text-sm flex flex-col gap-1 select-none">
-						<span className="text-gray-neutral">{data?.gender}</span>
+						{!isGuest && <span className="text-gray-neutral">{data?.gender}</span>}
 						<span className="mb-3">{data?.bio}</span>
 					</p>
 

@@ -22,8 +22,8 @@ export function StepOneAbout({
     onNext,
 }: StepOneAboutProps) {
     const canProceed =
-    (formData.fullName ?? "").trim().length > 0 &&
-    (formData.bio ?? "").trim().length > 0;
+        (formData.fullName ?? "").trim().length > 0 &&
+        (formData.bio ?? "").trim().length > 0;
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white p-8 rounded-[10px] w-full mx-auto border border-indigo-100/50 shadow-lg ring-1 ring-black/5 h-[750px]">
@@ -94,7 +94,13 @@ export function StepOneAbout({
                             type="text"
                             name="fullName"
                             value={formData.fullName ?? ""}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                e.target.value = e.target.value
+                                    .replace(/\s/g, "")
+                                    .replace(/[^a-zA-Z0-9._]/g, "");
+
+                                handleChange(e);
+                            }}
                             placeholder="Enter username"
                             className="w-full pl-10 pr-4 py-6 bg-white border-gray-300 rounded-xl"
                         />

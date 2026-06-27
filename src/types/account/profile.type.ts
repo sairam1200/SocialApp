@@ -10,6 +10,35 @@ export type UserProfileType = UserType & ServiceResponse & {
 	isGuestView: boolean;
 };
 
+export type PublicProfileModel = {
+	id: string;
+	userName: string;
+	firstName: string;
+	lastName: string;
+	bio: string | null;
+	profileImage: string | null;
+	followersCount: number;
+	followingCount: number;
+	connectedPlatformsCount: number;
+	linkedAccounts: {
+        id: string;
+        platform: string;
+    }[];
+	totalPosts: number;
+	engagementRate: number;
+	niche: string | null;
+	verified: boolean;
+	isFollowing?: boolean;
+};
+
+export type DiscoverCreatorsResponse = {
+	profiles: PublicProfileModel[];
+	page: number;
+	limit: number;
+	totalResults: number;
+	hasNextPage?: boolean;
+};
+
 export type LinkedAccountType = {
 	id: string;
 	username: string;

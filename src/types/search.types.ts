@@ -1,3 +1,5 @@
+import { PublicProfileModel } from "@/types/account/profile.type";
+
 /**
  * Search API Types
  * Defines request/response structures for the search endpoint
@@ -157,6 +159,7 @@ export interface YouTubeResult {
 export interface SearchResponse {
   query: string;
   platforms: string[];
+  profiles?: PublicProfileModel[];
   results: {
     twitter?: TwitterResult;
     instagram?: InstagramResult;

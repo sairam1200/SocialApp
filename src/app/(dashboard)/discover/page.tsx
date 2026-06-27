@@ -1,6 +1,6 @@
 "use client";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { Grid2x2, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, Grid2x2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -32,8 +32,8 @@ import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
 import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import { useLinkedInDiscover } from "@/hooks/discovery/useLinkedinDiscover";
-import { useProfileCardProps } from "@/hooks/useProfileCard";
 import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
+import { useDiscoverCreators } from "@/hooks/useDiscoverCreators";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -44,7 +44,6 @@ const filterSections = [
 		options: [
 			{ id: "feed_post", label: "Feed Post" },
 			{ id: "reels_shorts", label: "Reels/Shorts" },
-			{ id: "partnered", label: "Partnered" },
 			{ id: "live_stream", label: "Live Stream" },
 			{ id: "igtv_long_form", label: "IGTV/Long form" },
 		],
@@ -56,7 +55,6 @@ const filterSections = [
 		options: [
 			{ id: "highest_liked", label: "Highest Liked" },
 			{ id: "most_commented", label: "Most Commented" },
-			{ id: "most_shared", label: "Most Shared" },
 			{ id: "most_views", label: "Most Views" },
 			{ id: "fastest_growing", label: "Fastest-Growing" },
 		],
@@ -64,7 +62,7 @@ const filterSections = [
 	{
 		title: "Date Posted",
 		key: "datePosted",
-		type: "radio",
+		type: "checkbox",
 		options: [
 			{ id: "past_week", label: "Past week" },
 			{ id: "past_month", label: "Past month" },
@@ -96,9 +94,9 @@ const DiscoveryPage = () => {
 		monetization: [],
 	});
 
-	// Initialize search and trending hooks with mock data enabled (for now)
-	const searchState = useSearch({ debounceMs: 120, useMockData: true });
+	const searchState = useSearch({ debounceMs: 120, useMockData: false });
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
+	const creatorState = useDiscoverCreators(12);
 
 	// Determine which platforms are connected
 	const { connectedPlatforms } = useConnectedPlatforms();
@@ -394,16 +392,7 @@ const DiscoveryPage = () => {
 			!("isReel" in item && item.isReel) &&
 			!("isVideo" in item && item.isVideo)
 	);
-	const profiles = [
-		profile && {
-			id: profile.id,
-			profileImage: profile.profileImage,
-			username: profile.userName || profile.name,
-			platform: "youtube",
-			followersCount: profile.followersCount,
-			followingCount: profile.followingCount,
-		}
-	].filter(Boolean);
+	
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -470,6 +459,96 @@ const DiscoveryPage = () => {
 				[sectionKey]: updatedValues,
 			};
 		});
+	};
+
+	const renderCreators = () => {
+		if (creatorState.isLoading) {
+			return (
+				<div className="flex items-center justify-center py-12">
+					<Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+				</div>
+			);
+		}
+
+		if (creatorState.isError) {
+			return (
+				<div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+					<AlertCircle className="h-8 w-8 text-red-500" />
+					<p className="text-sm text-gray-600">
+						{creatorState.error?.message ?? "Unable to load creator profiles."}
+					</p>
+					<Button variant="secondary" onClick={creatorState.retry}>
+						Try again
+					</Button>
+				</div>
+			);
+		}
+
+		if (creatorState.profiles.length === 0) {
+			return (
+				<div className="rounded-xl border border-[#E6E6E6] bg-[#FAFAFA] px-4 py-10 text-center">
+					<p className="text-sm text-[#595959]">No creator profiles found yet.</p>
+				</div>
+			);
+		}
+
+		return (
+			<div className="space-y-6">
+				<div
+					className="grid gap-6"
+					style={{
+						gridTemplateColumns:
+							viewType === "grid"
+								? "repeat(auto-fit, minmax(240px, 1fr))"
+								: "1fr",
+						maxWidth: "100%",
+					}}
+				>
+					{creatorState.profiles.map((creator) => {
+						const displayName = [creator.firstName, creator.lastName].filter(Boolean).join(" ").trim();
+
+						return (
+							<ProfileCard
+								key={creator.id}
+								userId={creator.id}
+								profilePicSrc={creator.profileImage ?? "/icons/gaddr-logo-xs.svg"}
+								userName={displayName || creator.userName}
+								userHandle={`@${creator.userName}`}
+								category={creator.niche ?? "Creator"}
+								postCount={creator.totalPosts}
+								followerCount={creator.followersCount}
+								followingCount={creator.followingCount}
+								linkedAccounts={creator.linkedAccounts ?? []}
+								profileHref={`/u/${creator.userName}`}
+								initialIsFollowing={creator.isFollowing ?? false}
+							/>
+						);
+					})}
+				</div>
+
+				<div className="flex items-center justify-center gap-4">
+					<Button
+						onClick={creatorState.previousPage}
+						disabled={creatorState.page === 1}
+						className="flex items-center gap-2"
+					>
+						<ChevronLeft className="w-4 h-4" />
+						Previous
+					</Button>
+					<span className="text-sm text-gray-600">
+						Page {creatorState.page}
+					</span>
+					<Button
+						onClick={creatorState.nextPage}
+						disabled={!creatorState.hasNextPage}
+						className="flex items-center gap-2"
+					>
+						Next
+						<ChevronRight className="w-4 h-4" />
+					</Button>
+				</div>
+			</div>
+		);
 	};
 
 	// Render content based on search state
@@ -544,6 +623,13 @@ const DiscoveryPage = () => {
 		return (
 			<TabPanels className="flex-1 mt-5 text-gray-neutral text-sm">
 				<TabPanel className="space-y-6">
+					<section className="space-y-4">
+						<div className="flex items-center justify-between">
+							<h2 className="text-lg font-semibold text-gray-900">Creators to discover</h2>
+							<span className="text-sm text-gray-600">{creatorState.totalResults} profiles</span>
+						</div>
+						
+					</section>
 					<div
 						className="grid gap-6"
 						style={{
@@ -554,19 +640,7 @@ const DiscoveryPage = () => {
 							maxWidth: "100%",
 						}}
 					>
-						{/* 						{profiles.filter((a): a is NonNullable<typeof a> => a != null).map((account) => (
-							<ProfileCard
-								key={account.id}
-								profilePicSrc={account.profileImage ?? "/icons/gaddr-logo-xs.svg"}
-								userName={account.username ?? "Unknown User"}
-								userHandle={`@${account.username ?? "unknown"}`}
-								category={account.platform}
-								postCount={0}
-								followerCount={account.followersCount ?? 0}
-								followingCount={account.followingCount ?? 0}
-								channelIcons={[]}
-							/>
-						))} */}
+
 						{filteredFeed.map((item) => (
 							<div
 								key={`${item.platform}-${item.id}`}
@@ -617,8 +691,8 @@ const DiscoveryPage = () => {
 						))}
 					</div>
 				</TabPanel>
-				<TabPanel className="space-y-6">For you</TabPanel>
-				<TabPanel className="space-y-6">Profiles</TabPanel>
+				<TabPanel className="space-y-6">{renderCreators()}</TabPanel>
+				<TabPanel className="space-y-6">{renderCreators()}</TabPanel>
 				<TabPanel className="space-y-6">
 					<div
 						className="grid gap-6"

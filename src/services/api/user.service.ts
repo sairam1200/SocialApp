@@ -2,7 +2,7 @@
 import { ServiceResponse } from "@/types/serviceResponse.type";
 import { UpdateBasicInfoType } from "@/types/auth/authUser.type";
 import { Patch, Body, Query, Get, OnError, Delete, Path, Put, Post } from "restfit";
-import { CreateManualProfileType, LinkedAccountType, ManualProfileReorderRequestType, ManualProfileType, UpdateManualProfileType, UserPhotoPrivacy, UserProfileType  } from "@/types/account/profile.type";
+import { CreateManualProfileType, DiscoverCreatorsResponse, LinkedAccountType, ManualProfileReorderRequestType, ManualProfileType, PublicProfileModel, UpdateManualProfileType, UserPhotoPrivacy, UserProfileType  } from "@/types/account/profile.type";
 import { CompleteOnboardingResponseType } from "@/types/auth/Onboarding.type";
 export class UserService {
 
@@ -11,6 +11,11 @@ export class UserService {
 	})
 	@Get("/user/profile")
 	async getUserProfileAsync(@Query("userName") userName: string): Promise<UserProfileType> { return {} as UserProfileType }
+
+	@Get("/user/profile/public")
+	async getPublicProfileAsync(@Query("userName") userName: string): Promise<PublicProfileModel> {
+		return {} as PublicProfileModel;
+	}
 
 	@OnError((error) => {
 		return error.message;
@@ -53,6 +58,26 @@ export class UserService {
 
 	@Patch("/user/deactivate")
 	async deactivateUser(@Query("userId") userId: string): Promise<void> { }
+
+	@Post("/user/{userId}/follow")
+	async followUser(@Path("userId") userId: string): Promise<void> { }
+
+	@Delete("/user/{userId}/unfollow")
+	async unfollowUser(@Path("userId") userId: string): Promise<void> { }
+
+	@Get("/discover/creators")
+	async getDiscoverCreators(
+		@Query("page") page?: number,
+		@Query("limit") limit?: number
+	): Promise<DiscoverCreatorsResponse> {
+		return {
+			profiles: [],
+			page: page ?? 1,
+			limit: limit ?? 12,
+			totalResults: 0,
+			hasNextPage: false,
+		};
+	}
 
 	@Get("/user/profile/manual-profiles")
 	async getManualProfilesAsync(@Query("userName") userName: string): Promise<ManualProfileType[]> {

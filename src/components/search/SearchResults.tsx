@@ -6,6 +6,7 @@ import { SearchResult } from "@/types/search.types";
 import ContentFeedCard from "@/components/card/ContentFeedCard";
 import ProfileCard from "@/components/card/PorfileCard";
 import { cn } from "@/utils/cn.util";
+import { PublicProfileModel } from "@/types/account/profile.type";
 
 interface SearchResultsProps {
     results: SearchResult[];
@@ -141,17 +142,23 @@ export const SearchResults = ({
             {Array.isArray(results) && results.map((result) => {
                 // If result is a profile
                 if (result.type === "profile") {
+                    const publicProfile = result.publicProfile as PublicProfileModel | undefined;
+                    const handle = publicProfile?.userName ?? result.author?.handle?.replace(/^@/, "");
+
                     return (
                         <ProfileCard
                             key={result.id}
-                            profilePicSrc={result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
-                            userName={result.author?.name || "Unknown"}
-                            userHandle={result.author?.handle || "@unknown"}
-                            category={result.description || "Content Creator"}
-                            postCount={result.engagement?.views || 0}
-                            followerCount={0}
-                            followingCount={0}
+                            userId={publicProfile?.id ?? result.author?.id ?? result.id}
+                            profilePicSrc={publicProfile?.profileImage || result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
+                            userName={result.author?.name || publicProfile?.userName || "Unknown"}
+                            userHandle={handle ? `@${handle}` : "@unknown"}
+                            category={publicProfile?.niche || result.description || "Content Creator"}
+                            postCount={publicProfile?.totalPosts ?? result.engagement?.views ?? 0}
+                            followerCount={publicProfile?.followersCount ?? result.engagement?.likes ?? 0}
+                            followingCount={publicProfile?.followingCount ?? 0}
                             channelIcons={[]}
+                            profileHref={handle ? `/u/${handle}` : undefined}
+                            initialIsFollowing={publicProfile?.isFollowing ?? false}
                         />
                     );
                 }

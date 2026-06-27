@@ -64,6 +64,29 @@ export class SearchService {
   normalizeResults(response: SearchResponse): NormalizedSearchResults {
     const results: SearchResult[] = [];
 
+    response.profiles?.forEach((profile) => {
+      const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+
+      results.push({
+        id: profile.id,
+        type: "profile",
+        platform: "gaddr",
+        title: displayName || profile.userName,
+        description: profile.bio ?? profile.niche ?? "Creator profile",
+        author: {
+          id: profile.id,
+          name: displayName || profile.userName,
+          handle: `@${profile.userName}`,
+          profileImage: profile.profileImage ?? undefined,
+        },
+        engagement: {
+          views: profile.totalPosts,
+          likes: profile.followersCount,
+        },
+        publicProfile: profile,
+      });
+    });
+
     // Process Twitter results
     if (response.results.twitter?.result?.content) {
       response.results.twitter.result.content.forEach((item: TwitterContent) => {
