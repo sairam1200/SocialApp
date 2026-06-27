@@ -156,7 +156,7 @@ export const SearchResults = ({
                             postCount={publicProfile?.totalPosts ?? result.engagement?.views ?? 0}
                             followerCount={publicProfile?.followersCount ?? result.engagement?.likes ?? 0}
                             followingCount={publicProfile?.followingCount ?? 0}
-                            channelIcons={[]}
+                            linkedAccounts={publicProfile?.linkedAccounts ?? []}                           
                             profileHref={handle ? `/u/${handle}` : undefined}
                             initialIsFollowing={publicProfile?.isFollowing ?? false}
                         />
