@@ -1,4 +1,4 @@
-import { TokenService, AccountService, UserService, SearchService, YoutubeService } from "./api";
+import { TokenService, AccountService, UserService, SearchService, YoutubeService, FacebookService } from "./api";
 import { interceptors } from "@/interceptors";
 import { createApiService } from 'restfit';
 import { IntegrationsService } from "./api/integrations.service";
@@ -8,6 +8,7 @@ type ApiServiceMap = {
   Account: typeof AccountService;
   Integration: typeof IntegrationsService;
   Youtube: typeof YoutubeService;
+  Facebook: typeof FacebookService;
   User: typeof UserService;
   Search: typeof SearchService;
   Onboarding: typeof OnboardingService;
@@ -22,7 +23,7 @@ export const apiClient = createApiService<ApiServiceMap>(
         ? { "x-client-origin": process.env.NEXT_PUBLIC_CLIENT_ORIGIN }
         : {}),
     },
- 
+   
 authorization: async () => {
   if (typeof window === "undefined") {
     return null;
@@ -42,6 +43,7 @@ authorization: async () => {
     Account: AccountService,
     Integration: IntegrationsService,
     Youtube: YoutubeService,
+    Facebook: FacebookService,
     User: UserService,
     Search: SearchService,
     Onboarding: OnboardingService,

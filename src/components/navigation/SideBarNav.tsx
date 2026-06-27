@@ -7,6 +7,7 @@ import DiscoverIcon from "@/components/svg/dashboard.svg";
 import BookmarkIcon from "@/components/svg/bookmark.svg";
 import GaddrLogo from "@/components/svg/gaddr-logo-xs.svg";
 import PlusIcon from "@/components/svg/plus.svg";
+import AnalyticsIcon from "@/components/svg/analytics-icon.svg";
 import Link from "next/link";
 import DialogContainer from "../dialog/DialogContainer";
 import { Button } from "../ui/button";
@@ -24,6 +25,7 @@ export default function SidebarNav() {
 	const navItems = [
 		{ Icon: DiscoverIcon, label: "Discover", href: "/discover" },
 		{ Icon: BookmarkIcon, label: "Bookmarks", href: "/bookmarks" },
+		{ Icon: AnalyticsIcon, label: "Analytics", href: "/analytics" },
 		{ Icon: PlusIcon, label: "Post", href: "#", action: () => setOpenPostDialog(true) },
 	];
 

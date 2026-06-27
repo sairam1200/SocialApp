@@ -4,3 +4,4 @@ export { IntegrationsService as Integrations } from "./integrations.service";
 export { UserService } from "./user.service";
 export { SearchService } from "./search.service";
 export { YoutubeService } from "./youtube.service";
+export { FacebookService } from "./facebook.service";

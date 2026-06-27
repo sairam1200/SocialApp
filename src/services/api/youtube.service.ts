@@ -1,10 +1,16 @@
-import { Post, Get, Body, Path } from "restfit";
+import { Post, Get, Body, Path, Query } from "restfit";
 import {
   YoutubeUploadResponse,
   YoutubeStatsResponse,
   YoutubeSyncResponse,
   YoutubeVideoStatusResponse,
 } from "@/types/social/youtube.type";
+import {
+  YoutubeChannelAnalytics,
+  YoutubeVideoAnalytics,
+  YoutubeAnalyticsTrendsResponse,
+  YoutubeTopVideosResponse,
+} from "@/types/analytics/youtube";
 
 export class YoutubeService {
   @Post<YoutubeUploadResponse>("/integrations/youtube/upload")
@@ -36,5 +42,24 @@ export class YoutubeService {
     @Path("videoId") videoId: string
   ): Promise<{ jobId: string; status: string }> {
     return { jobId: "", status: "" };
+  }
+
+  @Get<YoutubeChannelAnalytics>("/integrations/youtube/analytics/channel")
+  async getChannelAnalytics(): Promise<YoutubeChannelAnalytics> {
+    return {} as YoutubeChannelAnalytics;
+  }
+
+  @Get<YoutubeTopVideosResponse>("/integrations/youtube/analytics/top-videos")
+  async getTopVideos(@Query("limit") limit?: string): Promise<YoutubeTopVideosResponse> {
+    return [] as YoutubeTopVideosResponse;
+  }
+
+  @Get<YoutubeAnalyticsTrendsResponse>("/integrations/youtube/analytics/trends")
+  async getTrends(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
+    @Query("videoId") videoId?: string
+  ): Promise<YoutubeAnalyticsTrendsResponse> {
+    return [] as YoutubeAnalyticsTrendsResponse;
   }
 }

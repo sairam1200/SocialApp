@@ -5,6 +5,7 @@ export const PROTECTED_ROUTES = [
 	"/profile",
 	"/discover",
 	"/messages",
+	"/analytics",
 ];
 
 export const ONBOARDING_INCOMPLETE_REDIRECT = "/onboarding";
