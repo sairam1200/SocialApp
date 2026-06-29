@@ -56,14 +56,18 @@ export function useYoutubeDiscover({ enabled = true }: { enabled?: boolean } = {
   const [loading, setLoading] = useState(true);
   const { user } = useHttpContext();
   useEffect(() => {
+    console.log("USER:", user);
+  console.log("ENABLED:", enabled);
     if (!user || !enabled) {
+      console.log("Skipping load");
       setLoading(false);
       return;
     }
-
+console.log("Calling loadData()");
     loadData();
   }, [user, enabled]);
   const loadData = async () => {
+      console.log("loadData started");
     try {
 
 
