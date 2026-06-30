@@ -89,10 +89,15 @@ console.log("Calling loadData()");
             "youtube",
             cursor
           );
+          console.log(
+        "youtube CONTENTS RESPONSE:",
+        contentsResponse,
+      );
         allContents = allContents.concat(contentsResponse.contents ?? []);
         cursor = contentsResponse.nextCursor ?? undefined;
         hasMore = contentsResponse.hasMore ?? false;
       }
+      
       setContents(allContents);
      /*  const profileSyncrequest =
         await apiClient.Integration.enableSync(
