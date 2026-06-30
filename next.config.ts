@@ -3,6 +3,9 @@ import bundleAnalyzer from '@next/bundle-analyzer'
 
 const nextConfig: NextConfig = {
 	/* config options here */
+   allowedDevOrigins: [
+    "almost-backtrack-drapery.ngrok-free.dev",
+  ],
 	images: {
    
 	remotePatterns: [
