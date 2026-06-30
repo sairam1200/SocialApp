@@ -131,7 +131,7 @@ const DiscoveryPage = () => {
 	const videoContents = contents.filter(
 
 		(item) =>
-			item.type === "playlist" || item.type === "uploaded" || item.type === "subscription_video"
+			item.type === "playlist" || item.type === "uploaded_video" || item.type === "subscription_video"
 
 
 	);
