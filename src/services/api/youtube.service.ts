@@ -25,11 +25,15 @@ export class YoutubeService {
     return {} as YoutubeStatsResponse;
   }
 
+  @Post<YoutubeSyncResponse>("/integrations/youtube/sync")
+  async sync(): Promise<YoutubeSyncResponse> {
+    return { success: false, message: "" };
+  }
+
   @Post<{ message: string }>("/integrations/youtube/analytics/sync")
   async syncAnalytics(): Promise<{ message: string }> {
     return { message: "" };
   }
-
   @Get<YoutubeVideoStatusResponse>("/integrations/youtube/upload/status/{videoId}")
   async getUploadStatus(
     @Path("videoId") videoId: string
