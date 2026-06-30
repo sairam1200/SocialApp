@@ -52,6 +52,8 @@ async function ensureAnalyticsExists() {
   await analyticsSyncPromise;
 }
 
+
+
 function isMissingAnalyticsError(error: any): boolean {
   const status =
     error?.response?.status ??
@@ -68,6 +70,19 @@ function isMissingAnalyticsError(error: any): boolean {
     typeof message === "string" &&
     message.includes("No channel analytics")
   );
+}
+
+async function ensureAnalyticsSynced() {
+  if (!analyticsSyncPromise) {
+    analyticsSyncPromise = apiClient.Youtube
+      .syncAnalytics()
+      .then(() => {})
+      .finally(() => {
+        analyticsSyncPromise = null;
+      });
+  }
+
+  await analyticsSyncPromise;
 }
 function mapChannelToOverview(data: YoutubeChannelAnalytics): YoutubeOverview {
   return {
@@ -108,6 +123,7 @@ function mapTrendsToChartPoints(data: YoutubeAnalyticsTrendsResponse, metric: st
       metric,
     }));
 }
+
 async function loadYoutubeOverview(): Promise<YoutubeOverview> {
   try {
     const data = await apiClient.Youtube.getChannelAnalytics();
@@ -117,12 +133,13 @@ async function loadYoutubeOverview(): Promise<YoutubeOverview> {
       throw error;
     }
 
-    await ensureAnalyticsExists();
+    await ensureAnalyticsSynced();
 
     const retry = await apiClient.Youtube.getChannelAnalytics();
     return mapChannelToOverview(retry);
   }
 }
+
 export function useYoutubeOverview() {
   return useQuery({
     queryKey: ["analytics", "youtube", "overview"],

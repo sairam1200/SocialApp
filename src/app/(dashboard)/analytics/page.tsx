@@ -43,7 +43,7 @@ function YoutubeSection({ range }: { range: DateRange }) {
   const overview = useYoutubeOverview();
   const topVideos = useYoutubeTopVideos(10);
   const trends = useYoutubeTrends(range);
-
+  
   if (overview.isError) {
     return <ErrorState title="Failed to load YouTube analytics" message={overview.error instanceof Error ? overview.error.message : "Something went wrong."} onRetry={() => overview.refetch()} />;
   }
