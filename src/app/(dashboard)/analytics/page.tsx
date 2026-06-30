@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 import { PlatformSelector, DateRangeFilter } from "@/components/analytics/Filters";
 import { MetricCard } from "@/components/analytics/MetricCard";
@@ -13,6 +14,7 @@ import { PlatformId, DateRange } from "@/types/analytics";
 import { formatNumber, formatCompactNumber } from "@/components/analytics/PlatformIcon";
 import { Eye, Users, ThumbsUp, TrendingUp, MousePointerClick } from "lucide-react";
 import Image from "next/image";
+import YoutubeAnalyticsContent from "@/components/analytics/YoutubeAnalyticsContent";
 import {
   useYoutubeOverview,
   useYoutubeTopVideos,
@@ -25,7 +27,7 @@ import {
   useFacebookTopVideos,
   useFacebookTrends,
 } from "@/hooks/api/useFacebookAnalytics";
-
+import { apiClient } from "@/services/apiClient.service";
 const ANALYTICS_METRICS: Record<string, { label: string; icon?: React.ReactNode }> = {
   subscribers: { label: "Subscribers", icon: <Users className="w-5 h-5 text-gray-400" /> },
   views: { label: "Views", icon: <Eye className="w-5 h-5 text-gray-400" /> },
@@ -38,60 +40,86 @@ const ANALYTICS_METRICS: Record<string, { label: string; icon?: React.ReactNode 
   pageViews: { label: "Page Views", icon: <MousePointerClick className="w-5 h-5 text-gray-400" /> },
   clicks: { label: "Clicks", icon: <MousePointerClick className="w-5 h-5 text-gray-400" /> },
 };
-
 function YoutubeSection({ range }: { range: DateRange }) {
-  const overview = useYoutubeOverview();
-  const topVideos = useYoutubeTopVideos(10);
-  const trends = useYoutubeTrends(range);
-  
-  if (overview.isError) {
-    return <ErrorState title="Failed to load YouTube analytics" message={overview.error instanceof Error ? overview.error.message : "Something went wrong."} onRetry={() => overview.refetch()} />;
+  const [ready, setReady] = useState(false);
+  const [syncing, setSyncing] = useState(true);
+  const [syncError, setSyncError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrap() {
+      try {
+        await apiClient.Youtube.getChannelAnalytics();
+      } catch (err: any) {
+        const status =
+          err?.response?.status ??
+          err?.status ??
+          err?.statusCode;
+
+        const message =
+          err?.response?.data?.title ??
+          err?.response?.data?.message ??
+          "";
+
+        if (
+          status === 404 &&
+          typeof message === "string" &&
+          message.includes("No channel analytics")
+        ) {
+          await apiClient.Youtube.syncAnalytics();
+        } else {
+          throw err;
+        }
+      }
+
+      if (!cancelled) {
+        setReady(true);
+        setSyncing(false);
+      }
+    }
+
+    bootstrap().catch((err) => {
+      if (!cancelled) {
+        setSyncError(err);
+        setSyncing(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (syncing) {
+    return (
+      <>
+        <OverviewCardsSkeleton />
+        <ChartSkeleton />
+        <ContentTableSkeleton />
+      </>
+    );
   }
 
-  const primaryMetrics = ["subscribers", "views", "videos"];
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {primaryMetrics.map((key) => {
-          const config = ANALYTICS_METRICS[key] ?? { label: key };
-          const value = overview.data?.metrics[key as keyof typeof overview.data.metrics];
-          return (
-            <MetricCard
-              key={key}
-              title={config.label}
-              value={typeof value === "number" ? value.toLocaleString() : "—"}
-              icon={config.icon}
-              loading={overview.isLoading}
-            />
-          );
-        })}
-      </div>
-
-      <GrowthChart
-        data={trends.data ?? []}
-        metric="views"
-        loading={trends.isLoading}
-        color="#FF0000"
+  if (syncError) {
+    return (
+      <ErrorState
+        title="Failed to initialize analytics"
+        message={
+          syncError instanceof Error
+            ? syncError.message
+            : "Something went wrong."
+        }
+        onRetry={() => window.location.reload()}
       />
+    );
+  }
 
-      <ContentTable
-        title="Top Videos"
-        items={topVideos.data ?? []}
-        isLoading={topVideos.isLoading}
-        isError={topVideos.isError}
-        error={topVideos.error}
-        onRetry={() => topVideos.refetch()}
-        renderMetrics={(item) => (
-          <>
-            <div className="text-xs text-gray-neutral">Views: {formatCompactNumber(item.metrics.views)}</div>
-            <div className="text-xs text-gray-neutral">Likes: {formatCompactNumber(item.metrics.likes)}</div>
-          </>
-        )}
-      />
-    </div>
-  );
+  if (!ready) return null;
+
+  return <YoutubeAnalyticsContent range={range} />;
 }
+
 
 function FacebookSection({ range }: { range: DateRange }) {
   const overview = useFacebookOverview();
