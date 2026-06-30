@@ -41,9 +41,9 @@ function MyPostsTab() {
 					key={`${item.type}-${item.id}`}
 					className="flex flex-col rounded-xl border border-[#E6E6E6] bg-white overflow-hidden hover:shadow-md transition-shadow"
 				>
-					{item.thumbnailUrl && (
+					{item.videoId && (
 						<div className="relative w-full h-40 bg-gray-100">
-							<Image src={item.thumbnailUrl} alt={item.title} fill className="object-cover" />
+							<Image src={`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`} alt={item.title} fill className="object-cover" />
 						</div>
 					)}
 					<div className="p-4 flex flex-col flex-1">
