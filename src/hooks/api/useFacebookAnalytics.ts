@@ -37,6 +37,16 @@ export interface FacebookTrendPoint {
   metric: string;
 }
 
+function unwrapRestfitResponse<T>(response: T): T {
+  if (response && typeof response === "object" && !Array.isArray(response)) {
+    const obj = response as Record<string, unknown>;
+    if ("data" in obj && "success" in obj) {
+      return obj.data as T;
+    }
+  }
+  return response;
+}
+
 function mapPageToOverview(data: FacebookPageAnalytics): FacebookOverview {
   return {
     platform: "facebook",
@@ -114,7 +124,7 @@ export function useFacebookTopPosts(limit: number = 10) {
   return useQuery({
     queryKey: ["analytics", "facebook", "top-posts", limit],
     queryFn: async () => {
-      const data = await apiClient.Facebook.getTopPosts(String(limit));
+      const data = unwrapRestfitResponse(await apiClient.Facebook.getTopPosts(String(limit)));
       return data.map(mapPostToContentItem);
     },
     staleTime: 1000 * 60 * 5,
@@ -126,7 +136,7 @@ export function useFacebookTopVideos(limit: number = 10) {
   return useQuery({
     queryKey: ["analytics", "facebook", "top-videos", limit],
     queryFn: async () => {
-      const data = await apiClient.Facebook.getTopVideos(String(limit));
+      const data = unwrapRestfitResponse(await apiClient.Facebook.getTopVideos(String(limit)));
       return data.map(mapVideoToContentItem);
     },
     staleTime: 1000 * 60 * 5,
@@ -140,7 +150,7 @@ export function useFacebookTrends(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "facebook", "trends", range],
     queryFn: async () => {
-      const data = await apiClient.Facebook.getTrends(startDate, endDate);
+      const data = unwrapRestfitResponse(await apiClient.Facebook.getTrends(startDate, endDate));
       return mapTrendsToChartPoints(data);
     },
     staleTime: 1000 * 60 * 5,

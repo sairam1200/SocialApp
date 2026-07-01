@@ -38,6 +38,17 @@ export interface YoutubeTrendPoint {
   value: number;
   metric: string;
 }
+
+function unwrapRestfitResponse<T>(response: T): T {
+  if (response && typeof response === "object" && !Array.isArray(response)) {
+    const obj = response as Record<string, unknown>;
+    if ("data" in obj && "success" in obj) {
+      return obj.data as T;
+    }
+  }
+  return response;
+}
+
 let analyticsSyncPromise: Promise<void> | null = null;
 
 async function ensureAnalyticsExists() {
@@ -155,7 +166,7 @@ export function useYoutubeOverview() {
 
 async function loadTopVideos(limit: number): Promise<YoutubeContentItem[]> {
   try {
-    const data = await apiClient.Youtube.getTopVideos(String(limit));
+    const data = unwrapRestfitResponse(await apiClient.Youtube.getTopVideos(String(limit)));
     return data.map(mapVideoToContentItem);
   } catch (error) {
     if (!isMissingAnalyticsError(error)) {
@@ -164,7 +175,7 @@ async function loadTopVideos(limit: number): Promise<YoutubeContentItem[]> {
 
     await ensureAnalyticsExists();
 
-    const retry = await apiClient.Youtube.getTopVideos(String(limit));
+    const retry = unwrapRestfitResponse(await apiClient.Youtube.getTopVideos(String(limit)));
     return retry.map(mapVideoToContentItem);
   }
 }
@@ -183,7 +194,7 @@ async function loadTrends(
   endDate: string
 ): Promise<YoutubeTrendPoint[]> {
   try {
-    const data = await apiClient.Youtube.getTrends(startDate, endDate);
+    const data = unwrapRestfitResponse(await apiClient.Youtube.getTrends(startDate, endDate));
     return mapTrendsToChartPoints(data, "viewCount");
   } catch (error) {
     if (!isMissingAnalyticsError(error)) {
@@ -192,7 +203,7 @@ async function loadTrends(
 
     await ensureAnalyticsExists();
 
-    const retry = await apiClient.Youtube.getTrends(startDate, endDate);
+    const retry = unwrapRestfitResponse(await apiClient.Youtube.getTrends(startDate, endDate));
     return mapTrendsToChartPoints(retry, "viewCount");
   }
 }
@@ -215,7 +226,6 @@ export function useYoutubeDashboardOverview(range: string = "30d") {
     queryKey: ["analytics", "youtube", "dashboard-overview", range],
     queryFn: async () => {
       const data = await apiClient.Youtube.getOverview(startDate, endDate);
-      console.log("[useYoutubeDashboardOverview] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -229,8 +239,7 @@ export function useYoutubeDailyViews(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "youtube", "daily-views", range],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getDailyViews(startDate, endDate);
-      console.log("[useYoutubeDailyViews] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getDailyViews(startDate, endDate));
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -244,8 +253,7 @@ export function useYoutubeWatchTime(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "youtube", "watch-time", range],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getWatchTime(startDate, endDate);
-      console.log("[useYoutubeWatchTime] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getWatchTime(startDate, endDate));
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -259,8 +267,7 @@ export function useYoutubeSubscriberGrowth(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "youtube", "subscriber-growth", range],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getSubscriberGrowth(startDate, endDate);
-      console.log("[useYoutubeSubscriberGrowth] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getSubscriberGrowth(startDate, endDate));
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -274,8 +281,7 @@ export function useYoutubeRevenue(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "youtube", "revenue", range],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getRevenue(startDate, endDate);
-      console.log("[useYoutubeRevenue] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getRevenue(startDate, endDate));
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -287,8 +293,7 @@ export function useYoutubeTrafficSources() {
   return useQuery({
     queryKey: ["analytics", "youtube", "traffic-sources"],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getTrafficSources();
-      console.log("[useYoutubeTrafficSources] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getTrafficSources());
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -301,7 +306,6 @@ export function useYoutubeAudience() {
     queryKey: ["analytics", "youtube", "audience"],
     queryFn: async () => {
       const data = await apiClient.Youtube.getAudience();
-      console.log("[useYoutubeAudience] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
       const demographics = data?.subscribedViewerPercentage !== undefined
         ? [
             { source: "Subscribed", viewPercentage: data.subscribedViewerPercentage },
@@ -320,8 +324,7 @@ export function useYoutubeGeography() {
   return useQuery({
     queryKey: ["analytics", "youtube", "geography"],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getGeography();
-      console.log("[useYoutubeGeography] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getGeography());
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -333,8 +336,7 @@ export function useYoutubeDevices() {
   return useQuery({
     queryKey: ["analytics", "youtube", "devices"],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getDevices();
-      console.log("[useYoutubeDevices] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getDevices());
       return data;
     },
     staleTime: 1000 * 60 * 5,
@@ -346,8 +348,7 @@ export function useYoutubePlaybackLocations() {
   return useQuery({
     queryKey: ["analytics", "youtube", "playback-locations"],
     queryFn: async () => {
-      const data = await apiClient.Youtube.getPlaybackLocations();
-      console.log("[useYoutubePlaybackLocations] response", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
+      const data = unwrapRestfitResponse(await apiClient.Youtube.getPlaybackLocations());
       return data;
     },
     staleTime: 1000 * 60 * 5,

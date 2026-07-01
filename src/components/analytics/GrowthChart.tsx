@@ -31,7 +31,6 @@ interface GrowthChartProps {
 }
 
 export function GrowthChart({ data, metric, color = "#6400BF", className, loading, height = 250, type = "area" }: GrowthChartProps) {
-  console.log("[GrowthChart] data check", { metric, data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
   const chartData = useMemo(() => {
     const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return sorted.map((point) => ({
@@ -50,6 +49,17 @@ export function GrowthChart({ data, metric, color = "#6400BF", className, loadin
   }
 
   const ChartComponent = type === "area" ? AreaChart : LineChart;
+
+  if (chartData.length === 0) {
+    return (
+      <div className={cn("w-full bg-white rounded-xl border border-[#E6E6E6] p-5", className)}>
+        <h3 className="text-base font-semibold text-gray-900 mb-4 capitalize">{metric} Trend</h3>
+        <div className="flex items-center justify-center" style={{ height }}>
+          <p className="text-sm text-gray-400">No data available for the selected period</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("w-full bg-white rounded-xl border border-[#E6E6E6] p-5", className)}>
