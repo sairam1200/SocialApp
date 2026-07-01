@@ -1,104 +1,274 @@
-import { useState } from "react";
-import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
-import { PlatformSelector, DateRangeFilter } from "@/components/analytics/Filters";
+"use client";
+
+import { useMemo } from "react";
 import { MetricCard } from "@/components/analytics/MetricCard";
 import { GrowthChart } from "@/components/analytics/GrowthChart";
 import { OverviewCardsSkeleton, ChartSkeleton, ContentTableSkeleton } from "@/components/analytics/LoadingSkeletons";
 import { EmptyState, ErrorState } from "@/components/analytics/EmptyState";
 import { Card } from "@/components/analytics/Card";
-import { Button } from "@/components/ui/button";
-import { PlatformId, DateRange } from "@/types/analytics";
-import { formatNumber, formatCompactNumber } from "@/components/analytics/PlatformIcon";
-import { Eye, Users, ThumbsUp, TrendingUp, MousePointerClick } from "lucide-react";
+import { DateRange } from "@/types/analytics";
+import { formatCompactNumber } from "@/components/analytics/PlatformIcon";
+import { Eye, Users, ThumbsUp, MessageCircle, Share2, DollarSign, Clock, TrendingUp, Monitor, MapPin, Play, Radio } from "lucide-react";
 import Image from "next/image";
 import {
-  useYoutubeOverview,
+  useYoutubeDashboardOverview,
+  useYoutubeDailyViews,
+  useYoutubeWatchTime,
+  useYoutubeSubscriberGrowth,
+  useYoutubeRevenue,
+  useYoutubeTrafficSources,
+  useYoutubeAudience,
+  useYoutubeGeography,
+  useYoutubeDevices,
+  useYoutubePlaybackLocations,
   useYoutubeTopVideos,
-  useYoutubeTrends,
-  YoutubeOverview,
 } from "@/hooks/api/useYoutubeAnalytics";
-import {
-  useFacebookOverview,
-  useFacebookTopPosts,
-  useFacebookTopVideos,
-  useFacebookTrends,
-} from "@/hooks/api/useFacebookAnalytics";
+import { YoutubeChannelAnalytics } from "@/types/analytics/youtube";
 
-const ANALYTICS_METRICS: Record<string, { label: string; icon?: React.ReactNode }> = {
-  subscribers: { label: "Subscribers", icon: <Users className="w-5 h-5 text-gray-400" /> },
-  views: { label: "Views", icon: <Eye className="w-5 h-5 text-gray-400" /> },
-  videos: { label: "Videos", icon: <Eye className="w-5 h-5 text-gray-400" /> },
-  engagement: { label: "Engagement", icon: <TrendingUp className="w-5 h-5 text-gray-400" /> },
-  followers: { label: "Followers", icon: <Users className="w-5 h-5 text-gray-400" /> },
-  fans: { label: "Fans", icon: <Users className="w-5 h-5 text-gray-400" /> },
-  impressions: { label: "Impressions", icon: <Eye className="w-5 h-5 text-gray-400" /> },
-  reach: { label: "Reach", icon: <Eye className="w-5 h-5 text-gray-400" /> },
-  pageViews: { label: "Page Views", icon: <MousePointerClick className="w-5 h-5 text-gray-400" /> },
-  clicks: { label: "Clicks", icon: <MousePointerClick className="w-5 h-5 text-gray-400" /> },
-};
+function mapToChartData(data: YoutubeChannelAnalytics[], metric: string) {
+  return data.map((item) => ({
+    date: item.snapshotDate,
+    value: (item as any)[metric] ?? 0,
+    metric,
+  }));
+}
+
+function DimensionGrid({ data, label, icon, valueKey, secondaryKey }: {
+  data: Record<string, any>[];
+  label: string;
+  icon: React.ReactNode;
+  valueKey: string;
+  secondaryKey?: string;
+}) {
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="text-gray-400">{icon}</div>
+          <h3 className="text-base font-semibold text-gray-900">{label}</h3>
+        </div>
+        <EmptyState title="No data yet" description="" />
+      </Card>
+    );
+  }
+
+  const total = data.reduce((sum: number, d: any) => sum + (Number(d[valueKey]) || 0), 0);
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="text-gray-400">{icon}</div>
+        <h3 className="text-base font-semibold text-gray-900">{label}</h3>
+      </div>
+      <div className="space-y-3">
+        {data.map((item: any, i: number) => {
+          const key = item.source ?? item.countryCode ?? item.deviceType ?? item.location ?? item.gender ?? `item-${i}`;
+          const name = item.source ?? item.countryName ?? item.deviceType ?? item.location ?? (item.gender && item.ageGroup ? `${item.gender}, ${item.ageGroup}` : key);
+          const val = Number(item[valueKey]) || 0;
+          const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0";
+          const secondary = secondaryKey ? Number(item[secondaryKey]) || 0 : null;
+
+          return (
+            <div key={key} className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
+                <div className="w-full h-1.5 bg-gray-100 rounded-full mt-1">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+              <div className="text-right ml-4 shrink-0">
+                <p className="text-sm font-semibold text-gray-900">{formatCompactNumber(val)}</p>
+                <p className="text-xs text-gray-neutral">{pct}%</p>
+                {secondary !== null && (
+                  <p className="text-xs text-gray-neutral">{formatCompactNumber(secondary)}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 export default function YoutubeAnalyticsContent({ range }: { range: DateRange }) {
-  const overview = useYoutubeOverview();
+  const overview = useYoutubeDashboardOverview(range);
+  const dailyViews = useYoutubeDailyViews(range);
+  const watchTime = useYoutubeWatchTime(range);
+  const subscriberGrowth = useYoutubeSubscriberGrowth(range);
+  const revenue = useYoutubeRevenue(range);
+  const trafficSources = useYoutubeTrafficSources();
+  const audience = useYoutubeAudience();
+  const geography = useYoutubeGeography();
+  const devices = useYoutubeDevices();
+  const playbackLocations = useYoutubePlaybackLocations();
   const topVideos = useYoutubeTopVideos(10);
-  const trends = useYoutubeTrends(range);
 
-  if (overview.isError) {
+  const loading = overview.isLoading;
+  const hasError = overview.isError;
+
+  if (loading) {
+    return (
+      <>
+        <OverviewCardsSkeleton />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+        <ChartSkeleton />
+        <ChartSkeleton />
+        <ContentTableSkeleton />
+      </>
+    );
+  }
+
+  if (hasError) {
     return (
       <ErrorState
         title="Failed to load YouTube analytics"
-        message={
-          overview.error instanceof Error
-            ? overview.error.message
-            : "Something went wrong."
-        }
+        message={overview.error instanceof Error ? overview.error.message : "Something went wrong."}
         onRetry={() => overview.refetch()}
       />
     );
   }
 
-  const primaryMetrics = ["subscribers", "views", "videos"];
+  const current = overview.data?.current;
+  const previous = overview.data?.previous;
+
+  function calcChange(current?: number, previous?: number): number | undefined {
+    if (current === undefined || previous === undefined || previous === 0) return undefined;
+    return ((current - previous) / previous) * 100;
+  }
+
+  const overviewMetrics = [
+    {
+      key: "estimatedMinutesWatched",
+      label: "Watch Time (min)",
+      value: current?.estimatedMinutesWatched ?? 0,
+      prev: previous?.estimatedMinutesWatched ?? 0,
+      icon: <Clock className="w-5 h-5" />,
+    },
+    {
+      key: "subscribersGained",
+      label: "Subscribers Gained",
+      value: current?.subscribersGained ?? 0,
+      prev: previous?.subscribersGained ?? 0,
+      icon: <Users className="w-5 h-5" />,
+    },
+    {
+      key: "likes",
+      label: "Likes",
+      value: current?.likes ?? 0,
+      prev: previous?.likes ?? 0,
+      icon: <ThumbsUp className="w-5 h-5" />,
+    },
+    {
+      key: "comments",
+      label: "Comments",
+      value: current?.comments ?? 0,
+      prev: previous?.comments ?? 0,
+      icon: <MessageCircle className="w-5 h-5" />,
+    },
+    {
+      key: "shares",
+      label: "Shares",
+      value: current?.shares ?? 0,
+      prev: previous?.shares ?? 0,
+      icon: <Share2 className="w-5 h-5" />,
+    },
+    {
+      key: "estimatedRevenueUsd",
+      label: "Revenue (USD)",
+      value: current?.estimatedRevenueUsd ?? 0,
+      prev: previous?.estimatedRevenueUsd ?? 0,
+      icon: <DollarSign className="w-5 h-5" />,
+    },
+  ];
+
+  const dailyViewsData = useMemo(() => mapToChartData(dailyViews.data ?? [], "viewCount"), [dailyViews.data]);
+  const watchTimeData = useMemo(() => mapToChartData(watchTime.data ?? [], "estimatedMinutesWatched"), [watchTime.data]);
+  const subscriberGrowthData = useMemo(() => mapToChartData(subscriberGrowth.data ?? [], "subscribersGained"), [subscriberGrowth.data]);
+  const revenueData = useMemo(() => mapToChartData(revenue.data ?? [], "estimatedRevenueUsd"), [revenue.data]);
 
   return (
     <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {primaryMetrics.map((key) => {
-              const config = ANALYTICS_METRICS[key] ?? { label: key };
-              const value = overview.data?.metrics[key as keyof typeof overview.data.metrics];
-              return (
-                <MetricCard
-                  key={key}
-                  title={config.label}
-                  value={typeof value === "number" ? value.toLocaleString() : "—"}
-                  icon={config.icon}
-                  loading={overview.isLoading}
-                />
-              );
-            })}
-          </div>
-    
-          <GrowthChart
-            data={trends.data ?? []}
-            metric="views"
-            loading={trends.isLoading}
-            color="#FF0000"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {overviewMetrics.map((m) => (
+          <MetricCard
+            key={m.key}
+            title={m.label}
+            value={Number(m.value).toLocaleString()}
+            change={calcChange(m.value, m.prev)}
+            icon={m.icon}
           />
-    
-          <ContentTable
-            title="Top Videos"
-            items={topVideos.data ?? []}
-            isLoading={topVideos.isLoading}
-            isError={topVideos.isError}
-            error={topVideos.error}
-            onRetry={() => topVideos.refetch()}
-            renderMetrics={(item) => (
-              <>
-                <div className="text-xs text-gray-neutral">Views: {formatCompactNumber(item.metrics.views)}</div>
-                <div className="text-xs text-gray-neutral">Likes: {formatCompactNumber(item.metrics.likes)}</div>
-              </>
-            )}
-          />
-        </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GrowthChart data={dailyViewsData} metric="views" color="#FF0000" loading={dailyViews.isLoading} />
+        <GrowthChart data={watchTimeData} metric="watch time (min)" color="#FF0000" loading={watchTime.isLoading} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GrowthChart data={subscriberGrowthData} metric="subscribers gained" color="#FF0000" loading={subscriberGrowth.isLoading} />
+        <GrowthChart data={revenueData} metric="revenue (USD)" color="#FF0000" loading={revenue.isLoading} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <DimensionGrid
+          data={Array.isArray(trafficSources.data) ? trafficSources.data : []}
+          label="Traffic Sources"
+          icon={<TrendingUp className="w-5 h-5" />}
+          valueKey="views"
+          secondaryKey="watchTimeMinutes"
+        />
+        <DimensionGrid
+          data={Array.isArray(audience.data?.demographics) ? audience.data.demographics : []}
+          label="Audience"
+          icon={<Users className="w-5 h-5" />}
+          valueKey="viewPercentage"
+        />
+        <DimensionGrid
+          data={Array.isArray(geography.data) ? geography.data : []}
+          label="Geography"
+          icon={<MapPin className="w-5 h-5" />}
+          valueKey="views"
+          secondaryKey="watchTimeMinutes"
+        />
+        <DimensionGrid
+          data={Array.isArray(devices.data) ? devices.data : []}
+          label="Devices"
+          icon={<Monitor className="w-5 h-5" />}
+          valueKey="views"
+          secondaryKey="watchTimeMinutes"
+        />
+        <DimensionGrid
+          data={Array.isArray(playbackLocations.data) ? playbackLocations.data : []}
+          label="Playback Locations"
+          icon={<Play className="w-5 h-5" />}
+          valueKey="views"
+          secondaryKey="watchTimeMinutes"
+        />
+      </div>
+
+      <ContentTable
+        title="Top Videos"
+        items={topVideos.data ?? []}
+        isLoading={topVideos.isLoading}
+        isError={topVideos.isError}
+        error={topVideos.error}
+        onRetry={() => topVideos.refetch()}
+        renderMetrics={(item) => (
+          <>
+            <div className="text-xs text-gray-neutral">Views: {formatCompactNumber(item.metrics.views)}</div>
+            <div className="text-xs text-gray-neutral">Likes: {formatCompactNumber(item.metrics.likes)}</div>
+          </>
+        )}
+      />
+    </div>
   );
 }
+
 interface ContentTableProps {
   title: string;
   items: any[];

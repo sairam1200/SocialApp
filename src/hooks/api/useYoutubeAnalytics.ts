@@ -4,6 +4,7 @@ import {
   YoutubeChannelAnalytics,
   YoutubeVideoAnalytics,
   YoutubeAnalyticsTrendsResponse,
+  YoutubeOverviewResponse,
 } from "@/types/analytics/youtube";
 
 export interface YoutubeOverview {
@@ -202,6 +203,136 @@ export function useYoutubeTrends(range: string = "30d") {
   return useQuery({
     queryKey: ["analytics", "youtube", "trends", range],
     queryFn: async () => loadTrends(startDate, endDate),
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeDashboardOverview(range: string = "30d") {
+  const { startDate, endDate } = getDateRange(range);
+
+  return useQuery({
+    queryKey: ["analytics", "youtube", "dashboard-overview", range],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getOverview(startDate, endDate);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeDailyViews(range: string = "30d") {
+  const { startDate, endDate } = getDateRange(range);
+
+  return useQuery({
+    queryKey: ["analytics", "youtube", "daily-views", range],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getDailyViews(startDate, endDate);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeWatchTime(range: string = "30d") {
+  const { startDate, endDate } = getDateRange(range);
+
+  return useQuery({
+    queryKey: ["analytics", "youtube", "watch-time", range],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getWatchTime(startDate, endDate);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeSubscriberGrowth(range: string = "30d") {
+  const { startDate, endDate } = getDateRange(range);
+
+  return useQuery({
+    queryKey: ["analytics", "youtube", "subscriber-growth", range],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getSubscriberGrowth(startDate, endDate);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeRevenue(range: string = "30d") {
+  const { startDate, endDate } = getDateRange(range);
+
+  return useQuery({
+    queryKey: ["analytics", "youtube", "revenue", range],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getRevenue(startDate, endDate);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeTrafficSources() {
+  return useQuery({
+    queryKey: ["analytics", "youtube", "traffic-sources"],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getTrafficSources();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeAudience() {
+  return useQuery({
+    queryKey: ["analytics", "youtube", "audience"],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getAudience();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeGeography() {
+  return useQuery({
+    queryKey: ["analytics", "youtube", "geography"],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getGeography();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubeDevices() {
+  return useQuery({
+    queryKey: ["analytics", "youtube", "devices"],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getDevices();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+}
+
+export function useYoutubePlaybackLocations() {
+  return useQuery({
+    queryKey: ["analytics", "youtube", "playback-locations"],
+    queryFn: async () => {
+      const data = await apiClient.Youtube.getPlaybackLocations();
+      return data;
+    },
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });

@@ -10,6 +10,7 @@ import {
   YoutubeVideoAnalytics,
   YoutubeAnalyticsTrendsResponse,
   YoutubeTopVideosResponse,
+  YoutubeOverviewResponse,
 } from "@/types/analytics/youtube";
 
 export class YoutubeService {
@@ -65,5 +66,70 @@ export class YoutubeService {
     @Query("videoId") videoId?: string
   ): Promise<YoutubeAnalyticsTrendsResponse> {
     return [] as YoutubeAnalyticsTrendsResponse;
+  }
+
+  @Get<YoutubeOverviewResponse>("/integrations/youtube/analytics/overview")
+  async getOverview(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ): Promise<YoutubeOverviewResponse> {
+    return {} as YoutubeOverviewResponse;
+  }
+
+  @Get<YoutubeChannelAnalytics[]>("/integrations/youtube/analytics/daily-views")
+  async getDailyViews(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ): Promise<YoutubeChannelAnalytics[]> {
+    return [] as YoutubeChannelAnalytics[];
+  }
+
+  @Get<YoutubeChannelAnalytics[]>("/integrations/youtube/analytics/watch-time")
+  async getWatchTime(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ): Promise<YoutubeChannelAnalytics[]> {
+    return [] as YoutubeChannelAnalytics[];
+  }
+
+  @Get<YoutubeChannelAnalytics[]>("/integrations/youtube/analytics/subscriber-growth")
+  async getSubscriberGrowth(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ): Promise<YoutubeChannelAnalytics[]> {
+    return [] as YoutubeChannelAnalytics[];
+  }
+
+  @Get<YoutubeChannelAnalytics[]>("/integrations/youtube/analytics/revenue")
+  async getRevenue(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ): Promise<YoutubeChannelAnalytics[]> {
+    return [] as YoutubeChannelAnalytics[];
+  }
+
+  @Get<Record<string, any>>("/integrations/youtube/analytics/traffic-sources")
+  async getTrafficSources(): Promise<Record<string, any>> {
+    return {};
+  }
+
+  @Get<Record<string, any>>("/integrations/youtube/analytics/audience")
+  async getAudience(): Promise<Record<string, any>> {
+    return {};
+  }
+
+  @Get<Record<string, any>>("/integrations/youtube/analytics/geography")
+  async getGeography(): Promise<Record<string, any>> {
+    return {};
+  }
+
+  @Get<Record<string, any>>("/integrations/youtube/analytics/devices")
+  async getDevices(): Promise<Record<string, any>> {
+    return {};
+  }
+
+  @Get<Record<string, any>>("/integrations/youtube/analytics/playback-locations")
+  async getPlaybackLocations(): Promise<Record<string, any>> {
+    return {};
   }
 }
