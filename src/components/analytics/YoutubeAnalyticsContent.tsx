@@ -8,7 +8,7 @@ import { EmptyState, ErrorState } from "@/components/analytics/EmptyState";
 import { Card } from "@/components/analytics/Card";
 import { DateRange } from "@/types/analytics";
 import { formatCompactNumber } from "@/components/analytics/PlatformIcon";
-import { Eye, Users, ThumbsUp, MessageCircle, Share2, DollarSign, Clock, TrendingUp, Monitor, MapPin, Play, Radio } from "lucide-react";
+import { Users, ThumbsUp, MessageCircle, Share2, DollarSign, Clock, TrendingUp, Monitor, MapPin, Play } from "lucide-react";
 import Image from "next/image";
 import {
   useYoutubeDashboardOverview,
@@ -107,6 +107,11 @@ export default function YoutubeAnalyticsContent({ range }: { range: DateRange })
   const loading = overview.isLoading;
   const hasError = overview.isError;
 
+  const dailyViewsData = useMemo(() => mapToChartData(dailyViews.data ?? [], "viewCount"), [dailyViews.data]);
+  const watchTimeData = useMemo(() => mapToChartData(watchTime.data ?? [], "estimatedMinutesWatched"), [watchTime.data]);
+  const subscriberGrowthData = useMemo(() => mapToChartData(subscriberGrowth.data ?? [], "subscribersGained"), [subscriberGrowth.data]);
+  const revenueData = useMemo(() => mapToChartData(revenue.data ?? [], "estimatedRevenueUsd"), [revenue.data]);
+
   if (loading) {
     return (
       <>
@@ -184,11 +189,6 @@ export default function YoutubeAnalyticsContent({ range }: { range: DateRange })
       icon: <DollarSign className="w-5 h-5" />,
     },
   ];
-
-  const dailyViewsData = useMemo(() => mapToChartData(dailyViews.data ?? [], "viewCount"), [dailyViews.data]);
-  const watchTimeData = useMemo(() => mapToChartData(watchTime.data ?? [], "estimatedMinutesWatched"), [watchTime.data]);
-  const subscriberGrowthData = useMemo(() => mapToChartData(subscriberGrowth.data ?? [], "subscribersGained"), [subscriberGrowth.data]);
-  const revenueData = useMemo(() => mapToChartData(revenue.data ?? [], "estimatedRevenueUsd"), [revenue.data]);
 
   return (
     <div className="space-y-6">
