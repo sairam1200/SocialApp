@@ -31,6 +31,7 @@ interface GrowthChartProps {
 }
 
 export function GrowthChart({ data, metric, color = "#6400BF", className, loading, height = 250, type = "area" }: GrowthChartProps) {
+  console.log("[GrowthChart] data check", { metric, data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name });
   const chartData = useMemo(() => {
     const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return sorted.map((point) => ({

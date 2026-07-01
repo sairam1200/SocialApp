@@ -26,6 +26,7 @@ import {
 import { YoutubeChannelAnalytics } from "@/types/analytics/youtube";
 
 function mapToChartData(data: YoutubeChannelAnalytics[], metric: string) {
+  console.log("[mapToChartData] input", { data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name, metric });
   return data.map((item) => ({
     date: item.snapshotDate,
     value: (item as any)[metric] ?? 0,
@@ -40,6 +41,7 @@ function DimensionGrid({ data, label, icon, valueKey, secondaryKey }: {
   valueKey: string;
   secondaryKey?: string;
 }) {
+  console.log("[DimensionGrid] data check", { label, data, type: typeof data, isArray: Array.isArray(data), constructor: data?.constructor?.name, length: (data as any)?.length, keys: data ? Object.keys(data) : null });
   if (!data || data.length === 0) {
     return (
       <Card>
