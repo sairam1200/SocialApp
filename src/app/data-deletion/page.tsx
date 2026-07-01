@@ -1,95 +1,99 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function DataDeletion() {
   const searchParams = useSearchParams();
-  const confirmationCode = searchParams.get("code");
+  const [confirmationCode, setConfirmationCode] = useState("");
 
-  const handleDeletion = () => {
-    if (!confirmationCode) {
-      alert("Missing confirmation code.");
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      setConfirmationCode(code);
+    }
+  }, [searchParams]);
+
+  const handleDelete = () => {
+    const code = confirmationCode.trim();
+
+    if (!code) {
+      alert("Please enter your confirmation code.");
       return;
     }
 
-    window.open(
-      `https://socialapp-backend-bx75.onrender.com/data-deletion?code=${encodeURIComponent(
-        confirmationCode
-      )}`,
-      "_blank"
-    );
+    window.location.href = `https://socialapp-backend-bx75.onrender.com/data-deletion?code=${encodeURIComponent(
+      code
+    )}`;
   };
 
   return (
     <main
       style={{
-        maxWidth: "800px",
-        margin: "40px auto",
+        maxWidth: "700px",
+        margin: "50px auto",
         padding: "24px",
-        fontFamily: "sans-serif",
+        fontFamily: "Arial, sans-serif",
       }}
     >
       <h1>Facebook Data Deletion</h1>
 
       <p>
-        If you requested deletion of your Facebook data, you can complete the
-        deletion process using the button below.
+        Enter the confirmation code you received from Facebook to continue your
+        data deletion request.
       </p>
 
-      {confirmationCode ? (
-        <>
-          <button
-            onClick={handleDeletion}
-            style={{
-              marginTop: "20px",
-              padding: "12px 24px",
-              background: "#1877F2",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "16px",
-            }}
-          >
-            Delete My Facebook Data
-          </button>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          marginTop: "24px",
+        }}
+      >
+        <input
+          type="text"
+          placeholder="Enter confirmation code"
+          value={confirmationCode}
+          onChange={(e) => setConfirmationCode(e.target.value)}
+          style={{
+            padding: "12px",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "6px",
+          }}
+        />
 
-          <div style={{ marginTop: "30px" }}>
-            <h3>Deletion Status</h3>
+        <button
+          onClick={handleDelete}
+          style={{
+            padding: "12px",
+            fontSize: "16px",
+            backgroundColor: "#1877F2",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Continue Data Deletion
+        </button>
+      </div>
 
-            <p>
-              After your request is processed, you can check its status here:
-            </p>
+      <hr style={{ margin: "40px 0" }} />
 
-            <a
-              href={`https://social-app-zeta-three.vercel.app/data-deletion?code=${encodeURIComponent(
-                confirmationCode
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://social-app-zeta-three.vercel.app/data-deletion?code=
-              {confirmationCode}
-            </a>
-          </div>
-        </>
-      ) : (
-        <>
-          <p>
-            If you would like your account data deleted manually, email{" "}
-            <strong>support@gaddr.com</strong> with the subject:
-          </p>
+      <h2>Manual Request</h2>
 
-          <p>
-            <strong>Data Deletion Request</strong>
-          </p>
+      <p>
+        If you don't have a confirmation code, you can still request data
+        deletion by emailing <strong>support@gaddr.com</strong> with the subject:
+      </p>
 
-          <p>
-            We will process your request and remove associated data within 30
-            days.
-          </p>
-        </>
-      )}
+      <p>
+        <strong>Data Deletion Request</strong>
+      </p>
+
+      <p>We will process your request within 30 days.</p>
     </main>
   );
 }
