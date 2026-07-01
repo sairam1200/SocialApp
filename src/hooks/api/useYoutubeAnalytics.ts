@@ -295,7 +295,14 @@ export function useYoutubeAudience() {
     queryKey: ["analytics", "youtube", "audience"],
     queryFn: async () => {
       const data = await apiClient.Youtube.getAudience();
-      return data;
+      const demographics = data?.subscribedViewerPercentage !== undefined
+        ? [
+            { source: "Subscribed", viewPercentage: data.subscribedViewerPercentage },
+            { source: "Returning", viewPercentage: data.returnViewerPercentage ?? 0 },
+            { source: "New", viewPercentage: data.newViewerPercentage ?? 0 },
+          ]
+        : [];
+      return { demographics };
     },
     staleTime: 1000 * 60 * 5,
     retry: 1,

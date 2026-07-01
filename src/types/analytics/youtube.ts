@@ -15,11 +15,11 @@ export type YoutubeChannelAnalytics = {
   shares: number;
   estimatedRevenueUsd: number;
   estimatedAdRevenueUsd: number;
-  trafficSources: Record<string, any>;
-  geography: Record<string, any>;
-  devices: Record<string, any>;
+  trafficSources: Record<string, any>[];
+  geography: Record<string, any>[];
+  devices: Record<string, any>[];
   audience: Record<string, any>;
-  playbackLocations: Record<string, any>;
+  playbackLocations: Record<string, any>[];
   snapshotDate: string;
   createdAt: string;
   updatedAt: string;

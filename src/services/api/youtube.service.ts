@@ -108,9 +108,9 @@ export class YoutubeService {
     return [] as YoutubeChannelAnalytics[];
   }
 
-  @Get<Record<string, any>>("/integrations/youtube/analytics/traffic-sources")
-  async getTrafficSources(): Promise<Record<string, any>> {
-    return {};
+  @Get<Record<string, any>[]>("/integrations/youtube/analytics/traffic-sources")
+  async getTrafficSources(): Promise<Record<string, any>[]> {
+    return [];
   }
 
   @Get<Record<string, any>>("/integrations/youtube/analytics/audience")
@@ -118,18 +118,18 @@ export class YoutubeService {
     return {};
   }
 
-  @Get<Record<string, any>>("/integrations/youtube/analytics/geography")
-  async getGeography(): Promise<Record<string, any>> {
-    return {};
+  @Get<Record<string, any>[]>("/integrations/youtube/analytics/geography")
+  async getGeography(): Promise<Record<string, any>[]> {
+    return [];
   }
 
-  @Get<Record<string, any>>("/integrations/youtube/analytics/devices")
-  async getDevices(): Promise<Record<string, any>> {
-    return {};
+  @Get<Record<string, any>[]>("/integrations/youtube/analytics/devices")
+  async getDevices(): Promise<Record<string, any>[]> {
+    return [];
   }
 
-  @Get<Record<string, any>>("/integrations/youtube/analytics/playback-locations")
-  async getPlaybackLocations(): Promise<Record<string, any>> {
-    return {};
+  @Get<Record<string, any>[]>("/integrations/youtube/analytics/playback-locations")
+  async getPlaybackLocations(): Promise<Record<string, any>[]> {
+    return [];
   }
 }

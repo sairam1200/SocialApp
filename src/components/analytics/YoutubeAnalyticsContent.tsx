@@ -216,34 +216,34 @@ export default function YoutubeAnalyticsContent({ range }: { range: DateRange })
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <DimensionGrid
-          data={Array.isArray(trafficSources.data) ? trafficSources.data : []}
+          data={trafficSources.data ?? []}
           label="Traffic Sources"
           icon={<TrendingUp className="w-5 h-5" />}
           valueKey="views"
           secondaryKey="watchTimeMinutes"
         />
         <DimensionGrid
-          data={Array.isArray(audience.data?.demographics) ? audience.data.demographics : []}
+          data={audience.data?.demographics ?? []}
           label="Audience"
           icon={<Users className="w-5 h-5" />}
           valueKey="viewPercentage"
         />
         <DimensionGrid
-          data={Array.isArray(geography.data) ? geography.data : []}
+          data={geography.data ?? []}
           label="Geography"
           icon={<MapPin className="w-5 h-5" />}
           valueKey="views"
           secondaryKey="watchTimeMinutes"
         />
         <DimensionGrid
-          data={Array.isArray(devices.data) ? devices.data : []}
+          data={devices.data ?? []}
           label="Devices"
           icon={<Monitor className="w-5 h-5" />}
           valueKey="views"
           secondaryKey="watchTimeMinutes"
         />
         <DimensionGrid
-          data={Array.isArray(playbackLocations.data) ? playbackLocations.data : []}
+          data={playbackLocations.data ?? []}
           label="Playback Locations"
           icon={<Play className="w-5 h-5" />}
           valueKey="views"
