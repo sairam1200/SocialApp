@@ -43,7 +43,7 @@ function MyPostsTab() {
 				>
 					{item.videoId && (
 						<div className="relative w-full h-40 bg-gray-100">
-							<Image src={`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`} alt={item.title} fill className="object-cover" />
+							<Image src={`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`||item.thumbnailUrl} alt={item.title} fill className="object-cover" />
 						</div>
 					)}
 					<div className="p-4 flex flex-col flex-1">
