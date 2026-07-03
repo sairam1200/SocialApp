@@ -128,6 +128,8 @@ export const SearchResults = ({
         );
     }
 
+    const firstContentIndex = results.findIndex((item) => item.type !== "profile");
+
     // Results Grid/List
     return (
         <div
@@ -139,7 +141,10 @@ export const SearchResults = ({
                 className
             )}
         >
-            {Array.isArray(results) && results.map((result) => {
+            {results.some((result) => result.type === "profile") && (
+                <h2 className="col-span-full text-lg font-semibold text-gray-900">Profiles</h2>
+            )}
+            {Array.isArray(results) && results.map((result, index) => {
                 // If result is a profile
                 if (result.type === "profile") {
                     const publicProfile = result.publicProfile as PublicProfileModel | undefined;
@@ -164,7 +169,7 @@ export const SearchResults = ({
                 }
 
                 // If result is a content feed item (post, video, reel)
-                return (
+                const card = (
                     <ContentFeedCard
                         key={result.id}
                         imageSrc={result.media?.url || result.media?.thumbnailUrl || "/icons/gaddr-logo-xs.svg"}
@@ -179,6 +184,12 @@ export const SearchResults = ({
                         comments={result.engagement?.comments || 0}
                     />
                 );
+                return index === firstContentIndex ? (
+                    <React.Fragment key={`content-section-${result.id}`}>
+                        <h2 className="col-span-full text-lg font-semibold text-gray-900">Contents</h2>
+                        {card}
+                    </React.Fragment>
+                ) : card;
             })}
             {!Array.isArray(results) && (
                 <div className="col-span-full text-center py-8">

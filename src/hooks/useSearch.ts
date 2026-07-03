@@ -1,13 +1,10 @@
-import { useDebounce } from '@/hooks/useDebounce';
 import { useState, useCallback, useEffect, useRef } from "react";
 import { apiClient } from "@/services/apiClient.service";
 import {
-  SearchRequest,
   SearchResult,
   PaginationTokens,
   SearchFilter,
 } from "@/types/search.types";
-import { de } from 'date-fns/locale';
 
 export interface UseSearchOptions {
   debounceMs?: number;
@@ -100,10 +97,6 @@ export const useSearch = (options: UseSearchOptions = {}) => {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
 
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
-    null
-  );
-
   /**
    * Perform search with given parameters
    */
@@ -149,27 +142,16 @@ export const useSearch = (options: UseSearchOptions = {}) => {
           return;
         } else {
           // Call actual API
-          const searchRequest: SearchRequest = {
-            query: searchTerm,
-            platforms,
-            filter,
-            page,
-            limit: 12,
-            paginationTokens: state.paginationTokens,
-          };
-
-          const response = await apiClient.Search.search(searchRequest);
-
-          // Normalize the platform-specific results into a flat array
-          const normalized = apiClient.Search.normalizeResults(response);
+          const response = await apiClient.Search.getGlobalResults(searchTerm.trim(), page, 12);
+          const normalized = apiClient.Search.normalizeGlobalResults(response);
 
           setState((prev) => ({
             ...prev,
             results: normalized.results,
             totalResults: normalized.totalResults,
-            page: response.page,
+            page: response.pagination.page,
             hasNextPage: page * 12 < normalized.totalResults,
-            paginationTokens: normalized.paginationTokens || {},
+            paginationTokens: {},
             isLoading: false,
             isError: false,
             error: null,

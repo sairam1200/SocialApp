@@ -81,7 +81,14 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                         isFocused && "border-black-default ring-1 ring-black-default/20"
                     )}
                 >
-                    <Search className="w-5 h-5 text-gray-neutral shrink-0" />
+                    <button
+                        type="button"
+                        onClick={() => onSearch(value)}
+                        aria-label="Search"
+                        className="shrink-0"
+                    >
+                        <Search className="w-5 h-5 text-gray-neutral" />
+                    </button>
                     <input
                         ref={ref}
                         type="text"

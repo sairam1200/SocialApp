@@ -9,6 +9,8 @@ import {
   TwitterContent,
   InstagramContent,
   YouTubeContent,
+  GlobalSearchResponse,
+  GlobalSearchSuggestion,
 } from "@/types/search.types";
 
 export class SearchService {
@@ -47,13 +49,70 @@ export class SearchService {
    * Get search suggestions
    * GET /search/suggestions
    */
-  @Get<{ suggestions: string[] }>("/search/suggestions")
+  @Get<{ suggestions: GlobalSearchSuggestion[] }>("/search/suggestions")
   async getSuggestions(
-    @Query("query") query: string,
-    @Query("limit") limit?: number
-  ): Promise<{ suggestions: string[] }> {
+    @Query("keyword") keyword: string
+  ): Promise<{ suggestions: GlobalSearchSuggestion[] }> {
     return {
       suggestions: [],
+    };
+  }
+
+  @Get<GlobalSearchResponse>("/search/results")
+  async getGlobalResults(
+    @Query("keyword") keyword: string,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 12
+  ): Promise<GlobalSearchResponse> {
+    return {
+      profiles: [],
+      contents: [],
+      pagination: {
+        page,
+        limit,
+        profiles: { total: 0 },
+        contents: { total: 0 },
+      },
+    };
+  }
+
+  normalizeGlobalResults(response: GlobalSearchResponse): NormalizedSearchResults {
+    const profiles: SearchResult[] = response.profiles.map((profile) => {
+      const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+      return {
+        id: profile.id,
+        type: "profile",
+        platform: "gaddr",
+        title: name || profile.userName,
+        description: profile.bio,
+        author: {
+          id: profile.id,
+          name: name || profile.userName,
+          handle: profile.userName ? `@${profile.userName}` : undefined,
+        },
+      };
+    });
+    const contents: SearchResult[] = response.contents.map((content) => {
+      const creatorName = [content.user.firstName, content.user.lastName].filter(Boolean).join(" ").trim();
+      return {
+        id: content.id,
+        type: "content",
+        platform: content.platform,
+        title: content.title,
+        description: content.title,
+        externalId: content.externalId,
+        url: content.sourceUrl,
+        publishedAt: content.publishedAt,
+        author: {
+          id: content.user.id,
+          name: creatorName || content.user.userName,
+          handle: content.user.userName ? `@${content.user.userName}` : undefined,
+        },
+      };
+    });
+    return {
+      results: [...profiles, ...contents],
+      totalResults: response.pagination.profiles.total + response.pagination.contents.total,
     };
   }
 

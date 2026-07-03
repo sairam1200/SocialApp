@@ -35,6 +35,45 @@ export interface SearchRequest {
   paginationTokens?: PaginationTokens;
 }
 
+export interface GlobalSearchSuggestion {
+  id: string;
+  type: "user" | "userContent";
+  label: string;
+  userName?: string;
+  href?: string;
+  creatorName?: string;
+}
+
+export interface GlobalSearchProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  userName?: string;
+  bio?: string;
+}
+
+export interface GlobalSearchContent {
+  id: string;
+  title: string;
+  type: string;
+  platform: string;
+  externalId: string;
+  sourceUrl?: string;
+  publishedAt?: string;
+  user: GlobalSearchProfile;
+}
+
+export interface GlobalSearchResponse {
+  profiles: GlobalSearchProfile[];
+  contents: GlobalSearchContent[];
+  pagination: {
+    page: number;
+    limit: number;
+    profiles: { total: number };
+    contents: { total: number };
+  };
+}
+
 /** Normalized search result item (after flattening platform-specific results) */
 export interface SearchResult {
   id: string;

@@ -9,6 +9,10 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import SearchDropdownTabs from "./SearchDropdownTabs";
 import { X } from "lucide-react";
 import { SearchInput } from "@/components/search";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/services/apiClient.service";
+import { GlobalSearchSuggestion } from "@/types/search.types";
 
 
 const aiSuggestions = [
@@ -27,6 +31,13 @@ const SearchBar = () => {
 	const router = useRouter();
 	const [query, setQuery] = useState(searchQuery);
 	const [openDropdown, setOpenDropdown] = useState(false);
+	const debouncedQuery = useDebounce(query.trim(), 300);
+	const suggestionQuery = useQuery({
+		queryKey: ["global-search-suggestions", debouncedQuery],
+		queryFn: () => apiClient.Search.getSuggestions(debouncedQuery),
+		enabled: debouncedQuery.length >= 3,
+		staleTime: 60_000,
+	});
 
 	const handleSearch = (searchQuery: string) => {
 		if (!searchQuery.trim()) return;
@@ -36,6 +47,19 @@ const SearchBar = () => {
 
 	const handleSuggestionClick = (label: string) => {
 		setQuery(label);
+	};
+
+	const handleGlobalSuggestionClick = (suggestion: GlobalSearchSuggestion) => {
+		setOpenDropdown(false);
+		if (suggestion.type === "user" && suggestion.userName) {
+			router.push(`/u/${encodeURIComponent(suggestion.userName)}`);
+			return;
+		}
+		if (suggestion.href) {
+			window.location.assign(suggestion.href);
+			return;
+		}
+		router.push(`/discover?q=${encodeURIComponent(suggestion.label)}`);
 	};
 
 	const isTyping = query.trim().length > 0;
@@ -76,7 +100,12 @@ const SearchBar = () => {
 					<button onClick={() => setOpenDropdown(false)} className="absolute right-5 top-3 scale-80 cursor-pointer">
 						<X className="scale-80" />
 					</button>
-					<SearchDropdownTabs />
+					<SearchDropdownTabs
+						suggestions={(suggestionQuery.data?.suggestions ?? []).slice(0, 5)}
+						isLoading={suggestionQuery.isFetching}
+						showSuggestions={debouncedQuery.length >= 3}
+						onSuggestionClick={handleGlobalSuggestionClick}
+					/>
 				</PopoverContent>
 			</Popover>
 

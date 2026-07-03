@@ -1,26 +1,10 @@
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import HistoryIcon from "@/components/svg/history-icon.svg";
 import { Button } from "@/components/ui/button";
+import { Loader2, Search, UserRound } from "lucide-react";
+import { GlobalSearchSuggestion } from "@/types/search.types";
 
-const searchTabs = ["Quick", "Inspiration", "Trending", "By Category"];
-const recentSearches = ["Social media marketing tips", "Content creation tools"];
-
-const hotTopics = [
-	"Sustainable Brands",
-	"Profit Margins",
-	"Customer-Generated Content",
-	"TikTok Shop",
-	"Instagram Shops",
-	"Predictive Trends",
-];
-
-const nicheTopics = [
-	"Captions for Travel Reels",
-	"AI-Recommended Travel Itineraries",
-	"Trending Destinations 2024",
-	"Wanderlust Spots",
-];
+const searchTabs = ["Profiles & Contents", "Inspiration", "Trending", "By Category"];
 
 const inspirations = [
 	"👗 Style & Aesthetics",
@@ -42,7 +26,19 @@ const inspirations = [
 	"🪩 Everyday Aesthetics",
 ];
 
-function SearchDropdownTabs() {
+interface SearchDropdownTabsProps {
+	suggestions: GlobalSearchSuggestion[];
+	isLoading: boolean;
+	showSuggestions: boolean;
+	onSuggestionClick: (suggestion: GlobalSearchSuggestion) => void;
+}
+
+function SearchDropdownTabs({
+	suggestions,
+	isLoading,
+	showSuggestions,
+	onSuggestionClick,
+}: SearchDropdownTabsProps) {
 	return (
 		<TabGroup>
 			<TabList className="flex gap-3 md:gap-5 overflow-x-auto">
@@ -65,49 +61,39 @@ function SearchDropdownTabs() {
 			<TabPanels className="mt-5 text-gray-neutral text-sm">
 				<TabPanel className="space-y-6">
 					<div>
-						{/* Recent Searches */}
-						<h3 className="font-semibold mb-3">Recent Searches</h3>
-						<div className="flex flex-wrap gap-3 mb-6">
-							{recentSearches?.map((s) => (
-								<Button
-									key={s}
-									size="sm"
-									className="flex items-center gap-2 bg-[#FAFAFA] text-sm shadow-none text-gray-neutral font-normal flex-wrap"
-								>
-									<HistoryIcon />
-									{s}
-								</Button>
-							))}
-						</div>
-
-						<hr className="my-4" />
-
-						{/* What's Hot */}
-						<h3 className="font-semibold mb-3">What&apos;s Hot Right Now</h3>
-						<div className="flex flex-wrap gap-3 mb-6">
-							{hotTopics.map((t) => (
-								<Button
-									key={t}
-									size="sm"
-									className="flex items-center gap-2 bg-[#FAFAFA] text-sm shadow-none text-gray-neutral font-normal"
-								>
-									{t}
-								</Button>
-							))}
-						</div>
-
-						<h3 className="font-semibold mb-3">Your Niche&apos;s Most Talked-About Topics</h3>
-						<div className="flex flex-wrap gap-3">
-							{nicheTopics.map((t) => (
-								<Button
-									key={t}
-									size="sm"
-									className="flex items-center gap-2 bg-[#FAFAFA] text-sm shadow-none text-gray-neutral font-normal"
-								>
-									{t}
-								</Button>
-							))}
-						</div>
+						{!showSuggestions && (
+							<p className="py-6 text-center text-gray-neutral">Type at least 3 characters to search.</p>
+						)}
+						{showSuggestions && isLoading && (
+							<div className="flex items-center justify-center gap-2 py-6">
+								<Loader2 className="h-4 w-4 animate-spin" /> Searching...
+							</div>
+						)}
+						{showSuggestions && !isLoading && suggestions.length === 0 && (
+							<p className="py-6 text-center text-gray-neutral">
+								No matching profiles or content found.
+							</p>
+						)}
+						{showSuggestions && !isLoading && suggestions.map((suggestion) => (
+							<button
+								key={`${suggestion.type}-${suggestion.id}`}
+								type="button"
+								onClick={() => onSuggestionClick(suggestion)}
+								className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-[#FAFAFA]"
+							>
+								{suggestion.type === "user"
+									? <UserRound className="h-5 w-5 shrink-0" />
+									: <Search className="h-5 w-5 shrink-0" />}
+								<span className="min-w-0">
+									<span className="block truncate font-medium text-[#0D0D0D]">{suggestion.label}</span>
+									<span className="block truncate text-xs text-gray-neutral">
+										{suggestion.type === "user"
+											? suggestion.userName && `@${suggestion.userName}`
+											: suggestion.creatorName || "Content"}
+									</span>
+								</span>
+							</button>
+						))}
 					</div>
 				</TabPanel>
 
