@@ -45,9 +45,28 @@ export type YoutubeVideoAnalytics = {
 
 export type YoutubeAnalyticsTrendsResponse = (YoutubeChannelAnalytics | YoutubeVideoAnalytics)[];
 
-export type YoutubeTopVideosResponse = YoutubeVideoAnalytics[];
+export type TopVideoItemModel = {
+  id: string;
+  title: string;
+  thumbnail?: string;
+  publishedAt?: Date;
+  duration?: string;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  estimatedMinutesWatched: number;
+  averageViewDurationSeconds: number;
+  estimatedRevenueUsd?: number;
+  estimatedAdRevenueUsd?: number;
+};
+
+export type YoutubeTopVideosResponse = {
+  topVideos: TopVideoItemModel[];
+};
 
 export type ChannelMetricsAggregate = {
+  viewCount: number;
   estimatedMinutesWatched: number;
   averageViewDurationSeconds: number;
   subscribersGained: number;

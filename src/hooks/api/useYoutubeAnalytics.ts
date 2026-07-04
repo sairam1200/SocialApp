@@ -5,6 +5,7 @@ import {
   YoutubeVideoAnalytics,
   YoutubeAnalyticsTrendsResponse,
   YoutubeOverviewResponse,
+  TopVideoItemModel,
 } from "@/types/analytics/youtube";
 
 export interface YoutubeOverview {
@@ -126,6 +127,23 @@ function mapVideoToContentItem(data: YoutubeVideoAnalytics): YoutubeContentItem 
   };
 }
 
+function mapTopVideoToContentItem(data: TopVideoItemModel): YoutubeContentItem {
+  return {
+    id: data.id,
+    videoId: data.id,
+    title: data.title,
+    thumbnailUrl: data.thumbnail ?? `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`,
+    publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : new Date().toISOString(),
+    metrics: {
+      views: data.views,
+      likes: data.likes,
+      comments: data.comments,
+      favorites: 0,
+    },
+    url: `https://www.youtube.com/watch?v=${data.id}`,
+  };
+}
+
 function mapTrendsToChartPoints(data: YoutubeAnalyticsTrendsResponse, metric: string = "viewCount"): YoutubeTrendPoint[] {
   return data
     .filter((item): item is YoutubeChannelAnalytics => "subscriberCount" in item)
@@ -166,8 +184,9 @@ export function useYoutubeOverview() {
 
 async function loadTopVideos(limit: number): Promise<YoutubeContentItem[]> {
   try {
-    const data = unwrapRestfitResponse(await apiClient.Youtube.getTopVideos(String(limit)));
-    return data.map(mapVideoToContentItem);
+    const response = await apiClient.Youtube.getTopVideos(String(limit));
+    const items = response?.topVideos ?? [];
+    return items.map(mapTopVideoToContentItem);
   } catch (error) {
     if (!isMissingAnalyticsError(error)) {
       throw error;
@@ -175,8 +194,9 @@ async function loadTopVideos(limit: number): Promise<YoutubeContentItem[]> {
 
     await ensureAnalyticsExists();
 
-    const retry = unwrapRestfitResponse(await apiClient.Youtube.getTopVideos(String(limit)));
-    return retry.map(mapVideoToContentItem);
+    const retry = await apiClient.Youtube.getTopVideos(String(limit));
+    const items = retry?.topVideos ?? [];
+    return items.map(mapTopVideoToContentItem);
   }
 }
 

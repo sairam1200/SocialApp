@@ -11,6 +11,7 @@ import {
   YoutubeAnalyticsTrendsResponse,
   YoutubeTopVideosResponse,
   YoutubeOverviewResponse,
+  TopVideoItemModel,
 } from "@/types/analytics/youtube";
 
 export class YoutubeService {
@@ -56,7 +57,7 @@ export class YoutubeService {
 
   @Get<YoutubeTopVideosResponse>("/integrations/youtube/analytics/top-videos")
   async getTopVideos(@Query("limit") limit?: string): Promise<YoutubeTopVideosResponse> {
-    return [] as YoutubeTopVideosResponse;
+    return { topVideos: [] };
   }
 
   @Get<YoutubeAnalyticsTrendsResponse>("/integrations/youtube/analytics/trends")

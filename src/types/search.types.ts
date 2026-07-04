@@ -50,6 +50,7 @@ export interface GlobalSearchProfile {
   lastName: string;
   userName?: string;
   bio?: string;
+  profileImage?: string;
 }
 
 export interface GlobalSearchContent {
@@ -60,6 +61,7 @@ export interface GlobalSearchContent {
   externalId: string;
   sourceUrl?: string;
   publishedAt?: string;
+  media?: any[];
   user: GlobalSearchProfile;
 }
 

@@ -16,12 +16,6 @@ import { Eye, Users, ThumbsUp, TrendingUp, MousePointerClick } from "lucide-reac
 import Image from "next/image";
 import YoutubeAnalyticsContent from "@/components/analytics/YoutubeAnalyticsContent";
 import {
-  useYoutubeOverview,
-  useYoutubeTopVideos,
-  useYoutubeTrends,
-  YoutubeOverview,
-} from "@/hooks/api/useYoutubeAnalytics";
-import {
   useFacebookOverview,
   useFacebookTopPosts,
   useFacebookTopVideos,

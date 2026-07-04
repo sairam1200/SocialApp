@@ -89,11 +89,15 @@ export class SearchService {
           id: profile.id,
           name: name || profile.userName,
           handle: profile.userName ? `@${profile.userName}` : undefined,
+          profileImage: profile.profileImage,
         },
       };
     });
     const contents: SearchResult[] = response.contents.map((content) => {
       const creatorName = [content.user.firstName, content.user.lastName].filter(Boolean).join(" ").trim();
+      const thumbnailUrl = Array.isArray(content.media) && content.media.length > 0
+        ? content.media[0]?.thumbnail || content.media[0]?.url
+        : undefined;
       return {
         id: content.id,
         type: "content",
@@ -107,7 +111,9 @@ export class SearchService {
           id: content.user.id,
           name: creatorName || content.user.userName,
           handle: content.user.userName ? `@${content.user.userName}` : undefined,
+          profileImage: content.user.profileImage,
         },
+        media: thumbnailUrl ? { type: "image", thumbnailUrl } : undefined,
       };
     });
     return {
