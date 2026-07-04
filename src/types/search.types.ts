@@ -51,6 +51,10 @@ export interface GlobalSearchProfile {
   userName?: string;
   bio?: string;
   profileImage?: string;
+  followersCount?: number;
+  followingCount?: number;
+  linkedAccounts?: { id: string; platform: string; verified?: boolean }[];
+  verified?: boolean;
 }
 
 export interface GlobalSearchContent {

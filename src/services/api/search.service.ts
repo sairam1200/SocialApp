@@ -91,6 +91,26 @@ export class SearchService {
           handle: profile.userName ? `@${profile.userName}` : undefined,
           profileImage: profile.profileImage,
         },
+        engagement: {
+          likes: profile.followersCount ?? 0,
+          views: 0,
+        },
+        publicProfile: {
+          id: profile.id,
+          userName: profile.userName ?? "",
+          firstName: profile.firstName ?? "",
+          lastName: profile.lastName ?? "",
+          bio: profile.bio ?? null,
+          profileImage: profile.profileImage ?? null,
+          followersCount: profile.followersCount ?? 0,
+          followingCount: profile.followingCount ?? 0,
+          linkedAccounts: (profile.linkedAccounts ?? []).map((la: any) => ({ id: la.id, platform: la.platform })),
+          verified: profile.verified ?? false,
+          connectedPlatformsCount: (profile.linkedAccounts ?? []).length,
+          totalPosts: 0,
+          engagementRate: 0,
+          niche: null,
+        },
       };
     });
     const contents: SearchResult[] = response.contents.map((content) => {
