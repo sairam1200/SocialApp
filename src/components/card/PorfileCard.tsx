@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, Activity } from "lucide-react";
+import { Loader2, Plus, Activity, User } from "lucide-react";
 import { useFollowUser } from "@/hooks/useFollowUser";
 import { useIsOwnProfile } from "@/hooks/useIsOwnProfile";
 import XIcon from "@/components/svg/x-icon.svg";
@@ -77,6 +77,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 }) => {
     const router = useRouter();
     const isOwnProfile = useIsOwnProfile(userId);
+    const [profileImageError, setProfileImageError] = useState(false);
     const { isFollowing, followersCount, isPending, toggleFollow, canFollow } = useFollowUser({
         userId,
         isFollowing: initialIsFollowing,
@@ -91,13 +92,21 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <div className={cardClasses}>
 
             {/* PROFILE IMAGE */}
-            <Image
-                src={profilePicSrc || "/images/default-avatar.png"}
-                alt={userName}
-                width={80}
-                height={80}
-                className="rounded-full object-cover shadow-md mb-3"
-            />
+            {profileImageError ? (
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center shadow-md mb-3">
+                    <User className="w-8 h-8 text-gray-400" />
+                </div>
+            ) : (
+                <Image
+                    src={profilePicSrc || "/images/default-avatar.png"}
+                    alt={userName}
+                    width={80}
+                    height={80}
+                    className="rounded-full object-cover shadow-md mb-3"
+                    unoptimized
+                    onError={() => setProfileImageError(true)}
+                />
+            )}
 
             {/* NAME AND CATEGORY */}
             <div className="mb-6">

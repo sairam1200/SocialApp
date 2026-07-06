@@ -6,6 +6,10 @@ export type MediaFile = {
 	previewUrl: string;
 	type: "image" | "video";
 	id: string;
+	serverUrl?: string;
+	uploadStatus?: "local" | "uploading" | "checking" | "converting" | "completed" | "error";
+	uploadProgress?: number;
+	uploadError?: string;
 };
 
 export type BaseContentValues = {

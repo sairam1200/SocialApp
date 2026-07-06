@@ -9,9 +9,9 @@ import { Formik } from "formik";
 import CustomizeStep from "./CustomizeStep";
 import SettingsStep from "./SettingsStep";
 import { SearchSelectionModal } from "./SearchSelectionModal";
-import { PlatformId } from "@/constants/platforms";
+import { PlatformId, platformMap } from "@/constants/platforms";
 import { PLATFORM_POST_TYPES } from "@/types/media.types";
-import { apiClient } from "@/services/apiClient.service";
+import { ALLOWED_VIDEO_MIME_TYPES } from "@/utils/media.utils";
 import { YoutubeVideoStatusResponse } from "@/types/social/youtube.type";
 import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
 import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
@@ -21,12 +21,27 @@ import YoutubeUploadProgress from "./YoutubeUploadProgress";
 import toast from "react-hot-toast";
 
 const mediaFileSchema: Yup.ObjectSchema<MediaFile> = Yup.object({
-	file: Yup.mixed<File>().required("File is required"),
+	file: Yup.mixed<File>()
+		.required("File is required")
+		.test("video-mime", "Unsupported video format. Please upload an MP4 or Apple MOV video encoded with H.264 video and AAC audio.", (value) => {
+			if (!value) return true;
+			if (value.type.startsWith("video/") && !(ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(value.type)) {
+				return false;
+			}
+			return true;
+		}),
 	previewUrl: Yup.string().required("Preview URL is required"),
 	type: Yup.string()
 		.oneOf(["image", "video"] as const)
 		.required("Type is required"),
 	id: Yup.string().required("ID is required"),
+	serverUrl: Yup.string().optional().default(undefined),
+	uploadStatus: Yup.string()
+		.oneOf(["local", "uploading", "checking", "converting", "completed", "error"] as const)
+		.optional()
+		.default(undefined),
+	uploadProgress: Yup.number().optional().default(undefined),
+	uploadError: Yup.string().optional().default(undefined),
 });
 
 const createBaseContentSchema = (platforms: PlatformId[]) =>
@@ -243,7 +258,8 @@ function CreatePostDialog({ close, open }: CreatePostProps) {
 				const youtubePlatform = values.platforms.find((p) => p === "youtube");
 
 				if (!youtubePlatform) {
-					console.log("Form submitted:", values);
+					const platformNames = values.platforms.map((p) => platformMap[p]?.name ?? p);
+					toast.success(`Post submitted to: ${platformNames.join(", ")}`);
 					setSubmitting(false);
 					close();
 					return;

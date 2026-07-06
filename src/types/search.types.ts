@@ -57,6 +57,12 @@ export interface GlobalSearchProfile {
   verified?: boolean;
 }
 
+export interface SearchMediaItem {
+  thumbnail?: string;
+  url?: string;
+  type?: string;
+}
+
 export interface GlobalSearchContent {
   id: string;
   title: string;
@@ -65,7 +71,8 @@ export interface GlobalSearchContent {
   externalId: string;
   sourceUrl?: string;
   publishedAt?: string;
-  media?: any[];
+  media?: SearchMediaItem[];
+  metaData?: Record<string, any>;
   user: GlobalSearchProfile;
 }
 

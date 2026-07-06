@@ -67,15 +67,16 @@ async function ensureAnalyticsExists() {
 
 
 
-function isMissingAnalyticsError(error: any): boolean {
+function isMissingAnalyticsError(error: unknown): boolean {
+  const err = error as { response?: { status?: number; data?: { title?: string; message?: string } }; status?: number; statusCode?: number } | undefined;
   const status =
-    error?.response?.status ??
-    error?.status ??
-    error?.statusCode;
+    err?.response?.status ??
+    err?.status ??
+    err?.statusCode;
 
   const message =
-    error?.response?.data?.title ??
-    error?.response?.data?.message ??
+    err?.response?.data?.title ??
+    err?.response?.data?.message ??
     "";
 
   return (

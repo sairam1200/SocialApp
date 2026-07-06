@@ -12,6 +12,7 @@ import {
   YoutubeTopVideosResponse,
   YoutubeOverviewResponse,
   TopVideoItemModel,
+  YoutubeDimensionResponse,
 } from "@/types/analytics/youtube";
 
 export class YoutubeService {
@@ -109,8 +110,8 @@ export class YoutubeService {
     return [] as YoutubeChannelAnalytics[];
   }
 
-  @Get<Record<string, any>[]>("/integrations/youtube/analytics/traffic-sources")
-  async getTrafficSources(): Promise<Record<string, any>[]> {
+  @Get<YoutubeDimensionResponse>("/integrations/youtube/analytics/traffic-sources")
+  async getTrafficSources(): Promise<YoutubeDimensionResponse> {
     return [];
   }
 
@@ -119,18 +120,18 @@ export class YoutubeService {
     return {};
   }
 
-  @Get<Record<string, any>[]>("/integrations/youtube/analytics/geography")
-  async getGeography(): Promise<Record<string, any>[]> {
+  @Get<YoutubeDimensionResponse>("/integrations/youtube/analytics/geography")
+  async getGeography(): Promise<YoutubeDimensionResponse> {
     return [];
   }
 
-  @Get<Record<string, any>[]>("/integrations/youtube/analytics/devices")
-  async getDevices(): Promise<Record<string, any>[]> {
+  @Get<YoutubeDimensionResponse>("/integrations/youtube/analytics/devices")
+  async getDevices(): Promise<YoutubeDimensionResponse> {
     return [];
   }
 
-  @Get<Record<string, any>[]>("/integrations/youtube/analytics/playback-locations")
-  async getPlaybackLocations(): Promise<Record<string, any>[]> {
+  @Get<YoutubeDimensionResponse>("/integrations/youtube/analytics/playback-locations")
+  async getPlaybackLocations(): Promise<YoutubeDimensionResponse> {
     return [];
   }
 }

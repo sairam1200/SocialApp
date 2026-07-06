@@ -82,6 +82,62 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.fna.fbcdn.net",
       },
+      {
+        protocol: "https",
+        hostname: "pbs.twimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "video.twimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "p16-amd-va.tiktokcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "p19-sign.tiktokcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "p16-sign.tiktokcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.tiktokcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+      },
+      {
+        protocol: "https",
+        hostname: "*.scdn.co",
+      },
+      {
+        protocol: "https",
+        hostname: "preview.redd.it",
+      },
+      {
+        protocol: "https",
+        hostname: "i.redd.it",
+      },
+      {
+        protocol: "https",
+        hostname: "external-preview.redd.it",
+      },
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "media.tenor.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.giphy.com",
+      },
     ]
 },
 	turbopack: {
@@ -92,18 +148,14 @@ const nextConfig: NextConfig = {
 			},
 		},
 	},
-	async headers() {
+  async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
           {
-            key: "Cross-Origin-Embedder-Policy",
-            value: "require-corp",
-          },
-          {
             key: "Cross-Origin-Opener-Policy",
-            value: "same-origin",
+            value: "same-origin-allow-popups",
           },
         ],
       },

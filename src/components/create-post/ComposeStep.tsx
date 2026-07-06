@@ -28,7 +28,7 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 
 	const selectedLocation = baseContent.location;
 	const selectedSound = baseContent.sound;
-	const PLATFORM_CHARACTER_LIMITS: Partial<Record<PlatformId, number>> = {
+	const PLATFORM_CHARACTER_LIMITS: Record<PlatformId, number> = {
 		facebook: 6300,
 		instagram: 2200,
 		twitter: 280,
@@ -36,7 +36,15 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 		youtube: 5000,
 		reddit: 40000,
 		pinterest: 2000,
+		behance: 2200,
+		tiktok: 2200,
+		discord: 2000,
+		spotify: 500,
 	};
+
+	const maxCaptionLength = formik.values.platforms.length > 0
+		? Math.min(...formik.values.platforms.map((p) => PLATFORM_CHARACTER_LIMITS[p] ?? 2200))
+		: 2200;
 	return (
 		<div className="space-y-5 text-black-default">
 			<div>
@@ -112,7 +120,7 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 							})}
 						</div>
 					</div>
-					<p>{baseContent.caption.length}/2200</p>
+					<p className={baseContent.caption.length > maxCaptionLength ? "text-destructive" : ""}>{baseContent.caption.length}/{maxCaptionLength}</p>
 				</div>
 
 				{formik.touched.baseContent?.caption && formik.errors.baseContent?.caption && (
@@ -138,7 +146,7 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 								onClick={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
-									formik.setFieldValue("location", null);
+									formik.setFieldValue("baseContent.location", null);
 								}}
 							>
 								<X className="size-4" />
@@ -165,7 +173,7 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 								onClick={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
-									formik.setFieldValue("sound", null);
+									formik.setFieldValue("baseContent.sound", null);
 								}}
 							>
 								<X className="size-4" />

@@ -8,9 +8,7 @@ import AuthHydrationProvider from "@/providers/AuthHydrationProvider";
 import { HttpContextProvider } from "@/providers/HttpContextProvider";
 import { Toaster } from "react-hot-toast";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
-import WebSocketStatus from "@/components/websocket/WebSocketStatus";
-import WebSocketDebug from "@/components/websocket/WebSocketDebug";
-import { TokenRefreshAnalytics } from "@/components/analytics";
+import { WebSocketEventHandlers } from "@/components/websocket/WebSocketEventHandlers";
 import { JwtPayload } from "@/types/jwtPayload.type";
 import { ToasterClient } from "@/app/ToasterClient";
 
@@ -39,13 +37,7 @@ export function AppProviders({ children, jwtUser, accessToken, isAuthenticated }
             <WebSocketProvider accessToken={accessToken}>
             <ToasterClient />
             {children}
-            {isAuthenticated && (
-              <>
-                <WebSocketStatus />
-                <WebSocketDebug />
-                <TokenRefreshAnalytics />
-              </>
-            )}
+            {isAuthenticated && <WebSocketEventHandlers />}
             </WebSocketProvider>
           </TokenRefreshProvider>
           

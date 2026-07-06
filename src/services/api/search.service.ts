@@ -104,7 +104,7 @@ export class SearchService {
           profileImage: profile.profileImage ?? null,
           followersCount: profile.followersCount ?? 0,
           followingCount: profile.followingCount ?? 0,
-          linkedAccounts: (profile.linkedAccounts ?? []).map((la: any) => ({ id: la.id, platform: la.platform })),
+          linkedAccounts: (profile.linkedAccounts ?? []).map((la: { id: string; platform: string }) => ({ id: la.id, platform: la.platform })),
           verified: profile.verified ?? false,
           connectedPlatformsCount: (profile.linkedAccounts ?? []).length,
           totalPosts: 0,
@@ -115,9 +115,11 @@ export class SearchService {
     });
     const contents: SearchResult[] = response.contents.map((content) => {
       const creatorName = [content.user.firstName, content.user.lastName].filter(Boolean).join(" ").trim();
-      const thumbnailUrl = Array.isArray(content.media) && content.media.length > 0
-        ? content.media[0]?.thumbnail || content.media[0]?.url
-        : undefined;
+      const mediaArray = Array.isArray(content.media) ? content.media : [];
+      const thumbnailFromMedia = mediaArray[0]?.thumbnail || mediaArray[0]?.url;
+      const meta = content.metaData;
+      const thumbnailFromMeta = meta?.thumbnailUrl || meta?.imageUrl || meta?.mediaUrl || meta?.coverImageUrl;
+      const thumbnailUrl = thumbnailFromMedia || thumbnailFromMeta || undefined;
       return {
         id: content.id,
         type: "content",

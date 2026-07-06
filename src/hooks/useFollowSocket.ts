@@ -25,6 +25,7 @@ export function useFollowSocket() {
 
     const handler = (payload: FollowUpdatedPayload) => {
       const currentUserId = authUser?.id;
+      const currentUsername = authUser?.username;
 
       if (!currentUserId) return;
 
@@ -44,6 +45,25 @@ export function useFollowSocket() {
         });
       }
 
+      if (currentUsername) {
+        const ownProfileKey = ["user", "profile", currentUsername];
+        queryClient.setQueryData(ownProfileKey, (old: unknown) => {
+          if (!old || typeof old !== "object") return old;
+          const profile = old as Record<string, unknown>;
+          return {
+            ...profile,
+            followingCount:
+              payload.viewerUserId === currentUserId
+                ? payload.viewerFollowingCount
+                : profile.followingCount,
+            followersCount:
+              payload.targetUserId === currentUserId
+                ? payload.targetFollowersCount
+                : profile.followersCount,
+          };
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
       queryClient.invalidateQueries({ queryKey: ["discover"] });
       queryClient.invalidateQueries({ queryKey: ["search"] });
@@ -54,5 +74,5 @@ export function useFollowSocket() {
     return () => {
       notificationsSocket.off("follow.updated", handler);
     };
-  }, [notificationsSocket, authUser?.id, setFollow, queryClient]);
+  }, [notificationsSocket, authUser?.id, authUser?.username, setFollow, queryClient]);
 }

@@ -45,15 +45,16 @@ function YoutubeSection({ range }: { range: DateRange }) {
     async function bootstrap() {
       try {
         await apiClient.Youtube.getChannelAnalytics();
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { status?: number; data?: { title?: string; message?: string } }; status?: number; statusCode?: number };
         const status =
-          err?.response?.status ??
-          err?.status ??
-          err?.statusCode;
+          error?.response?.status ??
+          error?.status ??
+          error?.statusCode;
 
         const message =
-          err?.response?.data?.title ??
-          err?.response?.data?.message ??
+          error?.response?.data?.title ??
+          error?.response?.data?.message ??
           "";
 
         if (
@@ -185,17 +186,24 @@ function FacebookSection({ range }: { range: DateRange }) {
   );
 }
 
-interface ContentTableProps {
+interface ContentTableItem {
+  id: string;
   title: string;
-  items: any[];
+  thumbnailUrl?: string;
+  publishedAt: string;
+}
+
+interface ContentTableProps<T extends ContentTableItem> {
+  title: string;
+  items: T[];
   isLoading: boolean;
   isError: boolean;
   error?: unknown;
   onRetry: () => void;
-  renderMetrics: (item: any) => React.ReactNode;
+  renderMetrics: (item: T) => React.ReactNode;
 }
 
-function ContentTable({ title, items, isLoading, isError, error, onRetry, renderMetrics }: ContentTableProps) {
+function ContentTable<T extends ContentTableItem>({ title, items, isLoading, isError, error, onRetry, renderMetrics }: ContentTableProps<T>) {
   if (isError) {
     return <ErrorState title={`Failed to load ${title}`} message={error instanceof Error ? error.message : "Something went wrong."} onRetry={onRetry} />;
   }

@@ -7,7 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "type-check": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",

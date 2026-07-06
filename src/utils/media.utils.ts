@@ -3,6 +3,44 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { LocationData, SoundData } from "@/types/media.types";
 
+export const ALLOWED_VIDEO_MIME_TYPES = ["video/mp4", "video/quicktime"] as const;
+
+export const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".mov"] as const;
+
+export const VIDEO_ACCEPT_STRING = "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime";
+
+export type VideoValidationResult = { valid: true } | { valid: false; error: string };
+
+export function validateVideoFile(file: File): VideoValidationResult {
+	const extension = "." + file.name.split(".").pop()?.toLowerCase();
+	if (!extension || !(ALLOWED_VIDEO_EXTENSIONS as readonly string[]).includes(extension)) {
+		return {
+			valid: false,
+			error:
+				"Unsupported video format. Please upload an MP4 or Apple MOV video encoded with H.264 video and AAC audio.",
+		};
+	}
+
+	if (!(ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(file.type)) {
+		if (file.type.startsWith("video/")) {
+			return {
+				valid: false,
+				error:
+					"Unsupported video format. Please upload an MP4 or Apple MOV video encoded with H.264 video and AAC audio.",
+			};
+		}
+	}
+
+	return { valid: true };
+}
+
+export function canPlayVideo(mimeType: string, codec?: string): boolean {
+	const video = document.createElement("video");
+	if (codec) {
+		return video.canPlayType(`${mimeType}; codecs="${codec}"`) !== "";
+	}
+	return video.canPlayType(mimeType) !== "";
+}
 
 export const getMediaType = (mimeType: string): "image" | "video" | null => {
 	if (mimeType.startsWith("image/")) return "image";

@@ -38,7 +38,6 @@ export function usePinterestDiscover({ enabled = true }: { enabled?: boolean } =
   }, [user, enabled]);
 
   const fetchFromApi = async (isBackground: boolean) => {
-    if (loadingRef.current) return;
     loadingRef.current = true;
 
     if (!isBackground) {

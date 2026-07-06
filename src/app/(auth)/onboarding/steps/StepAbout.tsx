@@ -126,7 +126,7 @@ export function StepOneAbout({
                         </p>
                     ) : (
                         <p className="mt-2 text-sm text-gray-500">
-                            Only letters, numbers, "." and "_" are allowed.
+                            Only letters, numbers, &ldquo;.&rdquo; and &ldquo;_&rdquo; are allowed.
                         </p>
                     )}
                 </div>

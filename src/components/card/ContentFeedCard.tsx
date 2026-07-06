@@ -30,6 +30,8 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 }) => {
 	const [currentLikes, setCurrentLikes] = useState(likes ?? 0);
 	const [isPostLiked, setIsPostLiked] = useState(false);
+	const [imageError, setImageError] = useState(false);
+	const [profileError, setProfileError] = useState(false);
 	const isVideo =
 		imageSrc?.toLowerCase().includes(".mp4") ||
 		imageSrc?.includes("video_dashinit") ||
@@ -70,7 +72,7 @@ useEffect(() => {
 	return (
 		<div className={cardClasses}>
 			{/* Thumbnail */}
-			{imageSrc && (
+			{imageSrc && !imageError && (
 				<div className="relative w-full h-[200px] bg-gray-100 flex items-center justify-center flex-shrink-0">
 					{isVideo ? (
 						<video
@@ -86,25 +88,38 @@ useEffect(() => {
 							alt="Content Visual"
 							fill
 							className={isPortrait ? "object-contain" : "object-cover"}
+							unoptimized
+							onError={() => setImageError(true)}
 						/>
 					)}
+				</div>
+			)}
+			{imageError && (
+				<div className="relative w-full h-[200px] bg-gray-200 flex items-center justify-center flex-shrink-0">
+					<div className="text-gray-400 text-sm">Image unavailable</div>
 				</div>
 			)}
 
 			<div className="p-4 flex flex-col flex-1 min-h-0">
 				<div className="flex-1 min-h-0 overflow-hidden">
 					{/* User Info */}
-					<div className="flex items-start justify-between mb-3">
+						<div className="flex items-start justify-between mb-3">
 						<div className="flex items-center">
 							{/* Profile Picture */}
 							<div className="relative mr-3 w-12 h-10 flex-shrink-0 overflow-visible">
-								<Image
-									src={profilePicSrc}
-									alt={userName}
-									width={40}
-									height={40}
-									className="rounded-full object-cover"
-								/>
+								{profileError ? (
+									<div className="w-10 h-10 rounded-full bg-gray-200" />
+								) : (
+									<Image
+										src={profilePicSrc || "/icons/gaddr-logo-xs.svg"}
+										alt={userName}
+										width={40}
+										height={40}
+										className="rounded-full object-cover"
+										unoptimized
+										onError={() => setProfileError(true)}
+									/>
+								)}
 								{/* Platform Icon Overlay */}
 								<div className="absolute
 		bottom-0

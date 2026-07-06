@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/utils/cn.util";
 import AvatarIcon from "@/components/svg/avatar-icon.svg";
 import DiscoverIcon from "@/components/svg/dashboard.svg";
@@ -22,14 +22,20 @@ export default function SidebarNav() {
 	const [openPostDialog, setOpenPostDialog] = useState(false);
 	const [isLoginDialog, setIsLoginDialog] = useState(false);
 	const pathname = usePathname();
-	const router = useRouter();
 	const isActive = useCallback((href: string) => pathname.startsWith(href), [pathname]);
+
+	const handlePostClick = useCallback(() => {
+		if (!isAuthenticated) {
+			setIsLoginDialog(true);
+			return;
+		}
+		setOpenPostDialog(true);
+	}, [isAuthenticated]);
 
 	const navItems = [
 		{ Icon: DiscoverIcon, label: "Discover", href: "/discover", action: () => queryClient.invalidateQueries({ queryKey: ['discover'] }) },
 		{ Icon: BookmarkIcon, label: "Bookmarks", href: "/bookmarks" },
 		{ Icon: AnalyticsIcon, label: "Analytics", href: "/analytics" },
-		{ Icon: PlusIcon, label: "Post", href: "#", action: () => setOpenPostDialog(true) },
 	];
 
 	const handleNavClick = (href: string, action?: () => void) => (e: React.MouseEvent) => {
@@ -79,6 +85,21 @@ export default function SidebarNav() {
 					{isMobile && <span className="text-xs text-[#0D0D0D]">{label}</span>}
 				</Link>
 			))}
+
+			{/* Post Button */}
+			<button
+				onClick={handlePostClick}
+				className={cn(
+					"rounded-md flex items-center justify-center p-2 cursor-pointer",
+					"hover:bg-[#F0EBFF]",
+					isMobile && "flex-col gap-1",
+					isMobile && "order-5"
+				)}
+				title="Post"
+			>
+				<PlusIcon className={cn(isMobile ? "scale-90" : "scale-80", "text-[#0D0D0D]")} />
+				{isMobile && <span className="text-xs text-[#0D0D0D]">Post</span>}
+			</button>
 		</>
 	);
 

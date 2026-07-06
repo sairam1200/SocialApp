@@ -52,7 +52,7 @@ function DimensionGrid({ data, label, icon, valueKey, secondaryKey }: {
     );
   }
 
-  const total = data.reduce((sum: number, d: any) => sum + (Number(d[valueKey]) || 0), 0);
+  const total = data.reduce((sum: number, d: Record<string, any>) => sum + (Number(d[valueKey]) || 0), 0);
 
   return (
     <Card>
@@ -61,7 +61,7 @@ function DimensionGrid({ data, label, icon, valueKey, secondaryKey }: {
         <h3 className="text-base font-semibold text-gray-900">{label}</h3>
       </div>
       <div className="space-y-3">
-        {data.map((item: any, i: number) => {
+        {data.map((item: Record<string, any>, i: number) => {
           const key = item.source ?? item.countryCode ?? item.deviceType ?? item.location ?? item.gender ?? `item-${i}`;
           const name = item.source ?? item.countryName ?? item.deviceType ?? item.location ?? (item.gender && item.ageGroup ? `${item.gender}, ${item.ageGroup}` : key);
           const val = Number(item[valueKey]) || 0;
@@ -269,17 +269,24 @@ export default function YoutubeAnalyticsContent({ range }: { range: DateRange })
   );
 }
 
-interface ContentTableProps {
+interface ContentTableItem {
+  id: string;
   title: string;
-  items: any[];
+  thumbnailUrl?: string;
+  publishedAt: string;
+}
+
+interface ContentTableProps<T extends ContentTableItem> {
+  title: string;
+  items: T[];
   isLoading: boolean;
   isError: boolean;
   error?: unknown;
   onRetry: () => void;
-  renderMetrics: (item: any) => React.ReactNode;
+  renderMetrics: (item: T) => React.ReactNode;
 }
 
-function ContentTable({ title, items, isLoading, isError, error, onRetry, renderMetrics }: ContentTableProps) {
+function ContentTable<T extends ContentTableItem>({ title, items, isLoading, isError, error, onRetry, renderMetrics }: ContentTableProps<T>) {
   if (isError) {
     return <ErrorState title={`Failed to load ${title}`} message={error instanceof Error ? error.message : "Something went wrong."} onRetry={onRetry} />;
   }

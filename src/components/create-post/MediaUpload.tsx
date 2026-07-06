@@ -1,12 +1,13 @@
-import { Play, Plus, X } from "lucide-react";
+import { Plus, X, AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 import ImageIcon from "@/components/svg/image.svg";
 import VideoIcon from "@/components/svg/video.svg";
 import EditIcon from "@/components/svg/edit.svg";
 import Image from "next/image";
 import { FormikProps } from "formik";
 import { CreatePostFormValues, MediaFile } from "@/types/media.types";
-import { ChangeEvent, DragEvent, useCallback, useRef, useState } from "react";
-import { getMediaType } from "@/utils/media.utils";
+import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
+import { getMediaType, validateVideoFile, VIDEO_ACCEPT_STRING } from "@/utils/media.utils";
+import { uploadVideo } from "@/services/api/upload-video.service";
 import EditMediaModal from "./EditMediaModal";
 import { cn } from "@/utils/cn.util";
 import { Button } from "../ui/button";
@@ -19,9 +20,15 @@ type MediaUploadProps = {
 	setMediaToEdit?: (media: MediaFile | null) => void;
 	imageStyles?: string;
 	uploadBoxStyles?: string;
-	uploadUI?: "button" | "box";
+	uploadUI?: "box" | "button";
 	iconScale?: string;
 	overrideId?: PlatformId;
+};
+
+const statusLabels: Record<string, string> = {
+	uploading: "Uploading video...",
+	checking: "Checking video compatibility...",
+	converting: "Converting video format...",
 };
 
 function MediaUpload({
@@ -43,33 +50,109 @@ function MediaUpload({
 		open: false,
 		activeMedia: null as MediaFile | null,
 	});
+	const [videoError, setVideoError] = useState("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const createdUrlsRef = useRef<Set<string>>(new Set());
+	const uploadAbortMapRef = useRef<Map<string, AbortController>>(new Map());
 
-	const processFiles = useCallback(
-		(files: FileList | null) => {
-			if (!files || files.length === 0) return;
-			const newMedia: MediaFile[] = Array.from(files)
-				.map((file) => {
-					const type = getMediaType(file.type);
-					if (!type) return null;
-
-					return {
-						file,
-						previewUrl: URL.createObjectURL(file),
-						type,
-						id: `${file.name}-${Date.now()}-${Math.random()}`,
-					};
-				})
-				.filter(Boolean) as MediaFile[];
-
-			const updatedFiles = [...mediaFiles, ...newMedia];
-
-			formik.setFieldValue(fieldPath, updatedFiles);
+	const updateMedia = useCallback(
+		(id: string, updates: Partial<MediaFile>) => {
+			const updated = mediaFiles.map((m) => (m.id === id ? { ...m, ...updates } : m));
+			formik.setFieldValue(fieldPath, updated);
 		},
 		[fieldPath, formik, mediaFiles]
 	);
 
-	// --- Event Handlers ---
+	const revokePreviewUrl = useCallback((url: string) => {
+		if (url?.startsWith("blob:") && createdUrlsRef.current.has(url)) {
+			createdUrlsRef.current.delete(url);
+			URL.revokeObjectURL(url);
+		}
+	}, []);
+
+	const uploadVideoFile = useCallback(
+		async (media: MediaFile) => {
+			if (media.type !== "video") return;
+
+			const abortController = new AbortController();
+			uploadAbortMapRef.current.set(media.id, abortController);
+			updateMedia(media.id, { uploadStatus: "uploading", uploadProgress: 0 });
+
+			try {
+				const result = await uploadVideo(media.file, (progress) => {
+					updateMedia(media.id, { uploadProgress: progress });
+				}, abortController.signal);
+
+				updateMedia(media.id, {
+					serverUrl: result.url,
+					uploadStatus: "completed",
+					uploadProgress: 100,
+				});
+
+				revokePreviewUrl(media.previewUrl);
+			} catch (err) {
+				if ((err as Error).name === "AbortError") return;
+				updateMedia(media.id, {
+					uploadStatus: "error",
+					uploadError: (err as Error).message || "Upload failed",
+				});
+			} finally {
+				uploadAbortMapRef.current.delete(media.id);
+			}
+		},
+		[updateMedia, revokePreviewUrl]
+	);
+
+	const processFiles = useCallback(
+		(files: FileList | null) => {
+			if (!files || files.length === 0) return;
+			setVideoError("");
+
+			const newMedia: MediaFile[] = [];
+			const errors: string[] = [];
+
+			Array.from(files).forEach((file) => {
+				const type = getMediaType(file.type);
+				if (!type) return;
+
+				if (type === "video") {
+					const validation = validateVideoFile(file);
+					if (!validation.valid) {
+						errors.push(validation.error);
+						return;
+					}
+				}
+
+				const previewUrl = URL.createObjectURL(file);
+				createdUrlsRef.current.add(previewUrl);
+				newMedia.push({
+					file,
+					previewUrl,
+					type,
+					id: `${file.name}-${Date.now()}-${Math.random()}`,
+					serverUrl: undefined,
+					uploadStatus: type === "video" ? "uploading" : undefined,
+					uploadProgress: 0,
+				});
+			});
+
+			if (errors.length > 0) {
+				setVideoError(errors[0]);
+			}
+
+			if (newMedia.length > 0) {
+				const updatedFiles = [...mediaFiles, ...newMedia];
+				formik.setFieldValue(fieldPath, updatedFiles);
+
+				newMedia.forEach((media) => {
+					if (media.type === "video") {
+						uploadVideoFile(media);
+					}
+				});
+			}
+		},
+		[fieldPath, formik, mediaFiles, uploadVideoFile]
+	);
 
 	const handleFileSelect = useCallback(
 		(e: ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +187,6 @@ function MediaUpload({
 			e.preventDefault();
 			e.stopPropagation();
 			setIsDragging(false);
-
 			if (e.dataTransfer.files) {
 				processFiles(e.dataTransfer.files);
 			}
@@ -113,8 +195,39 @@ function MediaUpload({
 	);
 
 	const handleRemoveMedia = (id: string) => {
+		const abortController = uploadAbortMapRef.current.get(id);
+		if (abortController) {
+			abortController.abort();
+			uploadAbortMapRef.current.delete(id);
+		}
+		const removed = mediaFiles.find((m) => m.id === id);
+		if (removed) revokePreviewUrl(removed.previewUrl);
 		const updated = [...mediaFiles].filter((media) => media.id !== id);
 		formik.setFieldValue(fieldPath, updated);
+	};
+
+	const handleRetryUpload = useCallback(
+		(media: MediaFile) => {
+			updateMedia(media.id, { uploadStatus: "uploading", uploadProgress: 0, uploadError: undefined });
+			uploadVideoFile(media);
+		},
+		[updateMedia, uploadVideoFile]
+	);
+
+	useEffect(() => {
+		const urls = createdUrlsRef.current;
+		const abortMap = uploadAbortMapRef.current;
+		return () => {
+			abortMap.forEach((controller) => controller.abort());
+			abortMap.clear();
+			urls.forEach((url) => URL.revokeObjectURL(url));
+			urls.clear();
+		};
+	}, []);
+
+	const videoSrc = (media: MediaFile): string => {
+		if (media.serverUrl) return media.serverUrl;
+		return media.previewUrl;
 	};
 
 	return (
@@ -149,14 +262,40 @@ function MediaUpload({
 										fill
 										style={objectFitStyle}
 									/>
-								) : (
+								) : media.uploadStatus === "completed" || !media.uploadStatus ? (
 									<div className="w-full h-full bg-black flex items-center justify-center">
-										<video controls={false} preload="metadata" playsInline muted className="w-full h-full">
-											<source src={media.previewUrl} type={media.file.type || "video/mp4"} />
-											<span className="text-white">
-												<Play />
-											</span>
+										<video
+											controls
+											preload="metadata"
+											playsInline
+											className="w-full h-full object-contain"
+										>
+											<source src={videoSrc(media)} type="video/mp4" />
 										</video>
+									</div>
+								) : media.uploadStatus === "error" ? (
+									<div className="w-full h-full bg-black flex flex-col items-center justify-center gap-2 text-white text-xs p-2 text-center">
+										<AlertCircle className="size-6 text-red-400" />
+										<span>Upload failed</span>
+										<button
+											onClick={(e) => { e.stopPropagation(); handleRetryUpload(media); }}
+											className="underline text-primary cursor-pointer"
+										>
+											Retry
+										</button>
+									</div>
+								) : (
+									<div className="w-full h-full bg-black flex flex-col items-center justify-center gap-2 text-white text-xs p-2 text-center">
+										<Loader2 className="size-6 animate-spin" />
+										<span>{statusLabels[media.uploadStatus || ""] || "Processing..."}</span>
+										{media.uploadProgress !== undefined && media.uploadProgress > 0 && (
+											<div className="w-16 h-1 bg-gray-700 rounded-full overflow-hidden">
+												<div
+													className="h-full bg-primary transition-all duration-300"
+													style={{ width: `${media.uploadProgress}%` }}
+												/>
+											</div>
+										)}
 									</div>
 								)}
 
@@ -190,19 +329,31 @@ function MediaUpload({
 										<EditIcon className={cn(iconScale)} />
 									</div>
 								)}
+
+								{media.uploadStatus === "completed" && (
+									<div className="absolute top-1 left-1 size-5 bg-green-500 rounded-full flex items-center justify-center">
+										<CheckCircle2 className="size-3 text-white" />
+									</div>
+								)}
 							</div>
 						);
 					})}
 				</div>
 			)}
 
-			{/* Media Upload Box */}
+			{videoError && (
+				<div className="flex items-start gap-2 text-sm text-destructive bg-destructive/5 p-2 rounded-md">
+					<AlertCircle className="size-4 mt-0.5 shrink-0" />
+					<span>{videoError}</span>
+				</div>
+			)}
+
 			<input
 				type="file"
 				ref={fileInputRef}
 				onChange={handleFileSelect}
 				multiple
-				accept="image/*,video/*"
+				accept={VIDEO_ACCEPT_STRING}
 				style={{ display: "none" }}
 			/>
 			{uploadUI === "box" ? (
