@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/utils/cn.util";
 import AvatarIcon from "@/components/svg/avatar-icon.svg";
 import DiscoverIcon from "@/components/svg/dashboard.svg";
@@ -14,25 +14,31 @@ import { Button } from "../ui/button";
 import ProfileMenu from "./ProfileMenu";
 import CreatePostDialog from "../create-post";
 import { useHttpContext } from "@/providers/HttpContextProvider";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SidebarNav() {
 	const { isAuthenticated } = useHttpContext();
+	const queryClient = useQueryClient();
 	const [openPostDialog, setOpenPostDialog] = useState(false);
 	const [isLoginDialog, setIsLoginDialog] = useState(false);
 	const pathname = usePathname();
-	const isActive = (href: string) => pathname.startsWith(href);
+	const router = useRouter();
+	const isActive = useCallback((href: string) => pathname.startsWith(href), [pathname]);
 
 	const navItems = [
-		{ Icon: DiscoverIcon, label: "Discover", href: "/discover" },
+		{ Icon: DiscoverIcon, label: "Discover", href: "/discover", action: () => queryClient.invalidateQueries({ queryKey: ['discover'] }) },
 		{ Icon: BookmarkIcon, label: "Bookmarks", href: "/bookmarks" },
 		{ Icon: AnalyticsIcon, label: "Analytics", href: "/analytics" },
 		{ Icon: PlusIcon, label: "Post", href: "#", action: () => setOpenPostDialog(true) },
 	];
 
-	const handleNavClick = (action?: () => void) => (e: React.MouseEvent) => {
-		if (action) {
+	const handleNavClick = (href: string, action?: () => void) => (e: React.MouseEvent) => {
+		if (action && isActive(href)) {
 			e.preventDefault();
 			action();
+			if (typeof window !== "undefined") {
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			}
 		}
 	};
 
@@ -67,7 +73,7 @@ export default function SidebarNav() {
 						isMobile && `order-${index + 1}`
 					)}
 					title={label}
-					onClick={handleNavClick(action)}
+					onClick={handleNavClick(href, action)}
 				>
 					<Icon className={cn(isMobile ? "scale-90" : "scale-80", "text-[#0D0D0D]")} />
 					{isMobile && <span className="text-xs text-[#0D0D0D]">{label}</span>}

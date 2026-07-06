@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentType, SVGProps, useState, use, useEffect } from "react";
+import React, { ComponentType, SVGProps, useState, use } from "react";
 import { AlertCircle, Camera, Edit, EllipsisVertical, Loader2, Mail, RefreshCw, UserPlus } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -13,15 +13,17 @@ import ArrowBackIcon from "@/components/svg/arrow_back.svg";
 import ProfileTabs from "./components/ProfileTabs";
 import SharePopup from "./components/SharePopup";
 import { Button } from "@/components/ui/button";
-import { apiClient } from "@/services/apiClient.service";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
 import { useFollowUser } from "@/hooks/useFollowUser";
+import { useGetUser } from "@/hooks/api/user.hook";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 import XIcon from "@/components/svg/x-icon.svg";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import LinkedInIcon from "@/components/svg/linkedin-blue.svg";
-// Dynamic imports for dialogs and skeleton
+
 const ProfilePictureDialog = dynamic(() => import("./components/ProfilePictureDialog"), {
 	ssr: false,
 });
@@ -53,47 +55,24 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 	const { username } = use(params);
 
 	const { isAuthenticated, user } = useHttpContext();
-	const [data, setData] = useState<UserProfileType | undefined>(undefined);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [isGuest, setIsGuest] = useState<boolean>(false);
+	const queryClient = useQueryClient();
+	const { data, isLoading, error, refetch } = useGetUser(username);
+
+	const currentUserId = user?.[ClaimTypes.UserId];
+	const isGuest = !isAuthenticated || data?.id !== currentUserId;
 
 	const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
 	const [openEditProfileDialog, setOpenEditProfileDialog] = useState(false);
 	const [openManageSocial, setOpenManageSocial] = useState(false);
+
 	const followState = useFollowUser({
 		userId: data?.id,
-		isFollowing: (data as (UserProfileType & { isFollowing?: boolean }) | undefined)?.isFollowing ?? false,
+		isFollowing: data?.isFollowing ?? false,
 		followersCount: data?.followersCount ?? 0,
-		onChange: ({ followersCount }) => {
-			setData((prev) => prev ? { ...prev, followersCount } : prev);
-		},
 	});
 
-	const fetchUserData = React.useCallback(async () => {
-		if (!username) return;
-
-		setIsLoading(true);
-		setError(null);
-
-		const result = await apiClient.User.getUserProfileAsync(username);
-		if (result.success) {
-			const currentUserId = user?.[ClaimTypes.UserId];
-			const isGuestView = !isAuthenticated || (result.id !== currentUserId);
-			setIsGuest(isGuestView);
-			setData(result);
-		} else {
-			setError(result.error ?? "An error occured!");
-		}
-
-		setIsLoading(false);
-	}, [username, isAuthenticated, user]);
-
-	useEffect(() => {
-		fetchUserData();
-	}, [fetchUserData]);
-
-	if (error)
+	if (error && !isLoading) {
+		const errorMessage = (error as { message?: string })?.message ?? "An error occurred!";
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[400px] px-4">
 				<div className="flex flex-col items-center max-w-md w-full space-y-4">
@@ -108,16 +87,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 							Unable to load profile
 						</h2>
 						<p className="text-sm text-gray-600 leading-relaxed">
-							{error || "Something went wrong while loading this profile. Please check the username and try again."}
+							{errorMessage}
 						</p>
 					</div>
 					<div className="flex gap-3 pt-2">
 						<Button
 							variant="secondary"
-							onClick={() => {
-								setError(null);
-								fetchUserData();
-							}}
+							onClick={() => refetch()}
 							className="flex items-center gap-2"
 						>
 							<RefreshCw className="w-4 h-4" />
@@ -127,6 +103,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 				</div>
 			</div>
 		);
+	}
 
 	if (isLoading) return <ProfileSkeleton />;
 
@@ -216,7 +193,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 					</div>
 				</div>
 
-				{/* ProfileDetails - Single responsive component */}
+				{/* ProfileDetails */}
 				<div className="w-full sm:col-start-2 sm:-mt-9 mt-4">
 					<div className="flex gap-5 my-0 text-sm select-none">
 						<p className="flex flex-col gap-1">
@@ -274,9 +251,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 				</div>
 			</div>
 
-			<div className="mt-8">
-				<ProfileTabs user={data} />
-			</div>
+			{!isGuest && (
+				<div className="mt-8">
+					<ProfileTabs user={data} />
+				</div>
+			)}
 
 			{openPhotoDialog && (
 				<ProfilePictureDialog open={openPhotoDialog} onClose={() => setOpenPhotoDialog(false)} user={data} />
@@ -288,9 +267,12 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 				openPhotoDialog={() => setOpenPhotoDialog(true)}
 				user={data}
 				onSuccess={(updatedData) => {
-					if (data) {
-						setData({ ...data, ...updatedData });
-					}
+					queryClient.setQueryData(queryKeys.userProfile(username), (old: unknown) => {
+						if (old && typeof old === "object") {
+							return { ...(old as object), ...updatedData };
+						}
+						return old;
+					});
 				}}
 			/>
 			<SocialDialogsManager
@@ -301,16 +283,24 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 				linkedAccounts={(data?.linkedAccounts ?? [])}
 				manualProfiles={(data?.manualProfiles ?? [])}
 				setLinkedAccounts={(updater) => {
-					if (data) {
-						const newLinkedAccounts = typeof updater === 'function' ? updater(data.linkedAccounts) : updater;
-						setData({ ...data, linkedAccounts: newLinkedAccounts });
-					}
+					queryClient.setQueryData(queryKeys.userProfile(username), (old: unknown) => {
+						if (old && typeof old === "object") {
+							const profile = old as UserProfileType;
+							const newLinkedAccounts = typeof updater === "function" ? updater(profile.linkedAccounts) : updater;
+							return { ...profile, linkedAccounts: newLinkedAccounts };
+						}
+						return old;
+					});
 				}}
 				setManualProfiles={(updater) => {
-					if (data) {
-						const newManualProfiles = typeof updater === 'function' ? updater(data.manualProfiles) : updater;
-						setData({ ...data, manualProfiles: newManualProfiles });
-					}
+					queryClient.setQueryData(queryKeys.userProfile(username), (old: unknown) => {
+						if (old && typeof old === "object") {
+							const profile = old as UserProfileType;
+							const newManualProfiles = typeof updater === "function" ? updater(profile.manualProfiles) : updater;
+							return { ...profile, manualProfiles: newManualProfiles };
+						}
+						return old;
+					});
 				}}
 			/>
 		</>

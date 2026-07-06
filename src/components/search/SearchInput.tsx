@@ -99,10 +99,9 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                         placeholder={placeholder}
                         className={cn(
                             "flex-1 bg-transparent text-sm outline-none",
-                            "placeholder-gray-neutral text-gray-neutral",
-                            "disabled:opacity-50 disabled:cursor-not-allowed"
+                            "placeholder-gray-neutral text-gray-neutral"
                         )}
-                        disabled={isLoading}
+                        autoComplete="off"
                     />
 
                     {isLoading ? (

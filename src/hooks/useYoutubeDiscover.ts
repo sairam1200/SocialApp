@@ -1,8 +1,16 @@
 // src/hooks/useYoutubeDiscover.ts
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiClient } from "@/services/apiClient.service";
 import { useHttpContext } from "@/providers/HttpContextProvider";
+import { ClaimTypes } from "@/constants/globals";
+import {
+  getCachedProfile,
+  setCachedProfile,
+  getCachedContent,
+  setCachedContent,
+  invalidateDiscoverCache,
+} from "@/lib/discover-cache";
 
 export type YoutubeChannelType = {
   id: string;
@@ -55,31 +63,33 @@ export function useYoutubeDiscover({ enabled = true }: { enabled?: boolean } = {
   const [contents, setContents] = useState<YoutubeContent[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useHttpContext();
+  const mountedRef = useRef(true);
+  const loadingRef = useRef(false);
+
   useEffect(() => {
-    console.log("USER:", user);
-  console.log("ENABLED:", enabled);
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
     if (!user || !enabled) {
-      console.log("Skipping load");
       setLoading(false);
       return;
     }
-console.log("Calling loadData()");
     loadData();
   }, [user, enabled]);
-  const loadData = async () => {
-      console.log("loadData started");
+
+  const fetchFromApi = async (isBackground: boolean) => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
+    if (!isBackground) {
+      setLoading(true);
+    }
+
     try {
-
-
       const profileResponse =
-        await apiClient.Integration.getMe<YoutubeProfile>(
-          "youtube"
-        );
-      console.log(
-        "YOUTUBE PROFILE RESPONSE:",
-        profileResponse
-      );
-      setProfile(profileResponse);
+        await apiClient.Integration.getMe<YoutubeProfile>("youtube");
       let allContents: YoutubeContent[] = [];
       let cursor: string | undefined;
       let hasMore = true;
@@ -89,44 +99,72 @@ console.log("Calling loadData()");
             "youtube",
             cursor
           );
-          console.log(
-        "youtube CONTENTS RESPONSE:",
-        contentsResponse,
-      );
         allContents = allContents.concat(contentsResponse.contents ?? []);
         cursor = contentsResponse.nextCursor ?? undefined;
         hasMore = contentsResponse.hasMore ?? false;
       }
-      
-      setContents(allContents);
-     /*  const profileSyncrequest =
-        await apiClient.Integration.enableSync(
-          "youtube"
-        );
-      console.log(
-        "YOUTUBE SYNC RESPONSE:",
-        profileSyncrequest
-      ); */
+
+      const uid = user?.[ClaimTypes.UserId] ?? "default";
+
+      await Promise.all([
+        setCachedProfile("youtube", uid, profileResponse),
+        setCachedContent("youtube", uid, allContents, cursor ?? null, hasMore),
+      ]);
+
+      if (mountedRef.current) {
+        setProfile(profileResponse);
+        setContents(allContents);
+      }
     } catch (error: unknown) {
       console.error("YOUTUBE LOAD ERROR:", error);
-
-      if (error instanceof Error) {
-        console.log("MESSAGE:", error.message);
-        console.log("NAME:", error.name);
-      }
-
-      console.log("RAW ERROR:", JSON.stringify(error, null, 2));
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+      loadingRef.current = false;
     }
   };
 
+  const loadData = async () => {
+    if (!user) return;
 
+    const uid = user[ClaimTypes.UserId] ?? "default";
+
+    try {
+      const [cachedProfile, cachedContent] = await Promise.all([
+        getCachedProfile("youtube", uid),
+        getCachedContent("youtube", uid),
+      ]);
+
+      if (cachedProfile && cachedContent && mountedRef.current) {
+        setProfile(cachedProfile.data as YoutubeProfile);
+        setContents(cachedContent.data.contents as YoutubeContent[]);
+
+        if (!cachedProfile.isStale && !cachedContent.isStale) {
+          setLoading(false);
+          return;
+        }
+
+        fetchFromApi(true);
+        return;
+      }
+    } catch {
+      // Cache error, fall through to API
+    }
+
+    fetchFromApi(false);
+  };
 
   return {
     profile,
     contents,
     loading,
-    refresh: loadData,
+    refresh: () => {
+      if (user) {
+        const uid = user[ClaimTypes.UserId] ?? "default";
+        invalidateDiscoverCache("youtube", uid);
+      }
+      fetchFromApi(false);
+    },
   };
 }

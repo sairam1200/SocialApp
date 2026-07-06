@@ -4,12 +4,14 @@ import { useWebSocket } from "@/contexts/WebSocketContext";
 import { useSessionSecurity } from "@/hooks/useSessionSecurity";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useImports } from "@/hooks/useImports";
+import { useFollowSocket } from "@/hooks/useFollowSocket";
 
 export default function WebSocketStatus() {
     const { isNotificationsConnected, isImportsConnected } = useWebSocket();
     const { isConnected: sessionSecurityConnected } = useSessionSecurity();
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
     const { recentImports } = useImports();
+    useFollowSocket();
 
     const overallConnected = isNotificationsConnected && isImportsConnected;
 

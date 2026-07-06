@@ -7,6 +7,7 @@ export type UserProfileType = UserType & ServiceResponse & {
 	manualProfiles: ManualProfileType[];
 	followersCount: number;
 	followingCount: number;
+	isFollowing?: boolean;
 	isGuestView: boolean;
 };
 

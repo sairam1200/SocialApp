@@ -10,9 +10,6 @@ import { ServiceResponse } from "@/types/serviceResponse.type";
 
 export class AccountService {
 
-  @OnError((error) => {
-    return error.message;
-  })
   @Post<RegisterResponseType>("/account/register")
   async registerNewUserAsync(
     @Body() RegisterPayload: RegisterRequestType,

@@ -104,18 +104,26 @@ export default function SignupPage() {
 					turnstileToken
 				);
 
-				if (response) {
+				if (response?.success) {
 					toast.success("Your account has been created successfully!");
 					router.push(`/confirm-email/${values.email}`);
 					resetForm();
 				} else {
-					toast.error("Registration failed. Please try again later.");
-					setStatus({ apiError: "Registration failed. Please try again later." });
+					const errorMessage = response?.error || "Registration failed. Please try again later.";
+					toast.error(errorMessage);
+					setStatus({ apiError: errorMessage });
 				}
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
-				toast.error(errorMessage);
-				setStatus({ apiError: errorMessage });
+				// Check if this is a 409 conflict (email already exists)
+				const axiosError = error as { response?: { status?: number; data?: { title?: string } } };
+				if (axiosError.response?.status === 409) {
+					const backendMsg = axiosError.response.data?.title || "This email is already registered.";
+					setEmailApiError(backendMsg);
+				} else {
+					const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+					toast.error(errorMessage);
+					setStatus({ apiError: errorMessage });
+				}
 			} finally {
 				setIsLoading(false);
 			}

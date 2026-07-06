@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Activity } from "lucide-react";
 import { useFollowUser } from "@/hooks/useFollowUser";
+import { useIsOwnProfile } from "@/hooks/useIsOwnProfile";
 import XIcon from "@/components/svg/x-icon.svg";
 import PinterestIcon from "@/components/svg/pinterest.svg";
 import LinkedInIcon from "@/components/svg/linkedin-blue.svg";
@@ -37,7 +38,6 @@ interface ProfileCardProps {
     profileHref?: string;
     initialIsFollowing?: boolean;
     hideFollowButton?: boolean;
-    onFollowChange?: (state: { isFollowing: boolean; followersCount: number }) => void;
 }
 
 type LinkedAccount = {
@@ -74,14 +74,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     profileHref,
     initialIsFollowing = false,
     hideFollowButton = false,
-    onFollowChange,
 }) => {
     const router = useRouter();
+    const isOwnProfile = useIsOwnProfile(userId);
     const { isFollowing, followersCount, isPending, toggleFollow, canFollow } = useFollowUser({
         userId,
         isFollowing: initialIsFollowing,
         followersCount: followerCount,
-        onChange: onFollowChange,
+        isOwnProfile,
     });
 
     const cardClasses = "flex flex-col items-center bg-white rounded-xl shadow-lg overflow-hidden min-w-[225px] min-h-[340px] p-6 text-center";
@@ -143,7 +143,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 >
                     View profile
                 </button>
-                {!hideFollowButton && (
+                {!hideFollowButton && !isOwnProfile && (
                     <button
                         className={`flex-1 flex items-center justify-center px-2 py-2 text-xs rounded-full font-semibold transition duration-150 ${isFollowing
                             ? "bg-gray-100 text-gray-600 border border-gray-200"

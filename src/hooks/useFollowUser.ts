@@ -1,100 +1,36 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
-import { apiClient } from "@/services/apiClient.service";
+import { useCallback } from "react";
+import { useFollowStore } from "@/store/follow.store";
+import { useFollowUserMutation } from "@/hooks/useFollowUserMutation";
 
-type FollowState = {
-	isFollowing: boolean;
-	followersCount: number;
-};
-
-type UseFollowUserOptions = FollowState & {
+type UseFollowUserOptions = {
 	userId?: string;
-	onChange?: (state: FollowState) => void;
-};
-
-const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
-
-const getStatusCode = (error: unknown) => {
-	if (typeof error !== "object" || error === null) return undefined;
-	const maybeError = error as { status?: number; response?: { status?: number } };
-	return maybeError.status ?? maybeError.response?.status;
+	isFollowing?: boolean;
+	followersCount?: number;
+	isOwnProfile?: boolean;
 };
 
 export const useFollowUser = ({
 	userId,
 	isFollowing: initialIsFollowing,
 	followersCount: initialFollowersCount,
-	onChange,
+	isOwnProfile,
 }: UseFollowUserOptions) => {
-	const [state, setState] = useState<FollowState>({
-		isFollowing: initialIsFollowing,
-		followersCount: initialFollowersCount,
-	});
-	const [isPending, setIsPending] = useState(false);
-	const inFlightRef = useRef(false);
+	const storeEntry = useFollowStore((s) => (userId ? s.follows[userId] : undefined));
+	const mutation = useFollowUserMutation();
 
-	useEffect(() => {
-		setState({
-			isFollowing: initialIsFollowing,
-			followersCount: initialFollowersCount,
-		});
-	}, [initialFollowersCount, initialIsFollowing]);
-
-	const commitState = useCallback(
-		(nextState: FollowState) => {
-			setState(nextState);
-			onChange?.(nextState);
-		},
-		[onChange]
-	);
+	const isFollowing = storeEntry?.isFollowing ?? initialIsFollowing ?? false;
+	const followersCount = storeEntry?.followersCount ?? initialFollowersCount ?? 0;
 
 	const toggleFollow = useCallback(async () => {
-		if (!userId || inFlightRef.current) return;
-
-		const previousState = state;
-		const nextState = {
-			isFollowing: !state.isFollowing,
-			followersCount: Math.max(0, state.followersCount + (state.isFollowing ? -1 : 1)),
-		};
-
-		inFlightRef.current = true;
-		setIsPending(true);
-		commitState(nextState);
-
-		const request = nextState.isFollowing
-			? () => apiClient.User.followUser(userId)
-			: () => apiClient.User.unfollowUser(userId);
-
-		try {
-			await request();
-		} catch (error) {
-			const statusCode = getStatusCode(error);
-
-			if (statusCode && RETRYABLE_STATUS_CODES.has(statusCode)) {
-				try {
-					await request();
-					return;
-				} catch (retryError) {
-					error = retryError;
-				}
-			}
-
-			commitState(previousState);
-			if (getStatusCode(error) === 429) {
-				toast.error("Daily follow limit reached. Please try again later.");
-			} else {
-				toast.error("Unable to update follow status. Please try again.");
-			}
-		} finally {
-			inFlightRef.current = false;
-			setIsPending(false);
-		}
-	}, [commitState, state, userId]);
+		if (!userId || isOwnProfile || mutation.isPending) return;
+		mutation.mutate({ userId, isFollowing: !isFollowing });
+	}, [userId, isOwnProfile, mutation, isFollowing]);
 
 	return {
-		...state,
-		isPending,
+		isFollowing,
+		followersCount,
+		isPending: mutation.isPending,
 		toggleFollow,
-		canFollow: Boolean(userId),
+		canFollow: Boolean(userId) && !isOwnProfile,
 	};
 };

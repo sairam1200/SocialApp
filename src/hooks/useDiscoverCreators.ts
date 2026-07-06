@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { apiClient } from "@/services/apiClient.service";
 import { PublicProfileModel } from "@/types/account/profile.type";
+import { queryKeys } from "@/lib/query-keys";
+import { useFollowStore } from "@/store/follow.store";
 
-type DiscoverCreatorsState = {
+type UseDiscoverCreatorsReturn = {
 	profiles: PublicProfileModel[];
 	isLoading: boolean;
 	isError: boolean;
@@ -10,55 +13,71 @@ type DiscoverCreatorsState = {
 	page: number;
 	totalResults: number;
 	hasNextPage: boolean;
+	nextPage: () => void;
+	previousPage: () => void;
+	retry: () => void;
 };
 
-export const useDiscoverCreators = (limit = 12) => {
-	const [state, setState] = useState<DiscoverCreatorsState>({
-		profiles: [],
-		isLoading: true,
-		isError: false,
-		error: null,
-		page: 1,
-		totalResults: 0,
-		hasNextPage: false,
+export const useDiscoverCreators = (limit = 12): UseDiscoverCreatorsReturn => {
+	const [page, setPage] = useState(1);
+	const queryClient = useQueryClient();
+	const setFollow = useFollowStore((s) => s.setFollow);
+
+	const queryKey = queryKeys.discoverCreators(page, limit);
+
+	const query = useQuery({
+		queryKey,
+		queryFn: async () => {
+			const response = await apiClient.User.getDiscoverCreators(page, limit);
+			const profiles = response.profiles ?? [];
+			const totalResults = response.totalResults ?? profiles.length ?? 0;
+			const hasNextPage =
+				response.hasNextPage ?? (response.page ?? page) * (response.limit ?? limit) < totalResults;
+
+			profiles.forEach((profile) => {
+				if (profile.id && typeof profile.isFollowing === "boolean" && typeof profile.followersCount === "number") {
+					setFollow(profile.id, {
+						isFollowing: profile.isFollowing,
+						followersCount: profile.followersCount,
+					});
+				}
+			});
+
+			return {
+				profiles,
+				page: response.page ?? page,
+				totalResults,
+				hasNextPage,
+			};
+		},
+		staleTime: 10 * 60 * 1000,
 	});
 
-	const loadPage = useCallback(
-		async (page = 1) => {
-			setState((prev) => ({ ...prev, isLoading: true, isError: false, error: null }));
+	const nextPage = useCallback(() => {
+		if (query.data?.hasNextPage) {
+			const next = page + 1;
+			setPage(next);
+		}
+	}, [query.data?.hasNextPage, page]);
 
-			try {
-				const response = await apiClient.User.getDiscoverCreators(page, limit);
-				setState({
-					profiles: response.profiles ?? [],
-					isLoading: false,
-					isError: false,
-					error: null,
-					page: response.page ?? page,
-					totalResults: response.totalResults ?? response.profiles?.length ?? 0,
-					hasNextPage:
-						response.hasNextPage ?? (response.page ?? page) * (response.limit ?? limit) < (response.totalResults ?? 0),
-				});
-			} catch (error) {
-				setState((prev) => ({
-					...prev,
-					isLoading: false,
-					isError: true,
-					error: error instanceof Error ? error : new Error("Unable to load creators"),
-				}));
-			}
-		},
-		[limit]
-	);
-
-	useEffect(() => {
-		loadPage(1);
-	}, [loadPage]);
+	const previousPage = useCallback(() => {
+		if (page > 1) {
+			setPage(page - 1);
+		}
+	}, [page]);
 
 	return {
-		...state,
-		nextPage: () => state.hasNextPage && loadPage(state.page + 1),
-		previousPage: () => state.page > 1 && loadPage(state.page - 1),
-		retry: () => loadPage(state.page),
+		profiles: query.data?.profiles ?? [],
+		isLoading: query.isLoading,
+		isError: query.isError,
+		error: query.error instanceof Error ? query.error : query.error ? new Error(String(query.error)) : null,
+		page: query.data?.page ?? page,
+		totalResults: query.data?.totalResults ?? 0,
+		hasNextPage: query.data?.hasNextPage ?? false,
+		nextPage,
+		previousPage,
+		retry: () => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.discoverCreators(page, limit) });
+		},
 	};
 };

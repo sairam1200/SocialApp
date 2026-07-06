@@ -2,7 +2,7 @@ import AuthFooter from "@/components/layouts/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { ToasterClient } from "../ToasterClient";
+
 
 interface IAuthLayoutProps {
 	children: ReactNode;
