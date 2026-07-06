@@ -1,5 +1,5 @@
 "use client";
-import type { ChangeEvent } from "react";
+import { useState, type ChangeEvent } from "react";
 import Image from "next/image";
 import { User, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ interface StepOneAboutProps {
     ) => void;
     handleImageChange: (e: ChangeEvent<HTMLInputElement>) => void;
     onNext: () => void;
+
 }
 
 export function StepOneAbout({
@@ -22,9 +23,9 @@ export function StepOneAbout({
     onNext,
 }: StepOneAboutProps) {
     const canProceed =
-        (formData.fullName ?? "").trim().length > 0 &&
+        (formData.username ?? "").trim().length > 0 &&
         (formData.bio ?? "").trim().length > 0;
-
+    const [usernameError, setUsernameError] = useState("");
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white p-8 rounded-[10px] w-full mx-auto border border-indigo-100/50 shadow-lg ring-1 ring-black/5 h-[750px]">
             <div className="my-4 text-center">
@@ -92,19 +93,42 @@ export function StepOneAbout({
 
                         <Input
                             type="text"
-                            name="fullName"
-                            value={formData.fullName ?? ""}
+                            name="username"
+                            value={formData.username ?? ""}
                             onChange={(e) => {
-                                e.target.value = e.target.value
-                                    .replace(/\s/g, "")
-                                    .replace(/[^a-zA-Z0-9._]/g, "");
+                                const rawValue = e.target.value;
+
+                                // Check for invalid characters
+                                if (/[^a-zA-Z0-9._]/.test(rawValue)) {
+                                    setUsernameError(
+                                        "Username can only contain letters, numbers, periods (.) and underscores (_)."
+                                    );
+                                } else {
+                                    setUsernameError("");
+                                }
+
+                                // Remove invalid characters
+                                e.target.value = rawValue.replace(/[^a-zA-Z0-9._]/g, "");
 
                                 handleChange(e);
                             }}
                             placeholder="Enter username"
-                            className="w-full pl-10 pr-4 py-6 bg-white border-gray-300 rounded-xl"
+                            className={`w-full pl-10 pr-4 py-6 rounded-xl ${usernameError
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300"
+                                }`}
+
                         />
                     </div>
+                    {usernameError ? (
+                        <p className="mt-2 text-sm text-red-500">
+                            {usernameError}
+                        </p>
+                    ) : (
+                        <p className="mt-2 text-sm text-gray-500">
+                            Only letters, numbers, "." and "_" are allowed.
+                        </p>
+                    )}
                 </div>
 
                 {/* Bio */}

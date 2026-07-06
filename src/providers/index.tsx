@@ -12,7 +12,7 @@ import WebSocketStatus from "@/components/websocket/WebSocketStatus";
 import WebSocketDebug from "@/components/websocket/WebSocketDebug";
 import { TokenRefreshAnalytics } from "@/components/analytics";
 import { JwtPayload } from "@/types/jwtPayload.type";
-import { ToasterClient } from "@/app/(auth)/ToasterClient";
+import { ToasterClient } from "@/app/ToasterClient";
 
 interface AppProvidersProps {
   children: ReactNode;

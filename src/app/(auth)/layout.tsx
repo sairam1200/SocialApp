@@ -2,7 +2,7 @@ import AuthFooter from "@/components/layouts/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { ToasterClient } from "./ToasterClient";
+import { ToasterClient } from "../ToasterClient";
 
 interface IAuthLayoutProps {
 	children: ReactNode;
@@ -26,7 +26,7 @@ const AuthLayout: React.FC<IAuthLayoutProps> = ({ children }) => {
 				</Link>
 			</header>
 			<main className="grow container mx-auto py-8">{children}</main>
-			<ToasterClient />
+			
 			<AuthFooter />
 		</div>
 	);

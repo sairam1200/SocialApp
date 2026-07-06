@@ -1,7 +1,7 @@
 import type { ElementType } from "react";
 
 export interface ProfileFormData {
-	fullName: string;
+	username: string;
 	email: string;
 	bio: string;
 	  interests: string[];

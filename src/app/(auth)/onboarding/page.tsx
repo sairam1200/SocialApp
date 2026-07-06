@@ -52,21 +52,36 @@ export default function ProfileCreationSystem() {
             )
             : {};
     const DEFAULT_FORM_DATA: ProfileFormData = {
-        fullName:
-            currentUser?.fullName ?? "",
+        username:
+            currentUser?.username ?? "",
         email:
             currentUser?.email ?? "",
         bio: "",
         interests: [],
         connectedAccounts: {},
-        profileImage: null,
-        profileImagePreview: "",
+        profileImage: currentUser?.profileImageUrl ?? null,
+        profileImagePreview: currentUser?.profileImageUrl ?? null,
     };
     const [formData, setFormData] =
         useState<ProfileFormData>(DEFAULT_FORM_DATA);
     useEffect(() => {
-        loadTopics();
-    }, []);
+    const init = async () => {
+        try {
+            const user = await apiClient.Token.currentAsync();
+
+            if (user.onboardingStep === "Completed") {
+                router.replace("/discover");
+                return;
+            }
+
+            await loadTopics();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    init();
+}, []);
 
     const loadTopics = async () => {
         try {
@@ -152,7 +167,7 @@ export default function ProfileCreationSystem() {
     }, [formData, step, isLoaded]);
     const handleStep1Next = async () => {
         await apiClient.Onboarding.saveStep1Async({
-            username: formData.fullName, // Assuming you want to use fullName as username for now, adjust as needed
+            username: formData.username, // Assuming you want to use fullName as username for now, adjust as needed
             bio: formData.bio,
         });
         

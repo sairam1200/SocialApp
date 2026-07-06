@@ -229,6 +229,7 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 												key={user?.photo}
 												src={user?.photo || "/images/avatar-placeholder.svg"}
 												alt="avatar"
+												fill
 												className="w-full h-full object-cover rounded-full"
 											/>
 										</div>

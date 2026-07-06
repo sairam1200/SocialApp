@@ -9,8 +9,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getDeviceId } from "@/utils/deviceId.util";
-import {setCookie} from "@/utils/cookie.util";
-import {COOKIE_NAMES} from "@/constants/globals";
+import { setCookie } from "@/utils/cookie.util";
+import { COOKIE_NAMES } from "@/constants/globals";
 import {
 	AuthCard,
 	AuthCheckbox,
@@ -174,18 +174,24 @@ function LoginForm() {
 				console.warn("Failed to fetch current user for localStorage", e);
 			}
 
-			toast.dismiss();
-			toast.success(
-				"Login successful!",
-			);
 
 			reset();
 
 			if (!onboardingCompleted) {
 				router.replace("/onboarding");
+				toast.success(
+					"Login successful!",
+				);
+
 			} else {
 				router.replace("/discover");
-				router.refresh();
+				setTimeout(() => {
+					router.refresh();
+				}, 500);
+				toast.success(
+					"Login successful!",
+				);
+
 			}
 
 		} catch (error) {

@@ -6,7 +6,7 @@ import { AppProviders } from "@/providers";
 import { COOKIE_NAMES } from "@/constants/globals";
 import { Geist, Geist_Mono } from "next/font/google";
 import { JwtPayload } from "@/types/jwtPayload.type";
-
+import { ToasterClient } from "./ToasterClient";
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -55,6 +55,7 @@ export default async function RootLayout({
 				<AppProviders jwtUser={jwtUser} accessToken={accessToken} isAuthenticated={isAuthenticated}>
 					{children}
 				</AppProviders>
+				<ToasterClient />
 			</body>
 		</html>
 	);

@@ -3,6 +3,7 @@
 export interface SaveStep1Request {
   username: string;
   bio: string;
+  
 }
 
 export interface SaveStep2Request {
