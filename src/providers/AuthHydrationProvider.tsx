@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import { useAuthUserStore } from "@/store/auth-user.store";
 import { AuthUserType } from "@/types/auth/authUser.type";
 import { ClaimTypes } from "@/constants/globals";
@@ -65,9 +66,26 @@ export default function AuthHydrationProvider({
 	useEffect(() => {
 		if (!hydrated) return;
 
-		if (isAuthenticated && jwtUser) {
-			const onboardingStep = jwtUser.onboardingStep as string | undefined;
-			const isCompleted = onboardingStep === 'Completed';
+		if (isAuthenticated) {
+			// Use localStorage JWT as the source of truth for onboardingStep
+			// (the server-prop jwtUser may be stale during client-side navigation)
+			let effectiveOnboardingStep = jwtUser?.onboardingStep as string | undefined;
+
+			if (typeof window !== 'undefined') {
+				const localToken = localStorage.getItem("accessToken");
+				if (localToken) {
+					try {
+						const decoded = jwtDecode<Record<string, unknown>>(localToken);
+						if (decoded?.onboardingStep) {
+							effectiveOnboardingStep = decoded.onboardingStep as string;
+						}
+					} catch {
+						// ignore decode errors
+					}
+				}
+			}
+
+			const isCompleted = effectiveOnboardingStep === 'Completed';
 
 			if (!isCompleted) {
 				const onProtectedRoute = PROTECTED_PATHS.some((route) =>

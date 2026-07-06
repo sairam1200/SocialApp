@@ -310,6 +310,7 @@ const handleStep4Submit = async () => {
       "Onboarding completed successfully!"
     );
     router.replace("/discover");
+    setTimeout(() => { router.refresh(); }, 500);
   } catch (error) {
     console.error(
       "STEP 4 ERROR:",

@@ -1,5 +1,5 @@
 
-// src/proxy.ts
+// src/middleware.ts
 
 import {
 	NextRequest,
@@ -147,11 +147,11 @@ function redirectToLogin(
 
 /**
  * ---------------------------------------------------
- * MAIN PROXY
+ * MAIN MIDDLEWARE
  * ---------------------------------------------------
  */
 
-export async function proxy(
+export async function middleware(
 	request: NextRequest
 ) {
 	const token =
