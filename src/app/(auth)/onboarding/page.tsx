@@ -309,8 +309,6 @@ const handleStep4Submit = async () => {
     toast.success(
       "Onboarding completed successfully!"
     );
-
-    router.refresh();
     router.replace("/discover");
   } catch (error) {
     console.error(
