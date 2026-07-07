@@ -4,6 +4,7 @@ import {
   type DiscoverProfileEntry,
   type DiscoverContentEntry,
 } from "./db";
+import { type DiscoverFeedResponse } from "@/types/discover.type";
 
 export const CACHE_TTL = {
   DISCOVER_PROFILE: 5 * 60 * 1000,
@@ -12,9 +13,10 @@ export const CACHE_TTL = {
 
 export const STALE_WINDOW = 30 * 60 * 1000;
 
-interface CacheResult<T> {
+export interface CacheResult<T> {
   data: T;
   isStale: boolean;
+  cachedAt: number;
 }
 
 async function withDb<T>(
@@ -46,6 +48,7 @@ export async function getCachedProfile(
     return {
       data: entry.profile,
       isStale: Date.now() >= entry.staleAt,
+      cachedAt: entry.cachedAt,
     };
   }, null);
 }
@@ -87,6 +90,7 @@ export async function getCachedContent(
         hasMore: entry.hasMore,
       },
       isStale: Date.now() >= entry.staleAt,
+      cachedAt: entry.cachedAt,
     };
   }, null);
 }
@@ -159,6 +163,58 @@ export async function invalidateDiscoverCache(
       db.discoverProfiles.delete(key),
       db.discoverContents.delete(key),
     ]);
+  }, undefined);
+}
+
+function discoverFeedKey(platform?: string, userId?: string): string {
+  const parts = ["feed"];
+  parts.push(platform || "all");
+  if (userId) parts.push(userId);
+  return parts.join("_");
+}
+
+export async function getCachedDiscoverFeed(
+  platform?: string,
+  userId?: string,
+): Promise<CacheResult<DiscoverFeedResponse> | null> {
+  return withDb(async () => {
+    const db = getDb();
+    if (!db) return null;
+    const entry = await db.discoverContents.get(discoverFeedKey(platform, userId));
+    if (!entry) return null;
+    return {
+      data: {
+        contents: entry.contents as DiscoverFeedResponse["contents"],
+        nextCursor: entry.nextCursor,
+        hasMore: entry.hasMore,
+      },
+      isStale: Date.now() >= entry.staleAt,
+      cachedAt: entry.cachedAt,
+    };
+  }, null);
+}
+
+export async function setCachedDiscoverFeed(
+  platform: string | undefined,
+  userId: string | undefined,
+  data: DiscoverFeedResponse,
+  ttl = CACHE_TTL.DISCOVER_CONTENT,
+): Promise<void> {
+  return withDb(async () => {
+    const db = getDb();
+    if (!db) return;
+    const now = Date.now();
+    const key = discoverFeedKey(platform, userId);
+    const entry: DiscoverContentEntry = {
+      key,
+      contents: data.contents,
+      nextCursor: data.nextCursor,
+      hasMore: data.hasMore,
+      cachedAt: now,
+      staleAt: now + ttl,
+      expiresAt: now + ttl + STALE_WINDOW,
+    };
+    await db.discoverContents.put(entry);
   }, undefined);
 }
 
