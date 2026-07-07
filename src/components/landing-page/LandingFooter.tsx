@@ -83,11 +83,11 @@ const LandingFooter = () => {
 
 						<p className="text-xs text-gray-600 leading-relaxed">
 							By subscribing, you agree to our{" "}
-							<Link href="#" className="text-primary underline">
+							<Link href="/privacy-policy" className="text-primary underline">
 								Privacy policy
 							</Link>{" "}
 							and{" "}
-							<Link href="#" className="text-primary underline">
+							<Link href="/terms" className="text-primary underline">
 								terms & conditions
 							</Link>
 							.

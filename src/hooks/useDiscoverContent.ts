@@ -6,14 +6,12 @@ import { getCachedDiscoverFeed, setCachedDiscoverFeed } from "@/lib/discover-cac
 import { useEffect } from "react";
 
 interface UseDiscoverContentOptions {
-  platform?: string;
   limit?: number;
   userId?: string;
   enabled?: boolean;
 }
 
 export const useDiscoverContent = (options?: UseDiscoverContentOptions) => {
-  const platform = options?.platform;
   const limit = options?.limit ?? 20;
   const userId = options?.userId;
   const enabled = options?.enabled ?? true;
@@ -23,9 +21,9 @@ export const useDiscoverContent = (options?: UseDiscoverContentOptions) => {
     if (!enabled) return;
     let cancelled = false;
     (async () => {
-      const cached = await getCachedDiscoverFeed(platform, userId);
+      const cached = await getCachedDiscoverFeed(undefined, userId);
       if (cancelled || !cached) return;
-      const qk = queryKeys.discoverFeed(platform, userId);
+      const qk = queryKeys.discoverFeed(userId);
       const existing = queryClient.getQueryData<InfiniteData<DiscoverFeedResponse>>(qk);
       if (existing) return;
       queryClient.setQueryData<InfiniteData<DiscoverFeedResponse>>(
@@ -38,19 +36,18 @@ export const useDiscoverContent = (options?: UseDiscoverContentOptions) => {
       );
     })();
     return () => { cancelled = true; };
-  }, [platform, userId, enabled, queryClient]);
+  }, [userId, enabled, queryClient]);
 
   return useInfiniteQuery<DiscoverFeedResponse, Error>({
-    queryKey: queryKeys.discoverFeed(platform, userId),
+    queryKey: queryKeys.discoverFeed(userId),
     queryFn: async ({ pageParam }) => {
       const data = await apiClient.Discover.getFeed(
         pageParam as string | undefined,
         limit,
-        platform,
         userId,
       );
       if (!pageParam) {
-        setCachedDiscoverFeed(platform, userId, data).catch(() => {});
+        setCachedDiscoverFeed(undefined, userId, data).catch(() => {});
       }
       return data;
     },

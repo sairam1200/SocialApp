@@ -31,6 +31,7 @@ import { useDiscoverCreators } from "@/hooks/useDiscoverCreators";
 import { useDiscoverContent } from "@/hooks/useDiscoverContent";
 import { useAuthUserStore } from "@/store/auth-user.store";
 import type { DiscoverContentModel } from "@/types/discover.type";
+import { getContentCategory, filterByPlatform, filterByContentType, filterByDatePosted, sortByMetrics } from "@/lib/discover-filters";
 import Link from "next/link";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
@@ -54,13 +55,13 @@ const filterSections = [
 			{ id: "highest_liked", label: "Highest Liked" },
 			{ id: "most_commented", label: "Most Commented" },
 			{ id: "most_views", label: "Most Views" },
-			{ id: "fastest_growing", label: "Fastest-Growing" },
+			{ id: "fastest_growing", label: "Fastest-Growing", disabled: true },
 		],
 	},
 	{
 		title: "Date Posted",
 		key: "datePosted",
-		type: "checkbox",
+		type: "radio",
 		options: [
 			{ id: "past_week", label: "Past week" },
 			{ id: "past_month", label: "Past month" },
@@ -88,7 +89,7 @@ const DiscoveryPage = () => {
 	const [filters, setFilters] = useState<Record<string, string | string[]>>({
 		contentType: [],
 		metrics: [],
-		datePosted: "",
+		datePosted: "anytime",
 		monetization: [],
 	});
 
@@ -103,7 +104,7 @@ const DiscoveryPage = () => {
 	const discoverContent = useDiscoverContent(); // "All" — public feed
 	const forYouContent = useDiscoverContent({ userId: authUser?.id, enabled: !!authUser }); // "For You" — user's own content (auth-only)
 
-	const allContents: DiscoverContentModel[] = React.useMemo(
+	const originalDiscoverItems: DiscoverContentModel[] = React.useMemo(
 		() => discoverContent.data?.pages.flatMap((p) => p.contents) ?? [],
 		[discoverContent.data],
 	);
@@ -113,66 +114,28 @@ const DiscoveryPage = () => {
 		[forYouContent.data],
 	);
 
-	function isVideoType(item: DiscoverContentModel): boolean {
-		const t = item.type?.toLowerCase() || '';
-		return t.includes('video') || t.includes('reel') || t.includes('short');
-	}
-
-	const filteredFeed = React.useMemo(() => {
-		let feed = allContents;
-
-		if (selectedPlatforms.length > 0) {
-			feed = feed.filter((item) => selectedPlatforms.includes(item.platform));
-		}
-
+	const filteredDiscoverItems = React.useMemo(() => {
 		const contentType = filters.contentType as string[];
-		if (contentType.length > 0) {
-			feed = feed.filter((item) => {
-				for (const ct of contentType) {
-					if (ct === 'reels_shorts' && isVideoType(item)) return true;
-					if (ct === 'feed_post' && !isVideoType(item)) return true;
-				}
-				return false;
-			});
-		}
-
-		const datePosted = filters.datePosted as string;
-		if (datePosted && datePosted !== 'anytime') {
-			const now = Date.now();
-			const cutoff =
-				datePosted === 'past_week'
-					? now - 7 * 24 * 60 * 60 * 1000
-					: now - 30 * 24 * 60 * 60 * 1000;
-			feed = feed.filter((item) => {
-				const ts = item.publishedAt ? new Date(item.publishedAt).getTime() : 0;
-				return ts >= cutoff;
-			});
-		}
-
 		const metrics = filters.metrics as string[];
-		if (metrics.length > 0) {
-			feed = [...feed].sort((a, b) => {
-				for (const m of metrics) {
-					let diff = 0;
-					if (m === 'highest_liked') diff = (b.likes ?? 0) - (a.likes ?? 0);
-					else if (m === 'most_commented') diff = (b.comments ?? 0) - (a.comments ?? 0);
-					else if (m === 'most_views') diff = (b.views ?? 0) - (a.views ?? 0);
-					if (diff !== 0) return diff;
-				}
-				return 0;
-			});
-		}
+		const datePosted = filters.datePosted as string;
+
+		let feed = originalDiscoverItems;
+
+		feed = filterByPlatform(feed, selectedPlatforms);
+		feed = filterByContentType(feed, contentType);
+		feed = filterByDatePosted(feed, datePosted);
+		feed = sortByMetrics(feed, metrics);
 
 		return feed;
-	}, [allContents, selectedPlatforms, filters]);
+	}, [originalDiscoverItems, selectedPlatforms, filters]);
 
 	const reelsAndShortsFeed = React.useMemo(
-		() => filteredFeed.filter(isVideoType),
-		[filteredFeed],
+		() => filteredDiscoverItems.filter((item) => getContentCategory(item) === "reels_shorts"),
+		[filteredDiscoverItems],
 	);
 	const PostsFeed = React.useMemo(
-		() => filteredFeed.filter((item) => !isVideoType(item)),
-		[filteredFeed],
+		() => filteredDiscoverItems.filter((item) => getContentCategory(item) === "feed_post"),
+		[filteredDiscoverItems],
 	);
 
 	function renderPlatformIcon(platform: string, className?: string): React.ReactNode {
@@ -458,7 +421,7 @@ const DiscoveryPage = () => {
 							<h2 className="text-lg font-semibold text-gray-900">Creators to discover</h2>
 							<span className="text-sm text-gray-600">{creatorState.totalResults} profiles</span>
 						</div>
-						
+
 					</section>
 					<div
 						className="grid gap-6"
@@ -471,7 +434,7 @@ const DiscoveryPage = () => {
 						}}
 					>
 
-						{filteredFeed.map((item) => renderContentFeedCard(item, 34))}
+						{filteredDiscoverItems.map((item) => renderContentFeedCard(item, 34))}
 						{discoverContent.hasNextPage && (
 							<div className="col-span-full flex justify-center">
 								<Button
@@ -678,22 +641,27 @@ const DiscoveryPage = () => {
 										<h4 className="text-black-default font-medium text-sm mb-3">{section.title}</h4>
 										<div className="space-y-3">
 											{section.options.map((option) => (
-												<label key={option.id} className="flex items-center gap-3 cursor-pointer">
+												<label key={option.id} className={`flex items-center gap-3 ${option.disabled ? '' : 'cursor-pointer'}`}>
 													<input
 														type={section.type}
-														name={section.type === "radio" ? section.key : undefined}
+														
 														checked={
 															section.type === "radio"
 																? filters[section.key] === option.id
 																: (filters[section.key] as string[])?.includes(option.id)
 														}
 														onChange={() => handleFilterChange(section.key, option.id, section.type)}
-														className="w-4 h-4 border border-black-default rounded cursor-pointer accent-black-default"
+														disabled={option.disabled}
+														className={
+															section.type === "radio"
+																? "gradient-radio peer"
+																: "w-4 h-4 rounded accent-primary peer"
+														}
 													/>
-													<span className="text-gray-neutral text-sm">{option.label}</span>
+													<span className={`text-sm ${option.disabled ? 'opacity-40' : 'text-gray-neutral peer-checked:text-primary'}`}>{option.label}</span>
 												</label>
-						))}
-					</div>
+											))}
+										</div>
 									</div>
 								))}
 							</div>
@@ -718,19 +686,20 @@ const DiscoveryPage = () => {
 									<h3 className="text-black-default font-medium text-base mb-4">{section.title}</h3>
 									<div className="space-y-3">
 										{section.options.map((option) => (
-											<label key={option.id} className="flex items-center gap-3 cursor-pointer">
+											<label key={option.id} className={`flex items-center gap-3 ${option.disabled ? '' : 'cursor-pointer'}`}>
 												<input
 													type={section.type}
-													name={section.type === "radio" ? section.key : undefined}
+													// name={section.type === "radio" ? section.key : undefined}
 													checked={
 														section.type === "radio"
 															? filters[section.key] === option.id
 															: (filters[section.key] as string[])?.includes(option.id)
 													}
 													onChange={() => handleFilterChange(section.key, option.id, section.type)}
-													className="w-4 h-4 border border-black-default rounded cursor-pointer accent-black-default"
+													disabled={option.disabled}
+													className={`w-4 h-4 ${section.type === "radio" ? "rounded-full" : "rounded"} ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer accent-primary peer'}`}
 												/>
-												<span className="text-gray-neutral text-sm">{option.label}</span>
+												<span className={`text-sm ${option.disabled ? 'opacity-40' : 'text-gray-neutral peer-checked:text-primary'}`}>{option.label}</span>
 											</label>
 										))}
 									</div>

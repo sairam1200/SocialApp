@@ -17,9 +17,9 @@ type Props = {
 };
 
 const navItems = [
-	{ label: "Explore", href: "/" },
-	{ label: "About", href: "/about" },
-	{ label: "Product Plans", href: "/plans" },
+	{ label: "Explore", href: "/discover" },
+	{ label: "About", href: "/" },
+	{ label: "Product Plans", href: "/" },
 ];
 
 export default function LandingPrimaryNav({ className = "" }: Props) {
