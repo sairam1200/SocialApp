@@ -1,7 +1,7 @@
 "use client";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { AlertCircle, Grid2x2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -26,14 +26,12 @@ import { SearchResults, TrendingSection } from "@/components/search";
 import { useSearch } from "@/hooks/useSearch";
 import { useTrending } from "@/hooks/useTrending";
 import { SearchFilter, TrendingItem } from "@/types/search.types";
-import { useYoutubeDiscover } from "@/hooks/useYoutubeDiscover";
-import { useFacebookDiscover } from "@/hooks/discovery/useFacebookDiscover";
-import { useInstagramDiscover } from "@/hooks/discovery/useInstagramDiscover";
-import { usePinterestDiscover } from "@/hooks/discovery/usePinterestDiscover";
 import PinterestIcon from "@/components/svg/pinterest.svg";
-import { useLinkedInDiscover } from "@/hooks/discovery/useLinkedinDiscover";
-import { useConnectedPlatforms } from "@/hooks/useConnectedPlatforms";
 import { useDiscoverCreators } from "@/hooks/useDiscoverCreators";
+import { useDiscoverContent } from "@/hooks/useDiscoverContent";
+import { useAuthUserStore } from "@/store/auth-user.store";
+import type { DiscoverContentModel } from "@/types/discover.type";
+import Link from "next/link";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
 const filterSections = [
@@ -98,264 +96,51 @@ const DiscoveryPage = () => {
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
 	const creatorState = useDiscoverCreators(12);
 
-	// Determine which platforms are connected
-	const { connectedPlatforms } = useConnectedPlatforms();
+	// Auth
+	const { authUser } = useAuthUserStore();
 
-	// YouTube discover hook
-	const {
-		profile,
-		contents,
-	} = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
-	//facebook hook
-	const {
-		profile: facebookProfile,
-		contents: facebookContents,
-	} = useFacebookDiscover({ enabled: connectedPlatforms.includes('facebook') });
-	// Instagram hook
-	const {
-		profile: InstagramProfile,
-		contents: InstagramContent,
+	// Discover feed hooks (cursor-paginated)
+	const discoverContent = useDiscoverContent(); // "All" — public feed
+	const forYouContent = useDiscoverContent({ userId: authUser?.id, enabled: !!authUser }); // "For You" — user's own content (auth-only)
 
-	} = useInstagramDiscover({ enabled: connectedPlatforms.includes('instagram') });
-	//pinterest hook
-	const {
-		profile: PinterestProfile,
-		contents: PinterestContent,
-	} = usePinterestDiscover({ enabled: connectedPlatforms.includes('pinterest') });
-	//linkedin hook
-	const {
-		profile: LinkedInProfile,
-		contents: LinkedInContent,
-	} = useLinkedInDiscover({ enabled: connectedPlatforms.includes('linkedin') });
-
-	const videoContents = contents.filter(
-
-		(item) =>
-			item.type === "playlist" || item.type === "uploaded_video" || item.type === "subscription_video"
-
-
+	const allContents: DiscoverContentModel[] = React.useMemo(
+		() => discoverContent.data?.pages.flatMap((p) => p.contents) ?? [],
+		[discoverContent.data],
 	);
 
-	const youtubeFeed = videoContents.map((item) => ({
-		platform: "youtube",
-		isShort: item.shorts,
-		id: item.id,
-		title: item.title,
-		description: item.description,
-		image:
-			item.thumbnailUrl ||
-			`https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
-		publishedAt: item.publishedAt,
-		views: item.viewCount,
-		likes: item.likeCount,
-		comments: item.commentCount,
-		profileImage: profile?.profileImage || "/icons/gaddr-logo-xs.svg",
-		userName: profile?.name ??
-			"YouTube User",
-		handle: profile?.channel.handle ??
+	const forYouContents: DiscoverContentModel[] = React.useMemo(
+		() => forYouContent.data?.pages.flatMap((p) => p.contents) ?? [],
+		[forYouContent.data],
+	);
 
-			"",
-		url: `https://www.youtube.com/watch?v=${item.videoId}`,
-	}));
-	const InstagramFeed = InstagramContent.map((item) => ({
-		platform: "instagram",
-		isReel: item.mediaType === "VIDEO",
-		id: item.id,
-		title:
-			item.title
-				?.split(" ")
-				.slice(0, 2)
-				.join(" ") ||
-			item.caption
-				?.split(" ")
-				.slice(0, 2)
-				.join(" ") ||
-			"Untitled",
-		description: item.caption,
-		image:
-			item.thumbnailUrl &&
-				!item.thumbnailUrl.endsWith(".mp4")
-				? item.thumbnailUrl
-				: "/images/video-placeholder.jpg",
-		publishedAt: item.timestamp ? new Date(item.timestamp) : "",
-		views: item.reach ?? 0,
-		likes: item.likeCount ?? 0,
-		comments: item.commentsCount ?? 0,
-		profileImage: InstagramProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
-		userName: InstagramProfile?.userName ??
-			"Instagram User",
-		handle: InstagramProfile?.userId ??
+	function isVideoType(item: DiscoverContentModel): boolean {
+		const t = item.type?.toLowerCase() || '';
+		return t.includes('video') || t.includes('reel') || t.includes('short');
+	}
 
-			"",
-		url: item.permalink || item.mediaUrl,
-	}));
-	const facebookFeed = facebookContents.map((item) => ({
-		platform: "facebook",
-		isVideo: item.type === "video",
-		id: item.id,
+	const filteredFeed = React.useMemo(() => {
+		let feed = allContents;
 
-		title:
-			item.title
-				?.split(" ")
-				.slice(0, 2)
-				.join(" ") ||
-			item.message
-				?.split(" ")
-				.slice(0, 2)
-				.join(" ") ||
-			"Facebook Post",
-
-		description:
-			item.message ||
-			"User dont have description.",
-
-		image: item.picture,
-
-		publishedAt: item.createdAt ? new Date(item.createdAt) : "",
-
-		views: item.engagement,
-
-		likes: item.reactions || 0,
-
-		comments: item.commentCount,
-
-		profileImage: facebookProfile?.profileImage || "/icons/gaddr-logo-xs.svg",
-
-		userName: facebookProfile?.name ??
-			"Facebook User",
-
-		handle: "",
-
-		url: item.permalinkUrl,
-	}));
-	const PinterestFeed = PinterestContent.map((item) => ({
-		platform: "pinterest",
-		isVideo: false,
-		id: item.id,
-		title:
-			item.title?.split(" ").slice(0, 2).join(" ") ||
-			item.description?.split(" ").slice(0, 2).join(" ") ||
-			"Untitled",
-		description: item.description || item.title,
-		image:
-			item.imageUrl ||
-			"/images/image-placeholder.jpg",
-		publishedAt: item.createdAt
-			? new Date(item.createdAt)
-			: "",
-		views: 0,
-		likes: item.pinCount ?? 0,
-		comments: 0,
-		profileImage:
-			PinterestProfile?.profileImage ||
-			"/icons/gaddr-logo-xs.svg",
-		userName:
-			PinterestProfile?.userName ??
-			"Pinterest User",
-		handle: "",
-		url:
-			item.link ||
-			`https://www.pinterest.com/pin/${item.externalId ?? item.id}/`,
-	}));
-	const LinkedInFeed = LinkedInContent.map((item) => ({
-		platform: "linkedin",
-		isVideo: false,
-		id: item.id,
-
-		title:
-			item.title ||
-			item.text
-				?.split(" ")
-				.slice(0, 4)
-				.join(" ") ||
-			"Untitled",
-
-		description: item.text,
-
-		image:
-			item.author?.image ||
-			LinkedInProfile?.profileImage ||
-			"/icons/gaddr-logo-xs.svg",
-
-		publishedAt: item.created
-			? new Date(item.created)
-			: "",
-
-		views: item.activity?.impressions ?? 0,
-
-		likes: item.activity?.likes ?? 0,
-
-		comments: item.activity?.comments ?? 0,
-
-		shares: item.activity?.shares ?? 0,
-
-		profileImage:
-			LinkedInProfile?.profileImage ||
-			"/icons/gaddr-logo-xs.svg",
-
-		userName:
-			`${LinkedInProfile?.firstName ?? ""} ${LinkedInProfile?.lastName ?? ""
-				}`.trim() || "LinkedIn User",
-
-		handle:
-			LinkedInProfile?.userName ||
-			LinkedInProfile?.linkedInId ||
-			"",
-
-		url: item.externalId
-			? `https://www.linkedin.com/feed/update/${item.externalId}`
-			: "#",
-	}));
-	const platformFeeds = {
-		youtube: youtubeFeed,
-		facebook: facebookFeed,
-		instagram: InstagramFeed,
-		pinterest: PinterestFeed,
-		linkedin: LinkedInFeed,
-		/* tiktok: tiktokFeed,
-		linkedin: linkedinFeed, */
-	};
-	const combinedFeed = Object.values(platformFeeds)
-		.flat()
-		.sort(
-			(a, b) =>
-				new Date(b.publishedAt).getTime() -
-				new Date(a.publishedAt).getTime()
-		);
-	const filteredFeed = (() => {
-		let feed =
-			selectedPlatforms.length > 0
-				? combinedFeed.filter((item) =>
-					selectedPlatforms.includes(item.platform)
-				)
-				: combinedFeed;
+		if (selectedPlatforms.length > 0) {
+			feed = feed.filter((item) => selectedPlatforms.includes(item.platform));
+		}
 
 		const contentType = filters.contentType as string[];
 		if (contentType.length > 0) {
 			feed = feed.filter((item) => {
 				for (const ct of contentType) {
-					if (ct === "reels_shorts") {
-						if (
-							("isShort" in item && item.isShort) ||
-							("isReel" in item && item.isReel)
-						) return true;
-					} else if (ct === "feed_post") {
-						if (
-							!("isShort" in item && item.isShort) &&
-							!("isReel" in item && item.isReel) &&
-							!("isVideo" in item && item.isVideo)
-						) return true;
-					}
+					if (ct === 'reels_shorts' && isVideoType(item)) return true;
+					if (ct === 'feed_post' && !isVideoType(item)) return true;
 				}
-				return contentType.length === 0;
+				return false;
 			});
 		}
 
 		const datePosted = filters.datePosted as string;
-		if (datePosted && datePosted !== "anytime") {
+		if (datePosted && datePosted !== 'anytime') {
 			const now = Date.now();
 			const cutoff =
-				datePosted === "past_week"
+				datePosted === 'past_week'
 					? now - 7 * 24 * 60 * 60 * 1000
 					: now - 30 * 24 * 60 * 60 * 1000;
 			feed = feed.filter((item) => {
@@ -369,9 +154,9 @@ const DiscoveryPage = () => {
 			feed = [...feed].sort((a, b) => {
 				for (const m of metrics) {
 					let diff = 0;
-					if (m === "highest_liked") diff = (b.likes ?? 0) - (a.likes ?? 0);
-					else if (m === "most_commented") diff = (b.comments ?? 0) - (a.comments ?? 0);
-					else if (m === "most_views") diff = (b.views ?? 0) - (a.views ?? 0);
+					if (m === 'highest_liked') diff = (b.likes ?? 0) - (a.likes ?? 0);
+					else if (m === 'most_commented') diff = (b.comments ?? 0) - (a.comments ?? 0);
+					else if (m === 'most_views') diff = (b.views ?? 0) - (a.views ?? 0);
 					if (diff !== 0) return diff;
 				}
 				return 0;
@@ -379,20 +164,65 @@ const DiscoveryPage = () => {
 		}
 
 		return feed;
-	})();
-	const reelsAndShortsFeed = filteredFeed.filter(
-		(item) =>
-			("isShort" in item && item.isShort) ||
-			("isReel" in item && item.isReel) ||
-			("isVideo" in item && item.isVideo)
+	}, [allContents, selectedPlatforms, filters]);
+
+	const reelsAndShortsFeed = React.useMemo(
+		() => filteredFeed.filter(isVideoType),
+		[filteredFeed],
 	);
-	const PostsFeed = filteredFeed.filter(
-		(item) =>
-			!("isShort" in item && item.isShort) &&
-			!("isReel" in item && item.isReel) &&
-			!("isVideo" in item && item.isVideo)
+	const PostsFeed = React.useMemo(
+		() => filteredFeed.filter((item) => !isVideoType(item)),
+		[filteredFeed],
 	);
-	
+
+	function renderPlatformIcon(platform: string, className?: string): React.ReactNode {
+		const cls = className ?? 'w-5 h-5 text-blue-600';
+		switch (platform) {
+			case 'facebook':
+				return <FacebookBlueIcon className={cls} />;
+			case 'youtube':
+				return <YoutubeRedIcon />;
+			case 'instagram':
+				return <InstagramColorIcon className={cls} />;
+			case 'pinterest':
+				return <PinterestIcon className={cls} />;
+			default:
+				return null;
+		}
+	}
+
+	function renderContentFeedCard(item: DiscoverContentModel, titleLimit = 34) {
+		return (
+			<div
+				key={`${item.platform}-${item.id}`}
+				onClick={() => item.sourceUrl && window.open(item.sourceUrl, '_blank')}
+				className="cursor-pointer"
+			>
+				<ContentFeedCard
+					imageSrc={item.imageUrl ?? undefined}
+					profilePicSrc={item.userProfileImage ?? '/icons/gaddr-logo-xs.svg'}
+					userName={item.userName}
+					userHandle={item.userHandle}
+					platformIcon={renderPlatformIcon(item.platform)}
+					textContent={
+						<>
+							<span className="font-semibold block line-clamp-1">
+								{item.title?.substring(0, titleLimit)}
+							</span>
+							<span className="text-sm text-muted-foreground block line-clamp-2">
+								{item.description}
+							</span>
+						</>
+					}
+					date={item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'none'}
+					views={item.views ?? 0}
+					likes={item.likes ?? 0}
+					comments={item.comments ?? 0}
+				/>
+			</div>
+		);
+	}
+
 	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -641,57 +471,63 @@ const DiscoveryPage = () => {
 						}}
 					>
 
-						{filteredFeed.map((item) => (
-							<div
-								key={`${item.platform}-${item.id}`}
-								onClick={() => item.url && window.open(item.url, "_blank")}
-								className="cursor-pointer"
-							>
-								<ContentFeedCard
-
-									imageSrc={item.image}
-									profilePicSrc={
-										item.profileImage ??
-										"/icons/gaddr-logo-xs.svg"
-									}
-									userName={item.userName ?? "Unknown"}
-									userHandle={item.handle ?? ""}
-									platformIcon={
-										item.platform === "facebook" ? (
-											<FacebookBlueIcon className="w-5 h-5 text-blue-600" />
-										) : item.platform === "youtube" ? (
-											<YoutubeRedIcon />
-										) : item.platform === "instagram" ? (
-											<InstagramColorIcon className="w-5 h-5 text-blue-600" />
-										) : item.platform === "pinterest" ? (
-											<PinterestIcon className="w-5 h-5 text-blue-600" />
-										) : null
-									}
-									textContent={
-										<>
-											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0, 34)}
-											</span>
-
-											<span className="text-sm text-muted-foreground block line-clamp-2">
-												{item.description}
-											</span>
-										</>
-									}
-									date={
-										item.publishedAt
-											? new Date(item.publishedAt).toLocaleDateString()
-											: "none"
-									}
-									views={item.views ?? 0}
-									likes={item.likes ?? 0}
-									comments={item.comments ?? 0}
-								/>
+						{filteredFeed.map((item) => renderContentFeedCard(item, 34))}
+						{discoverContent.hasNextPage && (
+							<div className="col-span-full flex justify-center">
+								<Button
+									onClick={() => discoverContent.fetchNextPage()}
+									disabled={discoverContent.isFetchingNextPage}
+									className="flex items-center gap-2"
+								>
+									{discoverContent.isFetchingNextPage ? (
+										<Loader2 className="w-4 h-4 animate-spin" />
+									) : null}
+									Load More
+								</Button>
 							</div>
-						))}
+						)}
 					</div>
 				</TabPanel>
-				<TabPanel className="space-y-6">{renderCreators()}</TabPanel>
+				<TabPanel className="space-y-6">
+					{!authUser ? (
+						<div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+							<h3 className="text-lg font-semibold text-gray-900">Your content, all in one place</h3>
+							<p className="text-sm text-gray-600 max-w-md">
+								Sign in to see your own posts, videos, and content across all your connected platforms.
+							</p>
+							<Link href="/login">
+								<Button className="cursor-pointer">Sign in</Button>
+							</Link>
+						</div>
+					) : (
+						<div
+							className="grid gap-6"
+							style={{
+								gridTemplateColumns:
+									viewType === "grid"
+										? "repeat(auto-fit, minmax(240px, 1fr))"
+										: "1fr",
+								maxWidth: "100%",
+							}}
+						>
+							{forYouContents.map((item) => renderContentFeedCard(item, 34))}
+							{forYouContent.hasNextPage && (
+								<div className="col-span-full flex justify-center">
+									<Button
+										onClick={() => forYouContent.fetchNextPage()}
+										disabled={forYouContent.isFetchingNextPage}
+										className="flex items-center gap-2"
+									>
+										{forYouContent.isFetchingNextPage ? (
+											<Loader2 className="w-4 h-4 animate-spin" />
+										) : null}
+										Load More
+									</Button>
+								</div>
+							)}
+						</div>
+					)}
+				</TabPanel>
 				<TabPanel className="space-y-6">{renderCreators()}</TabPanel>
 				<TabPanel className="space-y-6">
 					<div
@@ -704,53 +540,7 @@ const DiscoveryPage = () => {
 							maxWidth: "100%",
 						}}
 					>
-						{PostsFeed.map((item) => (
-							<div
-								key={`${item.platform}-${item.id}`}
-								onClick={() => item.url && window.open(item.url, "_blank")}
-								className="cursor-pointer"
-							>
-								<ContentFeedCard
-									imageSrc={item.image}
-									profilePicSrc={
-										item.profileImage ??
-										"/icons/gaddr-logo-xs.svg"
-									}
-									userName={item.userName ?? "Unknown"}
-									userHandle={item.handle ?? ""}
-									platformIcon={
-										item.platform === "facebook" ? (
-											<FacebookBlueIcon className="w-5 h-5" />
-										) : item.platform === "youtube" ? (
-											<YoutubeRedIcon />
-										) : item.platform === "instagram" ? (
-											<InstagramColorIcon className="w-5 h-5" />
-										) : item.platform === "pinterest" ? (
-											<PinterestIcon className="w-5 h-5" />
-										) : null
-									}
-									textContent={
-										<>
-											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0, 50)}
-											</span>
-
-											<span className="text-sm text-muted-foreground block line-clamp-2">
-												{item.description}
-											</span>
-										</>
-									}
-									date={
-										item.publishedAt
-											? new Date(item.publishedAt).toLocaleDateString()
-											: "none"
-									}
-									views={item.views ?? 0}
-									likes={item.likes ?? 0}
-									comments={item.comments ?? 0}
-								/>
-							</div>
-						))}
+						{PostsFeed.map((item) => renderContentFeedCard(item, 50))}
 					</div>
 				</TabPanel>
 				<TabPanel className="space-y-6">
@@ -764,51 +554,7 @@ const DiscoveryPage = () => {
 							maxWidth: "100%",
 						}}
 					>
-						{reelsAndShortsFeed.map((item) => (
-							<div
-								key={`${item.platform}-${item.id}`}
-								onClick={() => item.url && window.open(item.url, "_blank")}
-								className="cursor-pointer"
-							>
-								<ContentFeedCard
-									imageSrc={item.image}
-									profilePicSrc={
-										item.profileImage ?? "/icons/gaddr-logo-xs.svg"
-									}
-									userName={item.userName ?? "Unknown"}
-									userHandle={item.handle ?? ""}
-									platformIcon={
-										item.platform === "facebook" ? (
-											<FacebookBlueIcon className="w-5 h-5" />
-										) : item.platform === "youtube" ? (
-											<YoutubeRedIcon />
-										) : item.platform === "instagram" ? (
-											<InstagramColorIcon className="w-5 h-5" />
-										) : item.platform === "pinterest" ? (
-											<PinterestIcon className="w-5 h-5" />
-										) : null
-									}
-									textContent={
-										<>
-											<span className="font-semibold block line-clamp-1">
-												{item.title?.substring(0, 34)}
-											</span>
-											<span className="text-sm text-muted-foreground block line-clamp-2">
-												{item.description}
-											</span>
-										</>
-									}
-									date={
-										item.publishedAt
-											? new Date(item.publishedAt).toLocaleDateString()
-											: "none"
-									}
-									views={item.views ?? 0}
-									likes={item.likes ?? 0}
-									comments={item.comments ?? 0}
-								/>
-							</div>
-						))}
+						{reelsAndShortsFeed.map((item) => renderContentFeedCard(item, 34))}
 					</div>
 				</TabPanel>
 			</TabPanels>

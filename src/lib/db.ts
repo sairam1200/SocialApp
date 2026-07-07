@@ -18,30 +18,9 @@ export interface DiscoverContentEntry {
   expiresAt: number;
 }
 
-export interface DiscoverCreatorsEntry {
-  key: string;
-  profiles: unknown[];
-  page: number;
-  totalResults: number;
-  hasNextPage: boolean;
-  cachedAt: number;
-  staleAt: number;
-  expiresAt: number;
-}
-
-export interface UserProfileEntry {
-  key: string;
-  data: unknown;
-  cachedAt: number;
-  staleAt: number;
-  expiresAt: number;
-}
-
 interface GaddrCacheDB extends DexieType {
   discoverProfiles: Table<DiscoverProfileEntry, string>;
   discoverContents: Table<DiscoverContentEntry, string>;
-  discoverCreators: Table<DiscoverCreatorsEntry, string>;
-  userProfiles: Table<UserProfileEntry, string>;
 }
 
 const DB_NAME = "GaddrCache";
@@ -57,8 +36,6 @@ function createDb(): GaddrCacheDB {
   db.version(DB_VERSION).stores({
     discoverProfiles: "key, cachedAt, expiresAt",
     discoverContents: "key, cachedAt, expiresAt",
-    discoverCreators: "key, cachedAt, expiresAt",
-    userProfiles: "key, cachedAt, expiresAt",
   });
 
   return db;
@@ -136,8 +113,6 @@ async function clearAllCaches(): Promise<void> {
     await Promise.all([
       db.discoverProfiles.clear(),
       db.discoverContents.clear(),
-      db.discoverCreators.clear(),
-      db.userProfiles.clear(),
     ]);
   } catch {}
 }

@@ -17,6 +17,7 @@ import { ClaimTypes } from "@/constants/globals";
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useAuthUserStore } from "@/store/auth-user.store";
 function ProfileMenu({
 	triggerElement,
 	contentProps,
@@ -31,6 +32,7 @@ function ProfileMenu({
 const deviceId = getDeviceIdOrNull();
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { clearAuthUser } = useAuthUserStore();
 
 	const usernameHref = `/u/${user?.[ClaimTypes.UserName]}`;
 	const pathname = usePathname();
@@ -44,6 +46,7 @@ const deviceId = getDeviceIdOrNull();
 
 	const handleLogout = async () => {
   try {
+    clearAuthUser();
     await logoutFn(deviceId);
 
     queryClient?.clear?.();

@@ -1,4 +1,4 @@
-import { TokenService, AccountService, UserService, SearchService, YoutubeService, FacebookService } from "./api";
+import { TokenService, AccountService, UserService, SearchService, YoutubeService, FacebookService, DiscoverService } from "./api";
 import { interceptors } from "@/interceptors";
 import { createApiService } from 'restfit';
 import { IntegrationsService } from "./api/integrations.service";
@@ -12,6 +12,7 @@ type ApiServiceMap = {
   User: typeof UserService;
   Search: typeof SearchService;
   Onboarding: typeof OnboardingService;
+  Discover: typeof DiscoverService;
 };
 
 export const apiClient = createApiService<ApiServiceMap>(
@@ -47,6 +48,7 @@ authorization: async () => {
     User: UserService,
     Search: SearchService,
     Onboarding: OnboardingService,
+    Discover: DiscoverService,
   }
 );
 
