@@ -3,7 +3,9 @@
 import React, { ComponentType, SVGProps, useState, use } from "react";
 import { AlertCircle, Camera, Edit, EllipsisVertical, Loader2, Mail, RefreshCw, UserPlus } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
+import DialogContainer from "@/components/dialog/DialogContainer";
 import TiktokIcon from "@/components/svg/tiktok-black-circle.svg";
 import YoutubeIcon from "@/components/svg/youtube-red-circle.svg";
 import InstagramIcon from "@/components/svg/instagram-colored.svg";
@@ -64,6 +66,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 	const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
 	const [openEditProfileDialog, setOpenEditProfileDialog] = useState(false);
 	const [openManageSocial, setOpenManageSocial] = useState(false);
+	const [showLoginDialog, setShowLoginDialog] = useState(false);
 
 	const followState = useFollowUser({
 		userId: data?.id,
@@ -132,7 +135,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 						</div>
 
 						<div>
-							{isGuest ? (
+							{!isAuthenticated ? (
+								<div className="flex items-center gap-3">
+									<Button variant="secondary" onClick={() => setShowLoginDialog(true)}>
+										Follow
+									</Button>
+									<Button variant="secondary" onClick={() => setShowLoginDialog(true)}>
+										Message
+									</Button>
+								</div>
+							) : isGuest ? (
 								<div className="flex items-center gap-3">
 									<span>
 										<Button
@@ -303,6 +315,28 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 					});
 				}}
 			/>
+			{showLoginDialog && (
+				<DialogContainer
+					open={showLoginDialog}
+					onClose={() => setShowLoginDialog(false)}
+					title="Log In to Continue"
+					maxWidthClass="max-w-lg"
+					footer={
+						<div className="flex justify-end gap-4">
+							<Link href="/login">
+								<Button label="Login" variant="secondary" />
+							</Link>
+							<Link href="/signup">
+								<Button label="Signup" />
+							</Link>
+						</div>
+					}
+				>
+					<p className="text-sm">
+						To interact with this profile, you need to log in or sign up.
+					</p>
+				</DialogContainer>
+			)}
 		</>
 	);
 }

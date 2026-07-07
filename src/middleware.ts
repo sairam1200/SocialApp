@@ -330,7 +330,6 @@ export async function middleware(
 
 export const config = {
 	matcher: [
-		"/discover/:path*",
 		"/settings/:path*",
 		"/profile/:path*",
 

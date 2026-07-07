@@ -3,7 +3,6 @@
 export const PROTECTED_ROUTES = [
 	"/settings",
 	"/profile",
-	"/discover",
 	"/messages",
 	"/analytics",
 ];
