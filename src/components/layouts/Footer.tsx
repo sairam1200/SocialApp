@@ -21,17 +21,20 @@ const Footer = () => {
 						<Link href={""} className="text-xs text-[#333333]">
 							Contact Us
 						</Link>
-						<Link href={""} className="text-xs text-[#333333]">
-							Privacy & Terms
+						<Link href={"/privacy-policy"} className="text-xs text-[#333333]">
+							Privacy Policy
+						</Link>
+						<Link href={"/terms"} className="text-xs text-[#333333]">
+							Terms & Conditions
 						</Link>
 					</div>
 
 					<div className="flex gap-2 justify-center md:justify-start">
-						<BrandIcon href=" " src="/icons/gaddr-icon.svg" alt="gaddr" />
-						<BrandIcon href=" " src="/icons/twitter.svg" alt="twitter" />
-						<BrandIcon href=" " src="/icons/linkedin.svg" alt="linkedin" />
-						<BrandIcon href=" " src="/icons/instagram.svg" alt="instagram" />
-						<BrandIcon href=" " src="/icons/tiktok.svg" alt="tiktok" />
+						<BrandIcon href="https://gaddr.com" src="/icons/gaddr-icon.svg" alt="gaddr" />
+						<BrandIcon href="https://x.com" src="/icons/twitter.svg" alt="twitter" />
+						<BrandIcon href="https://www.linkedin.com/company/gaddr" src="/icons/linkedin.svg" alt="linkedin" />
+						<BrandIcon href="https://www.instagram.com" src="/icons/instagram.svg" alt="instagram" />
+						<BrandIcon href="https://www.tiktok.com" src="/icons/tiktok.svg" alt="tiktok" />
 					</div>
 				</div>
 

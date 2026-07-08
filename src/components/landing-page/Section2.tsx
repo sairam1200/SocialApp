@@ -8,15 +8,15 @@ import Link from "next/link";
 const CompanyCarouselImages = ["breakit", "mashable", "synsam", "schibsted", "academedia"];
 
 const DiscoveryImages = [
-	"discovery-image-1.svg",
-	"discovery-image-2.svg",
-	"discovery-image-3.svg",
-	"discovery-image-4.svg",
-	"discovery-image-5.svg",
-	"discovery-image-6.svg",
-	"discovery-image-7.svg",
-	["discovery-image-8.svg", "discovery-image-8-blured.webp"],
-	"discovery-image-9.svg",
+	"discovery-image-1.webp",
+	"discovery-image-2.webp",
+	"discovery-image-3.webp",
+	"discovery-image-4.webp",
+	"discovery-image-5.webp",
+	"discovery-image-6.webp",
+	"discovery-image-7.webp",
+	["discovery-image-8.webp", "discovery-image-8-blured.webp"],
+	"discovery-image-9.webp",
 ];
 
 export default function Section2() {
@@ -44,7 +44,7 @@ export default function Section2() {
 									alt={img}
 									width={160}
 									height={40}
-									className="object-contain w-24 md:w-40"
+									className="object-contain w-24 md:w-40 h-auto"
 									loading="lazy"
 								/>
 							</CarouselItem>
@@ -85,6 +85,7 @@ export default function Section2() {
 												loading="eager"
 												fetchPriority="high"
 												sizes="(max-width: 768px) 75vw, 400px"
+												unoptimized
 											/>
 										) : (
 											<div className="relative w-full h-full">
@@ -97,6 +98,7 @@ export default function Section2() {
 														className="translate-y-[4%]"
 														loading="eager"
 														fetchPriority="high"
+														unoptimized
 													/>
 												</div>
 												<Image
@@ -108,6 +110,7 @@ export default function Section2() {
 													loading="eager"
 													fetchPriority="high"
 													sizes="(max-width: 768px) 75vw, 400px"
+													unoptimized
 												/>
 											</div>
 										)}
@@ -131,6 +134,7 @@ export default function Section2() {
 							loading="eager"
 							fetchPriority="high"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[1]}`}
@@ -141,6 +145,7 @@ export default function Section2() {
 							loading="eager"
 							fetchPriority="high"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 					</div>
 
@@ -155,6 +160,7 @@ export default function Section2() {
 							loading="eager"
 							fetchPriority="high"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[3]}`}
@@ -164,6 +170,7 @@ export default function Section2() {
 							className="h-9/12 w-full object-cover"
 							loading="lazy"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 					</div>
 
@@ -178,6 +185,7 @@ export default function Section2() {
 							loading="eager"
 							fetchPriority="high"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[5]}`}
@@ -188,6 +196,7 @@ export default function Section2() {
 							loading="eager"
 							fetchPriority="high"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 						<Image
 							src={`/images/${DiscoveryImages[6]}`}
@@ -198,6 +207,7 @@ export default function Section2() {
 							fetchPriority="auto"
 							preload
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 					</div>
 
@@ -214,6 +224,7 @@ export default function Section2() {
 									loading="eager"
 									fetchPriority="high"
 									sizes="(max-width: 1280px) 25vw, 300px"
+									unoptimized
 								/>
 							</div>
 							<Image
@@ -225,6 +236,7 @@ export default function Section2() {
 								preload
 								fetchPriority="auto"
 								sizes="(max-width: 1280px) 25vw, 300px"
+								unoptimized
 							/>
 						</div>
 
@@ -237,6 +249,7 @@ export default function Section2() {
 							preload
 								fetchPriority="auto"
 							sizes="(max-width: 1280px) 25vw, 300px"
+							unoptimized
 						/>
 					</div>
 				</div>

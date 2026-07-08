@@ -35,26 +35,14 @@ export default function Section4() {
 						/>
 
 						<div className="relative max-w-full md:max-w-4xl">
-							{/* Fast WebP placeholder */}
 							<Image
 								src="/images/platform-image.webp"
 								alt="Platform"
 								width={1100}
 								height={720}
 								priority
-								className={`absolute inset-0 w-full h-auto transition-opacity duration-500 ${svgLoaded ? "opacity-0" : "opacity-100"
-									}`}
-							/>
-
-							{/* Heavy SVG */}
-							<Image
-								src="/images/platform-image.svg"
-								alt="Platform"
-								width={1100}
-								height={720}
-								onLoad={() => setSvgLoaded(true)}
-								className={`w-full h-auto transition-opacity duration-500 ${svgLoaded ? "opacity-100" : "opacity-0"
-									}`}
+								sizes="(max-width: 768px) 100vw, 1100px"
+								className="w-full h-auto"
 							/>
 						</div>
 					</div>
@@ -78,7 +66,7 @@ export default function Section4() {
 					</Button>
 
 					<Image
-						src={`/images/avatar-img-1.svg`}
+						src={`/images/avatar-img-1.webp`}
 						alt="Avatar"
 						width={72}
 						height={72}
@@ -88,7 +76,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/avatar-img-2.svg`}
+						src={`/images/avatar-img-2.webp`}
 						alt="Avatar"
 						width={72}
 						height={72}
@@ -99,7 +87,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/avatar-img-3.svg`}
+						src={`/images/avatar-img-3.webp`}
 						alt="Avatar"
 						width={72}
 						height={72}
@@ -110,7 +98,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/avatar-img-1.svg`}
+						src={`/images/avatar-img-4.webp`}
 						alt="Avatar"
 						width={72}
 						height={72}

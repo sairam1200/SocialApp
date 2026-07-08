@@ -52,7 +52,7 @@ export default function LandingPrimaryNav({ className = "" }: Props) {
 				{/* Links */}
 				<ul className="flex gap-8 text-white font-medium">
 					{navItems.map((item) => (
-						<li key={item.href} className="cursor-pointer transition text-base font-normal leading-6 hover:opacity-80">
+						<li key={item.label} className="cursor-pointer transition text-base font-normal leading-6 hover:opacity-80">
 							<Link href={item.href}>{item.label}</Link>
 						</li>
 					))}
@@ -119,7 +119,7 @@ export default function LandingPrimaryNav({ className = "" }: Props) {
 					{/* Nav links */}
 					<nav className="flex flex-col items-center gap-6 text-white text-[22px] font-medium mb-10">
 						{navItems.map((item) => (
-							<Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="active:opacity-70">
+							<Link key={item.label} href={item.href} onClick={() => setOpen(false)} className="active:opacity-70">
 								{item.label}
 							</Link>
 						))}

@@ -11,7 +11,7 @@ export default function Section3() {
         flex justify-center
         overflow-hidden"
 		>
-			<div className="pointer-events-none absolute inset-0 bg-[url('/images/landing-bg-pattern.png')] bg-repeat bg-top opacity-[0.05]" />
+			<div className="pointer-events-none absolute inset-0 bg-[url('/images/landing-bg-pattern.webp')] bg-repeat bg-top opacity-[0.05]" />
 
 			<div className="relative max-w-7xl w-full flex flex-col md:flex-row md:justify-between items-center gap-10">
 				{/* LEFT: Text */}
@@ -29,7 +29,7 @@ export default function Section3() {
 				{/* RIGHT: Image */}
 				<div className="flex justify-center md:w-1/2">
 					<Image
-						src="/images/laptop-mobile.svg"
+						src="/images/laptop-mobile.webp"
 						alt="Manage your social media from any device"
 						width={567}
 						height={350}

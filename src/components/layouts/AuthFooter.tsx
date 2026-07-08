@@ -24,7 +24,8 @@ const AuthFooter = () => {
         <div className='flex justify-center gap-8 md:gap-10'>
           <Link href="#" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Help Center</Link>
           <Link href="#" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Contact Us</Link>
-          <Link href="#" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Privacy & Terms</Link>
+          <Link href="privacy-policy" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Privacy policy</Link>
+          <Link href="terms" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Terms & conditions</Link>
         </div>
         {/* Right: social icons */}
         <div className='w-full md:w-auto flex items-center justify-center md:justify-end gap-[14px] mt-1'>

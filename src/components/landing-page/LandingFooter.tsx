@@ -23,8 +23,8 @@ const footerLinks = [
 	{
 		title: "Legal",
 		links: [
-			{ label: "Privacy Policy", href: "#" },
-			{ label: "Terms & Conditions", href: "#" },
+			{ label: "Privacy Policy", href: "/privacy-policy" },
+			{ label: "Terms & Conditions", href: "/terms" },
 		],
 	},
 ];
@@ -101,12 +101,12 @@ const LandingFooter = () => {
 
 					{/* SOCIAL ICONS */}
 					<div className="flex items-center gap-4">
-						<Image fetchPriority="low" loading="lazy"  src="/icons/gaddr-icon.svg" width={40} height={40} alt="gaddr" sizes="40px" />
-						<Image fetchPriority="low" loading="lazy"  src="/icons/tiktok.svg" width={40} height={40} alt="tiktok" sizes="40px" />
-						<Image fetchPriority="low" loading="lazy"  src="/icons/instagram.svg" width={40} height={40} alt="instagram" sizes="40px" />
-						<Image fetchPriority="low" loading="lazy"  src="/icons/linkedin.svg" width={40} height={40} alt="linkedin" sizes="40px" />
-						<Image fetchPriority="low" loading="lazy"  src="/icons/gaddr-fb.svg" width={50} height={50} alt="facebook" sizes="50px" />
-						<Image fetchPriority="low" loading="lazy"  src="/icons/twitter.svg" width={40} height={40} alt="twitter" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/gaddr-icon.svg" width={40} height={40} alt="gaddr" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/tiktok.svg" width={40} height={40} alt="tiktok" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/instagram.svg" width={40} height={40} alt="instagram" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/linkedin.svg" width={40} height={40} alt="linkedin" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/gaddr-fb.svg" width={40} height={40} alt="facebook" sizes="40px" />
+						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/twitter.svg" width={40} height={40} alt="twitter" sizes="40px" />
 					</div>
 				</div>
 			</div>

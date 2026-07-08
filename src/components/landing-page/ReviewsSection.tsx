@@ -15,28 +15,28 @@ export default function ReviewsSection() {
 			text: "“Following people in one place like Gaddr, could really be more effective. I think that’s the future”",
 			name: "Linda Hörnfeldt",
 			title: "Founder Influencers Sweden",
-			image: "/images/linda_testimonial.svg",
+			image: "/images/linda_testimonial.webp",
 		},
 		{
 			rating: 5,
 			text: "“Gaddr is like a swiss knife. Everything in one place”",
 			name: "Alexis Piippo",
 			title: "CEO Karlex. Founder TropSe",
-			image: "/images/alexis_testimonial.svg",
+			image: "/images/alexis_testimonial.webp",
 		},
 		{
 			rating: 4,
 			text: "“Thanks to Gaddr, we are now able to have all of our social profiles on one. We want our customers to get the quickest access to all our channels including support”",
 			name: "Nova and Daniella",
 			title: "Founders YourHappyPeriod",
-			image: "/images/nova_testimonial.svg",
+			image: "/images/nova_testimonial.webp",
 		},
 		{
 			rating: 4,
 			text: "“Gaddr is Fantastic! You have gathered all your platforms in one portal!”",
 			name: "Simon",
 			title: "Pro Gramer",
-			image: "/images/simon_testimonial.svg",
+			image: "/images/simon_testimonial.webp",
 		},
 	];
 
@@ -123,7 +123,7 @@ export default function ReviewsSection() {
 				alt="Image"
 				width={300}
 				height={300}
-				className="absolute -top-10 -right-10 w-[120px] sm:w-40 md:w-[220px]"
+				className="absolute -top-10 -right-10 w-[120px] sm:w-40 md:w-[220px] h-[120px] sm:h-40 md:h-[220px]"
 				loading="lazy"
 				aria-hidden="true"
 			/>
@@ -133,7 +133,7 @@ export default function ReviewsSection() {
 				alt="Image"
 				width={300}
 				height={300}
-				className="absolute -bottom-10 -left-5 w-[120px] sm:w-40 md:w-[220px]"
+				className="absolute -bottom-10 -left-5 w-[120px] sm:w-40 md:w-[220px] h-[120px] sm:h-40 md:h-[220px]"
 				loading="lazy"
 				aria-hidden="true"
 			/>

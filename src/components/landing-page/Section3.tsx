@@ -15,7 +15,7 @@ export default function Section3() {
 		>
 			<div
 				className="pointer-events-none absolute inset-0 
-          bg-[url('/images/landing-bg-pattern.png')]
+          bg-[url('/images/landing-bg-pattern.webp')]
           bg-repeat bg-top opacity-[0.05]"
 			/>
 
