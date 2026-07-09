@@ -22,8 +22,8 @@ const AuthFooter = () => {
         </div>
         {/* Center: links */}
         <div className='flex justify-center gap-8 md:gap-10'>
-          <Link href="#" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Help Center</Link>
-          <Link href="#" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Contact Us</Link>
+          <Link href="/contact" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Help Center</Link>
+          <Link href="/contact" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Contact Us</Link>
           <Link href="privacy-policy" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Privacy policy</Link>
           <Link href="terms" className='font-opensans font-bold text-[12px] text-[#595959] leading-[16px]'>Terms & conditions</Link>
         </div>

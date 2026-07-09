@@ -15,10 +15,10 @@ const Footer = () => {
 					</div>
 
 					<div className="flex gap-6 justify-center flex-wrap">
-						<Link href={""} className="text-xs text-[#333333]">
+						<Link href={"/contact"} className="text-xs text-[#333333]">
 							Help Center
 						</Link>
-						<Link href={""} className="text-xs text-[#333333]">
+						<Link href={"/contact"} className="text-xs text-[#333333]">
 							Contact Us
 						</Link>
 						<Link href={"/privacy-policy"} className="text-xs text-[#333333]">

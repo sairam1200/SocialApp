@@ -60,7 +60,7 @@ export default function ProfileCreationSystem() {
         interests: [],
         connectedAccounts: {},
         profileImage: currentUser?.profileImageUrl ?? null,
-        profileImagePreview: currentUser?.profileImageUrl ?? null,
+        profileImagePreview: currentUser?.["http://gaddr.com/claims/profile-picture"] ?? null,
     };
     const [formData, setFormData] =
         useState<ProfileFormData>(DEFAULT_FORM_DATA);

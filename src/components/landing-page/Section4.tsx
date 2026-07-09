@@ -1,9 +1,11 @@
-import React from "react";
+"use client";
+
+import { useRouter } from "next/navigation";
+
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { useState } from "react";
 export default function Section4() {
-	const [svgLoaded, setSvgLoaded] = useState(false);
+	  const router = useRouter();
 	return (
 		<>
 			<div className="w-full relative bg-white overflow-hidden py-12 md:py-32">
@@ -18,7 +20,7 @@ export default function Section4() {
 							inspired and updated without hopping between apps. Save time, spark ideas. Try it for free!
 						</p>
 
-						<Button size="lg" className="hidden md:block">
+						<Button size="lg" className="hidden md:block" onClick={() => router.push("/platform-status")}>
 							Get Demo Now
 						</Button>
 					</div>
@@ -47,7 +49,7 @@ export default function Section4() {
 						</div>
 					</div>
 
-					<Button size="lg" className="md:hidden">
+					<Button size="lg" className="md:hidden" onClick={() => router.push("/platform-status")}>
 						Get Demo Now
 					</Button>
 				</div>

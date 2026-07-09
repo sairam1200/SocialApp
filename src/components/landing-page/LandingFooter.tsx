@@ -7,16 +7,16 @@ import { Button } from "../ui/button";
 const footerLinks = [
 	{
 		title: "About",
-		links: [{ label: "About us", href: "#" }],
+		links: [{ label: "About us", href: "https://gaddr.com/" }],
 	},
 	{
 		title: "Features",
-		links: [{ label: "Platform features", href: "#" }],
+		links: [{ label: "Platform features", href: "platform-status" }],
 	},
 	{
 		title: "Support",
 		links: [
-			{ label: "Help Center", href: "#" },
+			{ label: "Help Center", href: "/contact" },
 			{ label: "FAQ", href: "#" },
 		],
 	},
