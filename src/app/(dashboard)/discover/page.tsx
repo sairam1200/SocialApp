@@ -226,6 +226,14 @@ const DiscoveryPage = () => {
 		}
 	}, [queryParam, searchQuery, handleSearch]);
 
+	// Reset search state when URL query param is removed (navigation away from search)
+	useEffect(() => {
+		if (!queryParam) {
+			setShowSearchResults(false);
+			setSearchQuery("");
+		}
+	}, [queryParam]);
+
 	// Handle trending item click
 	const handleTrendingClick = (item: TrendingItem) => {
 		setSearchQuery(item.title);
@@ -347,6 +355,10 @@ const DiscoveryPage = () => {
 	// Render content based on search state
 	const renderContent = () => {
 		if (showSearchResults) {
+			const platformFilteredResults = selectedPlatforms.length > 0
+				? searchState.results.filter((r) => selectedPlatforms.includes(r.platform))
+				: searchState.results;
+
 			return (
 				<div className="space-y-6">
 					<div className="flex items-center justify-between">
@@ -354,11 +366,11 @@ const DiscoveryPage = () => {
 							Search Results for &quot;{searchQuery}&quot;
 						</h2>
 						<span className="text-sm text-gray-600">
-							{searchState.totalResults} results
+							{platformFilteredResults.length} results
 						</span>
 					</div>
 					<SearchResults
-						results={searchState.results}
+						results={platformFilteredResults}
 						isLoading={searchState.isLoading}
 						isError={searchState.isError}
 						error={searchState.error}

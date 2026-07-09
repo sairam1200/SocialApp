@@ -1,7 +1,8 @@
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, UserRound } from "lucide-react";
+import SearchIcon from "@/components/svg/search.svg";
+import PersonIcon from "@/components/svg/person.svg";
 import { GlobalSearchSuggestion } from "@/types/search.types";
 
 const searchTabs = ["Profiles & Contents", "Inspiration", "Trending", "By Category"];
@@ -66,7 +67,7 @@ function SearchDropdownTabs({
 						)}
 						{showSuggestions && isLoading && (
 							<div className="flex items-center justify-center gap-2 py-6">
-								<Loader2 className="h-4 w-4 animate-spin" /> Searching...
+								<div className="h-4 w-4 border-2 border-gray-neutral border-t-transparent rounded-full animate-spin"></div> Searching...
 							</div>
 						)}
 						{showSuggestions && !isLoading && suggestions.length === 0 && (
@@ -81,9 +82,9 @@ function SearchDropdownTabs({
 								onClick={() => onSuggestionClick(suggestion)}
 								className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-[#FAFAFA]"
 							>
-								{suggestion.type === "user"
-									? <UserRound className="h-5 w-5 shrink-0" />
-									: <Search className="h-5 w-5 shrink-0" />}
+							{suggestion.type === "user"
+								? <PersonIcon className="h-5 w-5 shrink-0" />
+								: <SearchIcon className="h-5 w-5 shrink-0" />}
 								<span className="min-w-0">
 									<span className="block truncate font-medium text-[#0D0D0D]">{suggestion.label}</span>
 									<span className="block truncate text-xs text-gray-neutral">

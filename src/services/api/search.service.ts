@@ -120,6 +120,7 @@ export class SearchService {
       const meta = content.metaData;
       const thumbnailFromMeta = meta?.thumbnailUrl || meta?.imageUrl || meta?.mediaUrl || meta?.coverImageUrl;
       const thumbnailUrl = thumbnailFromMedia || thumbnailFromMeta || undefined;
+      const rawEngagement = content.engagement || meta;
       return {
         id: content.id,
         type: "content",
@@ -136,6 +137,12 @@ export class SearchService {
           profileImage: content.user.profileImage,
         },
         media: thumbnailUrl ? { type: "image", thumbnailUrl } : undefined,
+        engagement: {
+          views: rawEngagement?.views ?? (meta?.viewCount || meta?.impressions || 0),
+          likes: rawEngagement?.likes ?? (meta?.likeCount || 0),
+          comments: rawEngagement?.comments ?? (meta?.commentCount || meta?.commentsCount || meta?.numComments || 0),
+          shares: rawEngagement?.shares ?? 0,
+        },
       };
     });
     return {

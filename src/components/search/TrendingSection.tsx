@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import WarningIcon from "@/components/svg/warning-icon.svg";
+import StarIcon from "@/components/svg/Star.svg";
 import { TrendingItem } from "@/types/search.types";
 import { cn } from "@/utils/cn.util";
 
@@ -59,7 +60,7 @@ const TrendingItemCard = ({
                     </h3>
                     {item.growth !== undefined && item.growth > 0 && (
                         <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full shrink-0">
-                            <TrendingUp className="w-3 h-3" />
+                            <StarIcon className="w-3 h-3" />
                             <span>{item.growth}%</span>
                         </div>
                     )}
@@ -116,7 +117,7 @@ export const TrendingSection = ({
         return (
             <div className={cn("space-y-3", className)}>
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
+                    <StarIcon className="w-5 h-5" />
                     Trending Now
                 </h2>
                 <div className="space-y-3">
@@ -132,7 +133,7 @@ export const TrendingSection = ({
         return (
             <div className={cn("rounded-lg border border-red-200 bg-red-50 p-4", className)}>
                 <div className="flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                    <WarningIcon className="w-5 h-5 text-red-600 shrink-0" />
                     <div>
                         <h3 className="font-semibold text-red-900">
                             Failed to Load Trending
@@ -149,7 +150,7 @@ export const TrendingSection = ({
     if (!items || items.length === 0) {
         return (
             <div className={cn("rounded-lg border border-[#E6E6E6] bg-white p-8 text-center", className)}>
-                <Loader2 className="w-8 h-8 text-gray-400 mx-auto mb-3 opacity-50" />
+                <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-3 opacity-50"></div>
                 <p className="text-gray-600">No trending content available</p>
             </div>
         );
@@ -158,7 +159,7 @@ export const TrendingSection = ({
     return (
         <div className={cn("space-y-3", className)}>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+                <StarIcon className="w-5 h-5" />
                 Trending Now
             </h2>
             <div className="space-y-3">

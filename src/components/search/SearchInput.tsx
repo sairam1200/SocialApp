@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Search, X, Loader2 } from "lucide-react";
+import SearchIcon from "@/components/svg/search.svg";
+import CloseIcon from "@/components/svg/icon-close.svg";
 import { cn } from "@/utils/cn.util";
 
 interface SearchInputProps {
@@ -87,7 +88,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                         aria-label="Search"
                         className="shrink-0"
                     >
-                        <Search className="w-5 h-5 text-gray-neutral" />
+                        <SearchIcon className="w-5 h-5 text-gray-neutral" />
                     </button>
                     <input
                         ref={ref}
@@ -105,14 +106,14 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                     />
 
                     {isLoading ? (
-                        <Loader2 className="w-5 h-5 text-gray-neutral animate-spin shrink-0" />
+                        <div className="w-5 h-5 border-2 border-gray-neutral border-t-transparent rounded-full animate-spin shrink-0"></div>
                     ) : value ? (
                         <button
                             onClick={handleClear}
                             className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
                             aria-label="Clear search"
                         >
-                            <X className="w-5 h-5 text-gray-neutral" />
+                            <CloseIcon className="w-5 h-5 text-gray-neutral" />
                         </button>
                     ) : null}
                 </div>
@@ -133,7 +134,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
                                             "text-gray-neutral hover:text-gray-default"
                                         )}
                                     >
-                                        <Search className="w-4 h-4 text-gray-neutral shrink-0" />
+                                        <SearchIcon className="w-4 h-4 text-gray-neutral shrink-0" />
                                         <span className="truncate">{suggestion}</span>
                                     </button>
                                 ))}

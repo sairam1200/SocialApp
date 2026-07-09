@@ -3,9 +3,10 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ImageIcon from "@/components/svg/image.svg";
 import MicIcon from "@/components/svg/mic.svg";
+import SearchIcon from "@/components/svg/search.svg";
+import CloseIcon from "@/components/svg/icon-close.svg";
 import { Button } from "@/components/ui/button";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { X, Search, Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/services/apiClient.service";
@@ -184,7 +185,7 @@ const SearchBar = () => {
 
         {debouncedQuery.length >= 3 && isLoading && (
           <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-gray-neutral">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <div className="h-4 w-4 border-2 border-gray-neutral border-t-transparent rounded-full animate-spin"></div>
             Searching...
           </div>
         )}
@@ -212,7 +213,7 @@ const SearchBar = () => {
               highlightedIndex === index ? "bg-[#F0F0FF]" : "hover:bg-[#F5F5F5]"
             )}
           >
-            <Search className="h-4 w-4 shrink-0 text-gray-neutral" />
+            <SearchIcon className="h-4 w-4 shrink-0 text-gray-neutral" />
             <span className="min-w-0">
               <span className="block truncate font-medium text-[#0D0D0D]">{suggestion.label}</span>
               {suggestion.type === "user" && suggestion.userName && (
@@ -242,7 +243,7 @@ const SearchBar = () => {
             aria-label="Search"
             className="shrink-0"
           >
-            <Search className="w-5 h-5 text-gray-neutral" />
+            <SearchIcon className="w-5 h-5 text-gray-neutral" />
           </button>
           <input
             ref={inputRef}
@@ -264,7 +265,7 @@ const SearchBar = () => {
           />
 
           {isLoading ? (
-            <Loader2 className="w-5 h-5 text-gray-neutral animate-spin shrink-0" />
+            <div className="w-5 h-5 border-2 border-gray-neutral border-t-transparent rounded-full animate-spin shrink-0"></div>
           ) : query ? (
             <button
               onClick={handleClear}
@@ -272,7 +273,7 @@ const SearchBar = () => {
               aria-label="Clear search"
               type="button"
             >
-              <X className="w-5 h-5 text-gray-neutral" />
+              <CloseIcon className="w-5 h-5 text-gray-neutral" />
             </button>
           ) : null}
 

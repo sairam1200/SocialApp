@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/utils/cn.util";
 import AvatarIcon from "@/components/svg/avatar-icon.svg";
 import DiscoverIcon from "@/components/svg/dashboard.svg";
@@ -22,6 +22,7 @@ export default function SidebarNav() {
 	const [openPostDialog, setOpenPostDialog] = useState(false);
 	const [isLoginDialog, setIsLoginDialog] = useState(false);
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
 	const isActive = useCallback((href: string) => pathname.startsWith(href), [pathname]);
 
 	const handlePostClick = useCallback(() => {
@@ -40,6 +41,8 @@ export default function SidebarNav() {
 
 	const handleNavClick = (href: string, action?: () => void) => (e: React.MouseEvent) => {
 		if (action && isActive(href)) {
+			const hasSearchQuery = searchParams.has('q') && searchParams.get('q')!.trim().length > 0;
+			if (hasSearchQuery) return;
 			e.preventDefault();
 			action();
 			if (typeof window !== "undefined") {

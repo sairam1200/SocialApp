@@ -73,6 +73,12 @@ export interface GlobalSearchContent {
   publishedAt?: string;
   media?: SearchMediaItem[];
   metaData?: Record<string, any>;
+  engagement?: {
+    views?: number;
+    likes?: number;
+    comments?: number;
+    shares?: number;
+  };
   user: GlobalSearchProfile;
 }
 

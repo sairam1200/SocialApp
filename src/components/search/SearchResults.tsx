@@ -1,14 +1,16 @@
 "use client";
 
 import React from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import WarningIcon from "@/components/svg/warning-icon.svg";
 import { SearchResult } from "@/types/search.types";
 import ContentFeedCard from "@/components/card/ContentFeedCard";
 import ProfileCard from "@/components/card/PorfileCard";
 import { cn } from "@/utils/cn.util";
 import { PublicProfileModel } from "@/types/account/profile.type";
-import { platformMap, PlatformId } from "@/constants/platforms";
-
+import YoutubeRedIcon from "@/components/svg/Youtube.svg";
+import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
+import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
+import PinterestIcon from "@/components/svg/pinterest.svg";
 interface SearchResultsProps {
     results: SearchResult[];
     isLoading: boolean;
@@ -83,7 +85,7 @@ export const SearchResults = ({
         return (
             <div className={cn("flex flex-col items-center justify-center py-12", className)}>
                 <div className="rounded-full bg-red-100 p-4 mb-4">
-                    <AlertCircle className="w-8 h-8 text-red-600" />
+                    <WarningIcon className="w-8 h-8 text-red-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {error?.message || "Search Error"}
@@ -117,7 +119,7 @@ export const SearchResults = ({
                 )}
             >
                 <div className="rounded-full bg-gray-100 p-4 mb-4">
-                    <Loader2 className="w-8 h-8 text-gray-400 opacity-50" />
+                    <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin opacity-50"></div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     No Results Found
@@ -178,9 +180,13 @@ export const SearchResults = ({
                         userName={result.author?.name || "Unknown"}
                         userHandle={result.author?.handle || "@unknown"}
                         platformIcon={(() => {
-                          const p = platformMap[result.platform as PlatformId];
-                          const Icon = p?.icon;
-                          return Icon ? <Icon className="w-4 h-4" /> : <div className="text-xs text-gray-600">{result.platform}</div>;
+                          switch (result.platform) {
+                            case 'facebook': return <FacebookBlueIcon className="w-4 h-4" />;
+                            case 'youtube': return <YoutubeRedIcon />;
+                            case 'instagram': return <InstagramColorIcon className="w-4 h-4" />;
+                            case 'pinterest': return <PinterestIcon className="w-4 h-4" />;
+                            default: return <div className="text-xs text-gray-600">{result.platform}</div>;
+                          }
                         })()}
                         textContent={result.description || result.content || result.title || ""}
                         date={result.publishedAt ? new Date(result.publishedAt).toLocaleDateString() : ""}
