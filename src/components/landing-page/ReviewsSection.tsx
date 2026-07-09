@@ -15,7 +15,7 @@ export default function ReviewsSection() {
 			text: "“Following people in one place like Gaddr, could really be more effective. I think that’s the future”",
 			name: "Linda Hörnfeldt",
 			title: "Founder Influencers Sweden",
-			image: "/images/linda_testimonial.webp",
+			image: "/images/Linda_Testimonial.webp",
 		},
 		{
 			rating: 5,
@@ -36,7 +36,7 @@ export default function ReviewsSection() {
 			text: "“Gaddr is Fantastic! You have gathered all your platforms in one portal!”",
 			name: "Simon",
 			title: "Pro Gramer",
-			image: "/images/simon_testimonial.webp",
+			image: "/images/Simon_Testimonial.webp",
 		},
 	];
 
