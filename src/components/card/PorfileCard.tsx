@@ -39,6 +39,7 @@ interface ProfileCardProps {
     profileHref?: string;
     initialIsFollowing?: boolean;
     hideFollowButton?: boolean;
+    isProfileAvailable?: boolean;
 }
 
 type LinkedAccount = {
@@ -75,6 +76,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     profileHref,
     initialIsFollowing = false,
     hideFollowButton = false,
+    isProfileAvailable = true,
 }) => {
     const router = useRouter();
     const { isAuthenticated } = useHttpContext();
@@ -147,7 +149,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 </div>
             </div>
             {/* ACTION BUTTONS */}
-            {isAuthenticated && !hideFollowButton && !isOwnProfile ? (
+            {isProfileAvailable === false ? (
+                <div className="flex flex-col items-center w-full mt-auto">
+                    <p className="text-xs text-gray-400 italic">Onboarding in progress</p>
+                </div>
+            ) : isAuthenticated && !hideFollowButton && !isOwnProfile ? (
                 <div className="flex justify-center space-x-3 w-full mt-auto">
                     <button
                         className="flex-1 px-4 py-2 text-indigo-700 border border-indigo-700 rounded-full font-semibold hover:bg-indigo-50 transition duration-150"

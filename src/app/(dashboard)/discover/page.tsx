@@ -332,6 +332,7 @@ const DiscoveryPage = () => {
 				>
 					{creatorState.profiles.map((creator) => {
 						const displayName = [creator.firstName, creator.lastName].filter(Boolean).join(" ").trim();
+						const isProfileAvailable = !!creator.userName;
 
 						return (
 							<ProfileCard
@@ -339,14 +340,15 @@ const DiscoveryPage = () => {
 								userId={creator.id}
 								profilePicSrc={creator.profileImage ?? "/icons/gaddr-logo-xs.svg"}
 								userName={displayName || creator.userName}
-								userHandle={`@${creator.userName}`}
+								userHandle={isProfileAvailable ? `@${creator.userName}` : ""}
 								category={creator.niche ?? "Creator"}
 								postCount={creator.totalPosts}
 								followerCount={creator.followersCount}
 								followingCount={creator.followingCount}
 								linkedAccounts={creator.linkedAccounts ?? []}
-								profileHref={`/u/${creator.userName}`}
+								profileHref={isProfileAvailable ? `/u/${creator.userName}` : undefined}
 								initialIsFollowing={creator.isFollowing ?? false}
+								isProfileAvailable={isProfileAvailable}
 							/>
 						);
 					})}
