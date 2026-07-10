@@ -140,11 +140,13 @@ useEffect(() => {
 					</div>
 
 					{/* Content Text */}
-					<div className="flex-1 overflow-y-auto">
-						<div className={`text-gray-700 ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
-							{textContent}
+					{textContent && (
+						<div className="flex-1 overflow-y-auto">
+							<div className={`text-gray-700 ${textFontSize} ${textFontWeight} ${textLineHeight}`}>
+								{textContent}
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 
 				{/* Date and Stats */}

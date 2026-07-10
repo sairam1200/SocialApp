@@ -6,7 +6,7 @@ export interface DiscoverContentModel {
   userProfileImage: string | null;
   platform: string;
   type: string;
-  title: string;
+  title: string | null;
   description: string | null;
   imageUrl: string | null;
   publishedAt: string | null;

@@ -154,12 +154,26 @@ const DiscoveryPage = () => {
 		}
 	}
 
+	function isValidUrl(url: string): boolean {
+		try {
+			const parsed = new URL(url);
+			return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
 	function renderContentFeedCard(item: DiscoverContentModel, titleLimit = 34) {
+		const validUrl = item.sourceUrl && isValidUrl(item.sourceUrl) ? item.sourceUrl : null;
 		return (
 			<div
 				key={`${item.platform}-${item.id}`}
-				onClick={() => item.sourceUrl && window.open(item.sourceUrl, '_blank')}
-				className="cursor-pointer"
+				onClick={() => {
+					if (validUrl) {
+						window.open(validUrl, '_blank', 'noopener,noreferrer');
+					}
+				}}
+				className={validUrl ? 'cursor-pointer' : ''}
 			>
 				<ContentFeedCard
 					imageSrc={item.imageUrl ?? undefined}
@@ -168,14 +182,25 @@ const DiscoveryPage = () => {
 					userHandle={item.userHandle}
 					platformIcon={renderPlatformIcon(item.platform)}
 					textContent={
-						<>
-							<span className="font-semibold block line-clamp-1">
-								{item.title?.substring(0, titleLimit)}
-							</span>
-							<span className="text-sm text-muted-foreground block line-clamp-2">
-								{item.description}
-							</span>
-						</>
+						(() => {
+							const t = item.title?.trim() ?? '';
+							const d = item.description?.trim() ?? '';
+							if (!t && !d) return null;
+							return (
+								<>
+									{t && (
+										<span className="font-semibold block line-clamp-1">
+											{t.substring(0, titleLimit)}
+										</span>
+									)}
+									{d && (
+										<span className="text-sm text-muted-foreground block line-clamp-2">
+											{d}
+										</span>
+									)}
+								</>
+							);
+						})()
 					}
 					date={item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'none'}
 					views={item.views ?? 0}

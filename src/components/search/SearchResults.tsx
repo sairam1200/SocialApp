@@ -188,7 +188,7 @@ export const SearchResults = ({
                             default: return <div className="text-xs text-gray-600">{result.platform}</div>;
                           }
                         })()}
-                        textContent={result.description || result.content || result.title || ""}
+                        textContent={result.description || result.content || result.title || null}
                         date={result.publishedAt ? new Date(result.publishedAt).toLocaleDateString() : ""}
                         views={result.engagement?.views || 0}
                         likes={result.engagement?.likes || 0}

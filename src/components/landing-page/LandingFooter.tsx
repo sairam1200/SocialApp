@@ -1,9 +1,44 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { ArrowRight, Mail } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
+import { apiClient } from "@/services/apiClient.service";
+const socialLinks = [
+	{
+		href: "https://gaddr.com",
+		icon: "/icons/gaddr-icon.svg",
+		alt: "Gaddr",
+	},
+	{
+		href: "https://www.tiktok.com/@gaddr",
+		icon: "/icons/tiktok.svg",
+		alt: "TikTok",
+	},
+	{
+		href: "https://www.instagram.com/gaddr.official",
+		icon: "/icons/instagram.svg",
+		alt: "Instagram",
+	},
+	{
+		href: "https://www.linkedin.com/company/gaddr",
+		icon: "/icons/linkedin.svg",
+		alt: "LinkedIn",
+	},
+	{
+		href: "https://www.facebook.com/gaddrcom",
+		icon: "/icons/gaddr-fb.svg",
+		alt: "Facebook",
+	},
+	{
+		href: "https://x.com/gaddrme",
+		icon: "/icons/twitter.svg",
+		alt: "Twitter",
+	},
+];
 const footerLinks = [
 	{
 		title: "About",
@@ -11,7 +46,7 @@ const footerLinks = [
 	},
 	{
 		title: "Features",
-		links: [{ label: "Platform features", href: "platform-status" }],
+		links: [{ label: "Platform features", href: "/platform-status" }],
 	},
 	{
 		title: "Support",
@@ -30,6 +65,48 @@ const footerLinks = [
 ];
 
 const LandingFooter = () => {
+	const [email, setEmail] = useState("");
+	const [validationError, setValidationError] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+	const handleSubscribe = async () => {
+		const trimmed = email.trim().toLowerCase();
+
+		if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+			setValidationError("Please enter a valid email address.");
+			setStatusMessage(null);
+			return;
+		}
+
+		setValidationError("");
+		setLoading(true);
+		setStatusMessage(null);
+
+		try {
+			const result = await apiClient.Newsletter.subscribeAsync({
+				email: trimmed,
+			});
+
+			if (result.success) {
+				if (result.alreadySubscribed) {
+					setStatusMessage("You're already subscribed to Gaddr updates.");
+				} else {
+					setStatusMessage(
+						"🎉 Thanks! You've been subscribed to Gaddr updates.",
+					);
+				}
+				setEmail("");
+			} else {
+				setStatusMessage("Something went wrong. Please try again later.");
+			}
+		} catch {
+			setStatusMessage("Something went wrong. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<footer className="w-full bg-white py-10 border-t text-black-default">
 			<div className="max-w-7xl mx-auto px-5">
@@ -70,16 +147,38 @@ const LandingFooter = () => {
 						<div className="flex items-center gap-2 mb-3">
 							<div className="relative flex-1">
 								<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-								<Input type="email" placeholder="Enter email..." className="text-sm pl-10" />
+								<Input
+									type="email"
+									placeholder="Enter email..."
+									className="text-sm pl-10"
+									value={email}
+									onChange={(e) => {
+										setEmail(e.target.value);
+										if (validationError) setValidationError("");
+									}}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && !loading) handleSubscribe();
+									}}
+								/>
 							</div>
 
 							<Button
 								className="rounded-md shadow-md"
 								style={{ background: "linear-gradient(132deg, #6400BF 37.13%, #0F13B9 80.11%)" }}
+								onClick={handleSubscribe}
+								disabled={loading}
 							>
 								<ArrowRight className="scale-x-150 text-white" />
 							</Button>
 						</div>
+
+						{validationError && (
+							<p className="text-xs text-red-500 mb-2">{validationError}</p>
+						)}
+
+						{statusMessage && (
+							<p className="text-xs text-gray-700 mb-2">{statusMessage}</p>
+						)}
 
 						<p className="text-xs text-gray-600 leading-relaxed">
 							By subscribing, you agree to our{" "}
@@ -101,12 +200,16 @@ const LandingFooter = () => {
 
 					{/* SOCIAL ICONS */}
 					<div className="flex items-center gap-4">
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/gaddr-icon.svg" width={40} height={40} alt="gaddr" sizes="40px" />
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/tiktok.svg" width={40} height={40} alt="tiktok" sizes="40px" />
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/instagram.svg" width={40} height={40} alt="instagram" sizes="40px" />
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/linkedin.svg" width={40} height={40} alt="linkedin" sizes="40px" />
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/gaddr-fb.svg" width={40} height={40} alt="facebook" sizes="40px" />
-						<Image className="shrink-0" fetchPriority="low" loading="lazy"  src="/icons/twitter.svg" width={40} height={40} alt="twitter" sizes="40px" />
+						{socialLinks.map((social) => (
+							<Link key={social.alt} href={social.href}>
+								<Image
+									src={social.icon}
+									width={40}
+									height={40}
+									alt={social.alt}
+								/>
+							</Link>
+						))}
 					</div>
 				</div>
 			</div>
