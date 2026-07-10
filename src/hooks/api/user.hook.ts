@@ -5,13 +5,12 @@ import toast from "react-hot-toast";
 import { queryKeys } from "@/lib/query-keys";
 import { apiClient } from "@/services/apiClient.service";
 import { parseApiError } from "@/utils/api-error.util";
-import { useFollowStore } from "@/store/follow.store";
+import { hydrateFollowState } from "@/store/follow.store";
 import type { ApiError } from "@/types/error.types";
 import type { ServiceResponse } from "@/types/serviceResponse.type";
 
 export const useGetUser = (username: string, options?: UseQueryOptions<UserProfileType, ApiError>) => {
 	const { authUser, updateAuthUser } = useAuthUserStore((store) => store);
-	const setFollow = useFollowStore((s) => s.setFollow);
 
 	return useQuery<UserProfileType, ApiError>({
 		queryKey: queryKeys.userProfile(username),
@@ -19,12 +18,7 @@ export const useGetUser = (username: string, options?: UseQueryOptions<UserProfi
 			const profile = await apiClient.User.getUserProfileAsync(username);
 			const profileWithUsername = { ...profile, username };
 
-			if (profile.id && typeof (profile as UserProfileType).isFollowing === "boolean" && typeof (profile as UserProfileType).followersCount === "number") {
-				setFollow(profile.id, {
-					isFollowing: (profile as UserProfileType).isFollowing!,
-					followersCount: (profile as UserProfileType).followersCount,
-				});
-			}
+			hydrateFollowState(profile);
 
 			if (authUser) {
 				if (profile?.id === authUser?.id) {

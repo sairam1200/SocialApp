@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { apiClient } from "@/services/apiClient.service";
 import { PublicProfileModel } from "@/types/account/profile.type";
 import { queryKeys } from "@/lib/query-keys";
-import { useFollowStore } from "@/store/follow.store";
+import { hydrateFollowState } from "@/store/follow.store";
 
 type UseDiscoverCreatorsReturn = {
 	profiles: PublicProfileModel[];
@@ -21,7 +21,6 @@ type UseDiscoverCreatorsReturn = {
 export const useDiscoverCreators = (limit = 12): UseDiscoverCreatorsReturn => {
 	const [page, setPage] = useState(1);
 	const queryClient = useQueryClient();
-	const setFollow = useFollowStore((s) => s.setFollow);
 
 	const queryKey = queryKeys.discoverCreators(page, limit);
 
@@ -34,14 +33,7 @@ export const useDiscoverCreators = (limit = 12): UseDiscoverCreatorsReturn => {
 			const hasNextPage =
 				response.hasNextPage ?? (response.page ?? page) * (response.limit ?? limit) < totalResults;
 
-			profiles.forEach((profile) => {
-				if (profile.id && typeof profile.isFollowing === "boolean" && typeof profile.followersCount === "number") {
-					setFollow(profile.id, {
-						isFollowing: profile.isFollowing,
-						followersCount: profile.followersCount,
-					});
-				}
-			});
+			hydrateFollowState(profiles);
 
 			return {
 				profiles,

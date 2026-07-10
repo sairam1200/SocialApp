@@ -39,6 +39,9 @@ export function useFollowUserMutation() {
 				toast.error("Unable to update follow status. Please try again.");
 			}
 		},
+		// Fallback invalidation — the WebSocket (useFollowSocket) is the
+		// primary sync mechanism. This serves as a safety net when the
+		// WebSocket event fails to deliver. It does NOT mutate follow state.
 		onSettled: (_data, _err, { userId }) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.followStatus(userId) });
 		},

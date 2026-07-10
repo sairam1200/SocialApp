@@ -18,7 +18,7 @@ export type PublicProfileModel = {
 	lastName: string;
 	bio: string | null;
 	profileImage: string | null;
-	followersCount: number;
+	followersCount?: number;
 	followingCount: number;
 	connectedPlatformsCount: number;
 	linkedAccounts: {

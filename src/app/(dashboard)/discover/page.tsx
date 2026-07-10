@@ -343,7 +343,7 @@ const DiscoveryPage = () => {
 								userHandle={isProfileAvailable ? `@${creator.userName}` : ""}
 								category={creator.niche ?? "Creator"}
 								postCount={creator.totalPosts}
-								followerCount={creator.followersCount}
+								followerCount={creator.followersCount ?? 0}
 								followingCount={creator.followingCount}
 								linkedAccounts={creator.linkedAccounts ?? []}
 								profileHref={isProfileAvailable ? `/u/${creator.userName}` : undefined}

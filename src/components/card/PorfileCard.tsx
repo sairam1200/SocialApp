@@ -71,7 +71,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     category,
     postCount,
     followerCount,
-    followingCount,
+    followingCount: initialFollowingCount,
     linkedAccounts,
     profileHref,
     initialIsFollowing = false,
@@ -82,10 +82,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     const { isAuthenticated } = useHttpContext();
     const isOwnProfile = useIsOwnProfile(userId);
     const [profileImageError, setProfileImageError] = useState(false);
-    const { isFollowing, followersCount, isPending, toggleFollow, canFollow } = useFollowUser({
+    const { isFollowing, followersCount, followingCount, isPending, toggleFollow, canFollow } = useFollowUser({
         userId,
         isFollowing: initialIsFollowing,
         followersCount: followerCount,
+        followingCount: initialFollowingCount,
         isOwnProfile,
     });
 

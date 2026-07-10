@@ -29,21 +29,16 @@ export function useFollowSocket() {
 
       if (!currentUserId) return;
 
-      const existingTarget = useFollowStore.getState().follows[payload.targetUserId];
-
-      if (existingTarget) {
-        setFollow(payload.targetUserId, {
-          ...existingTarget,
-          followersCount: payload.targetFollowersCount,
-        });
-      }
-
-      if (payload.viewerUserId === currentUserId) {
-        setFollow(payload.targetUserId, {
-          isFollowing: payload.isFollowing,
-          followersCount: payload.targetFollowersCount,
-        });
-      }
+      // Always write — never skip unseen users.
+      // The server payload is the authoritative source of truth.
+      // Never merge or do arithmetic — overwrite completely.
+      setFollow(payload.targetUserId, {
+        isFollowing:
+          payload.viewerUserId === currentUserId
+            ? payload.isFollowing
+            : (useFollowStore.getState().follows[payload.targetUserId]?.isFollowing ?? payload.isFollowing),
+        followersCount: payload.targetFollowersCount,
+      });
 
       if (currentUsername) {
         const ownProfileKey = ["user", "profile", currentUsername];

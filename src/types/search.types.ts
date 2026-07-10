@@ -44,17 +44,10 @@ export interface GlobalSearchSuggestion {
   creatorName?: string;
 }
 
-export interface GlobalSearchProfile {
+export interface GlobalSearchProfile extends Partial<PublicProfileModel> {
   id: string;
   firstName: string;
   lastName: string;
-  userName?: string;
-  bio?: string;
-  profileImage?: string;
-  followersCount?: number;
-  followingCount?: number;
-  linkedAccounts?: { id: string; platform: string; verified?: boolean }[];
-  verified?: boolean;
 }
 
 export interface SearchMediaItem {
@@ -66,6 +59,7 @@ export interface SearchMediaItem {
 export interface GlobalSearchContent {
   id: string;
   title: string;
+  description?: string;
   type: string;
   platform: string;
   externalId: string;

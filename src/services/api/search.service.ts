@@ -12,6 +12,8 @@ import {
   GlobalSearchResponse,
   GlobalSearchSuggestion,
 } from "@/types/search.types";
+import { normalizePublicProfile } from "@/lib/normalizers/profile.normalizer";
+import { normalizeGlobalSearchContent } from "@/lib/normalizers/content.normalizer";
 
 export class SearchService {
   /**
@@ -84,67 +86,21 @@ export class SearchService {
         type: "profile",
         platform: "gaddr",
         title: name || profile.userName,
-        description: profile.bio,
+        description: profile.bio ?? undefined,
         author: {
           id: profile.id,
           name: name || profile.userName,
           handle: profile.userName ? `@${profile.userName}` : undefined,
-          profileImage: profile.profileImage,
+          profileImage: profile.profileImage ?? undefined,
         },
         engagement: {
           likes: profile.followersCount ?? 0,
           views: 0,
         },
-        publicProfile: {
-          id: profile.id,
-          userName: profile.userName ?? "",
-          firstName: profile.firstName ?? "",
-          lastName: profile.lastName ?? "",
-          bio: profile.bio ?? null,
-          profileImage: profile.profileImage ?? null,
-          followersCount: profile.followersCount ?? 0,
-          followingCount: profile.followingCount ?? 0,
-          linkedAccounts: (profile.linkedAccounts ?? []).map((la: { id: string; platform: string }) => ({ id: la.id, platform: la.platform })),
-          verified: profile.verified ?? false,
-          connectedPlatformsCount: (profile.linkedAccounts ?? []).length,
-          totalPosts: 0,
-          engagementRate: 0,
-          niche: null,
-        },
+        publicProfile: normalizePublicProfile(profile),
       };
     });
-    const contents: SearchResult[] = response.contents.map((content) => {
-      const creatorName = [content.user.firstName, content.user.lastName].filter(Boolean).join(" ").trim();
-      const mediaArray = Array.isArray(content.media) ? content.media : [];
-      const thumbnailFromMedia = mediaArray[0]?.thumbnail || mediaArray[0]?.url;
-      const meta = content.metaData;
-      const thumbnailFromMeta = meta?.thumbnailUrl || meta?.imageUrl || meta?.mediaUrl || meta?.coverImageUrl;
-      const thumbnailUrl = thumbnailFromMedia || thumbnailFromMeta || undefined;
-      const rawEngagement = content.engagement || meta;
-      return {
-        id: content.id,
-        type: "content",
-        platform: content.platform,
-        title: content.title,
-        description: content.title,
-        externalId: content.externalId,
-        url: content.sourceUrl,
-        publishedAt: content.publishedAt,
-        author: {
-          id: content.user.id,
-          name: creatorName || content.user.userName,
-          handle: content.user.userName ? `@${content.user.userName}` : undefined,
-          profileImage: content.user.profileImage,
-        },
-        media: thumbnailUrl ? { type: "image", thumbnailUrl } : undefined,
-        engagement: {
-          views: rawEngagement?.views ?? (meta?.viewCount || meta?.impressions || 0),
-          likes: rawEngagement?.likes ?? (meta?.likeCount || 0),
-          comments: rawEngagement?.comments ?? (meta?.commentCount || meta?.commentsCount || meta?.numComments || 0),
-          shares: rawEngagement?.shares ?? 0,
-        },
-      };
-    });
+    const contents: SearchResult[] = response.contents.map(normalizeGlobalSearchContent);
     return {
       results: [...profiles, ...contents],
       totalResults: response.pagination.profiles.total + response.pagination.contents.total,

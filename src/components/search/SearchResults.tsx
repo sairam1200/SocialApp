@@ -7,6 +7,7 @@ import ContentFeedCard from "@/components/card/ContentFeedCard";
 import ProfileCard from "@/components/card/PorfileCard";
 import { cn } from "@/utils/cn.util";
 import { PublicProfileModel } from "@/types/account/profile.type";
+import { hydrateFollowState } from "@/store/follow.store";
 import YoutubeRedIcon from "@/components/svg/Youtube.svg";
 import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
 import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
@@ -60,6 +61,14 @@ export const SearchResults = ({
     onRetry,
     className,
 }: SearchResultsProps) => {
+    React.useEffect(() => {
+        if (!Array.isArray(results)) return;
+        results.forEach((result) => {
+            if (result.type === "profile" && result.publicProfile) {
+                hydrateFollowState(result.publicProfile);
+            }
+        });
+    }, [results]);
 
     // Loading State
     if (isLoading) {
@@ -152,7 +161,7 @@ export const SearchResults = ({
                 if (result.type === "profile") {
                     const publicProfile = result.publicProfile as PublicProfileModel | undefined;
                     const handle = publicProfile?.userName ?? result.author?.handle?.replace(/^@/, "");
-
+                    const isProfileAvailable = !!publicProfile?.userName;
                     return (
                         <ProfileCard
                             key={result.id}
@@ -167,6 +176,7 @@ export const SearchResults = ({
                             linkedAccounts={publicProfile?.linkedAccounts ?? []}                           
                             profileHref={handle ? `/u/${handle}` : undefined}
                             initialIsFollowing={publicProfile?.isFollowing ?? false}
+                            isProfileAvailable={isProfileAvailable}
                         />
                     );
                 }
