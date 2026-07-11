@@ -12,11 +12,11 @@ if (!fs.existsSync(pngDir)) {
   process.exit(1);
 }
 
-const pngFiles = fs
-  .readdirSync(pngDir)
-  .filter((f) => f.toLowerCase().endsWith(".png"))
-  .sort();
-
+// const pngFiles = fs
+//   .readdirSync(pngDir)
+//   .filter((f) => f.toLowerCase().endsWith(".png"))
+//   .sort();
+const pngFiles = ["E:\\SocialApp\\public\\images\\Laptop+mobile.png"]; // Replace with your file name
 if (pngFiles.length === 0) {
   console.log("No PNG files found in", pngDir);
   process.exit(0);

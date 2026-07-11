@@ -1,5 +1,21 @@
 import { GlobalSearchContent, SearchResult } from "@/types/search.types";
 
+const platformMetadataKey: Record<string, string> = {
+  facebook: "message",
+  instagram: "caption",
+  pinterest: "description",
+  youtube: "description",
+};
+
+function getPlatformMetadataText(
+  content: GlobalSearchContent,
+): string | undefined {
+  const key = platformMetadataKey[content.platform];
+  if (!key || !content.metaData) return undefined;
+  const value = content.metaData[key];
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 export function normalizeGlobalSearchContent(
   content: GlobalSearchContent,
 ): SearchResult {
@@ -23,7 +39,8 @@ export function normalizeGlobalSearchContent(
     type: "content",
     platform: content.platform,
     title: content.title,
-    description: content.description ?? content.title,
+    description:
+      content.description || getPlatformMetadataText(content) || content.title,
     externalId: content.externalId,
     url: content.sourceUrl,
     publishedAt: content.publishedAt,

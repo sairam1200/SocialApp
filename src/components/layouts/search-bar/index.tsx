@@ -213,7 +213,6 @@ const SearchBar = () => {
               highlightedIndex === index ? "bg-[#F0F0FF]" : "hover:bg-[#F5F5F5]"
             )}
           >
-            <SearchIcon className="h-4 w-4 shrink-0 text-gray-neutral" />
             <span className="min-w-0">
               <span className="block truncate font-medium text-[#0D0D0D]">{suggestion.label}</span>
               {suggestion.type === "user" && suggestion.userName && (
