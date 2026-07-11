@@ -60,13 +60,14 @@ async function convertOne(inputPath, outputName) {
 }
 
 async function convert() {
-  for (const file of pngFiles) {
-    const inputPath = path.join(pngDir, file);
-    const baseName = path.parse(file).name.trim();
-    const outputName = baseName + ".webp";
-    await convertOne(inputPath, outputName);
-  }
-
+  // for (const file of pngFiles) {
+  //   const inputPath = path.join(pngDir, file);
+  //   const baseName = path.parse(file).name.trim();
+  //   const outputName = baseName + ".webp";
+  //   await convertOne(inputPath, outputName);
+  // }
+const inputPath = "E:\\SocialApp\\public\\images\\Laptop+mobile.png";
+await convertOne(inputPath, "Laptop+mobile.webp");
   // Also convert landing-bg-pattern.png if it exists (used in landing-page components)
   if (fs.existsSync(extraSrc)) {
     console.log(`\nPlus extra file not in png/ folder:`);
