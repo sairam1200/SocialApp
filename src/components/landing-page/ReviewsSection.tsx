@@ -119,7 +119,7 @@ export default function ReviewsSection() {
 			</div>
 
 			<Image
-				src={`/images/sphere.svg`}
+				src={`/images/sphere.webp`}
 				alt="Image"
 				width={300}
 				height={300}
@@ -129,7 +129,7 @@ export default function ReviewsSection() {
 			/>
 
 			<Image
-				src={`/images/cylinder.svg`}
+				src={`/images/cylinder.webp`}
 				alt="Image"
 				width={300}
 				height={300}

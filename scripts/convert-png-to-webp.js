@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
-const pngDir = path.resolve(__dirname, "..", "public", "images", "png");
+const pngDir = path.resolve(__dirname, "..", "public", "images");
 const outDir = path.resolve(__dirname, "..", "public", "images");
 
 const extraSrc = path.resolve(__dirname, "..", "public", "images", "landing-bg-pattern.png");
@@ -12,11 +12,10 @@ if (!fs.existsSync(pngDir)) {
   process.exit(1);
 }
 
-// const pngFiles = fs
-//   .readdirSync(pngDir)
-//   .filter((f) => f.toLowerCase().endsWith(".png"))
-//   .sort();
-const pngFiles = ["E:\\SocialApp\\public\\images\\Laptop+mobile.png"]; // Replace with your file name
+const pngFiles = fs
+  .readdirSync(pngDir)
+  .filter((f) => f.toLowerCase().endsWith(".png"))
+  .sort(); // Replace with your file name
 if (pngFiles.length === 0) {
   console.log("No PNG files found in", pngDir);
   process.exit(0);
@@ -60,14 +59,13 @@ async function convertOne(inputPath, outputName) {
 }
 
 async function convert() {
-  // for (const file of pngFiles) {
-  //   const inputPath = path.join(pngDir, file);
-  //   const baseName = path.parse(file).name.trim();
-  //   const outputName = baseName + ".webp";
-  //   await convertOne(inputPath, outputName);
-  // }
-const inputPath = "E:\\SocialApp\\public\\images\\Laptop+mobile.png";
-await convertOne(inputPath, "Laptop+mobile.webp");
+  for (const file of pngFiles) {
+    const inputPath = path.join(pngDir, file);
+    const baseName = path.parse(file).name.trim();
+    const outputName = baseName + ".webp";
+    await convertOne(inputPath, outputName);
+  }
+
   // Also convert landing-bg-pattern.png if it exists (used in landing-page components)
   if (fs.existsSync(extraSrc)) {
     console.log(`\nPlus extra file not in png/ folder:`);

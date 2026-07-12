@@ -263,14 +263,14 @@ export default function Section2() {
 
 				{/* Background Shapes */}
 				<Image
-					src={`/images/pyramid.svg`}
+					src={`/images/pyramid.png`}
 					alt=""
 					width={400}
 					height={400}
 					className="absolute -top-30 -right-40 hidden sm:block"
 				/>
 				<Image
-					src={`/images/cube.svg`}
+					src={`/images/cube.webp`}
 					alt=""
 					width={300}
 					height={300}

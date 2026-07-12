@@ -111,7 +111,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/pyramid.svg`}
+						src={`/images/pyramid.png`}
 						alt="Pyramid 3D shape"
 						width={60}
 						height={60}
@@ -122,7 +122,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/sphere.svg`}
+						src={`/images/Sphere-small.png`}
 						alt="Cube 3D shape"
 						width={50}
 						height={50}
@@ -133,7 +133,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/cube.svg`}
+						src={`/images/cube.webp`}
 						alt="Cylinder 3D shape"
 						width={50}
 						height={50}
@@ -144,7 +144,7 @@ export default function Section4() {
 					/>
 
 					<Image
-						src={`/images/cylinder.svg`}
+						src={`/images/Cylinder-small.png`}
 						alt="Sphere 3D shape"
 						width={60}
 						height={60}
