@@ -11,9 +11,9 @@ export interface DiscoverContentModel {
   imageUrl: string | null;
   publishedAt: string | null;
   sourceUrl: string | null;
-  views: number;
-  likes: number;
-  comments: number;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
 }
 
 export interface DiscoverFeedResponse {

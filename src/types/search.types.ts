@@ -68,10 +68,10 @@ export interface GlobalSearchContent {
   media?: SearchMediaItem[];
   metaData?: Record<string, any>;
   engagement?: {
-    views?: number;
-    likes?: number;
-    comments?: number;
-    shares?: number;
+    views?: number | null;
+    likes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
   };
   user: GlobalSearchProfile;
 }
@@ -108,10 +108,10 @@ export interface SearchResult {
     thumbnailUrl?: string;
   };
   engagement?: {
-    views?: number;
-    likes?: number;
-    comments?: number;
-    shares?: number;
+    views?: number | null;
+    likes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
   };
   url?: string;
   publishedAt?: string;

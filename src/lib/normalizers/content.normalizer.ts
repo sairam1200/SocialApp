@@ -58,15 +58,17 @@ export function normalizeGlobalSearchContent(
     engagement: {
       views:
         rawEngagement?.views ??
-        (meta?.viewCount || meta?.impressions || 0),
-      likes: rawEngagement?.likes ?? (meta?.likeCount || 0),
+        meta?.viewCount ??
+        meta?.impressions ??
+        null,
+      likes: rawEngagement?.likes ?? meta?.likeCount ?? null,
       comments:
         rawEngagement?.comments ??
-        (meta?.commentCount ||
-          meta?.commentsCount ||
-          meta?.numComments ||
-          0),
-      shares: rawEngagement?.shares ?? 0,
+        meta?.commentCount ??
+        meta?.commentsCount ??
+        meta?.numComments ??
+        null,
+      shares: rawEngagement?.shares ?? null,
     },
   };
 }

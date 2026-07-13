@@ -10,6 +10,7 @@ interface ProfileUpdatePayload {
   userId: string;
   updates: {
     linkedAccounts?: LinkedAccountType[];
+    totalPosts?: number;
     [key: string]: unknown;
   };
 }
@@ -28,16 +29,19 @@ export function useProfileSocket() {
 
       if (!currentUserId) return;
       if (payload.userId !== currentUserId) return;
-      if (!payload.updates?.linkedAccounts) return;
 
       const ownProfileKey = ["user", "profile", currentUsername];
 
       queryClient.setQueryData(ownProfileKey, (old: unknown) => {
         if (!old || typeof old !== "object") return old;
-        return {
-          ...(old as Record<string, unknown>),
-          linkedAccounts: payload.updates.linkedAccounts,
-        };
+        const profile = { ...(old as Record<string, unknown>) };
+        if (payload.updates.linkedAccounts) {
+          profile.linkedAccounts = payload.updates.linkedAccounts;
+        }
+        if (payload.updates.totalPosts !== undefined) {
+          profile.totalPosts = payload.updates.totalPosts;
+        }
+        return profile;
       });
     };
 

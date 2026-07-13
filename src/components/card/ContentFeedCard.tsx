@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { MoreVertical } from "lucide-react";
 import CardStats from "./CardStats";
+import { StatItem } from "@/lib/card-helpers";
 import { useEffect } from "react";
 interface ContentFeedCardProps {
 	imageSrc?: string;
@@ -11,9 +12,7 @@ interface ContentFeedCardProps {
 	platformIcon: React.ReactNode;
 	textContent: React.ReactNode;
 	date?: string;
-	views?: number;
-	likes?: number;
-	comments?: number;
+	stats: StatItem[];
 }
 
 const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
@@ -24,11 +23,9 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	platformIcon,
 	textContent,
 	date,
-	views,
-	likes,
-	comments,
+	stats,
 }) => {
-	const [currentLikes, setCurrentLikes] = useState(likes ?? 0);
+	const [currentStats, setCurrentStats] = useState<StatItem[]>(stats);
 	const [isPostLiked, setIsPostLiked] = useState(false);
 	const [imageError, setImageError] = useState(false);
 	const [profileError, setProfileError] = useState(false);
@@ -37,12 +34,14 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		imageSrc?.includes("video_dashinit") ||
 		imageSrc?.includes("/video");
 	const handleLikeClick = () => {
-		if (isPostLiked) {
-			setCurrentLikes((prevCount) => prevCount - 1);
-		} else {
-			setCurrentLikes((prevCount) => prevCount + 1);
-		}
-		setIsPostLiked((prevIsLiked) => !prevIsLiked);
+		setCurrentStats((prev) =>
+			prev.map((s) =>
+				s.type === "likes"
+					? { ...s, value: s.value + (isPostLiked ? -1 : 1) }
+					: s
+			)
+		);
+		setIsPostLiked((prev) => !prev);
 	};
 
 	// Change to only text if thumbnail does not exist
@@ -50,10 +49,7 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	const textFontSize = hasThumbnail ? "text-sm" : "text-base";
 	const textFontWeight = hasThumbnail ? "font-normal" : "font-semibold";
 	const textLineHeight = hasThumbnail ? "leading-relaxed" : "leading-tight";
-	const hasStats =
-		(views ?? 0) > 0 ||
-		(currentLikes ?? 0) > 0 ||
-		(comments ?? 0) > 0;
+	const hasStats = currentStats.some((s) => s.value != null && s.value > 0);
 	const cardClasses =
 		"flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] h-[440px]";
     const [isPortrait, setIsPortrait] = useState(false);
@@ -155,9 +151,7 @@ useEffect(() => {
 
 					{hasStats && (
 						<CardStats
-							views={views}
-							likes={currentLikes}
-							comments={comments}
+							stats={currentStats}
 							isLiked={isPostLiked}
 							onLikeClick={handleLikeClick}
 						/>

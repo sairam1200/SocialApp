@@ -40,7 +40,7 @@ const ProfileSkeleton = dynamic(() => import("@/components/loaders/skeletons/Pro
 });
 
 const platformIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-	tikTok: TiktokIcon,
+	tiktok: TiktokIcon,
 	youtube: YoutubeIcon,
 	instagram: InstagramIcon,
 	facebook: FacebookIcon,
@@ -210,7 +210,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 					<div className="flex gap-5 my-0 text-sm select-none">
 						<p className="flex flex-col gap-1">
 							<span className="gradient-text-primary">Posts</span>
-							<span className="font-bold text-black-default">0</span>
+							<span className="font-bold text-black-default">{data?.totalPosts ?? 0}</span>
 						</p>
 						<p className="flex flex-col gap-1">
 							<span className="gradient-text-primary">Followers</span>

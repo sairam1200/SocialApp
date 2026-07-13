@@ -13,9 +13,6 @@ import {
 	MultiSelectValue,
 } from "@/components/ui/multi-select";
 
-import YoutubeRedIcon from "@/components/svg/Youtube.svg";
-import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
-import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
 import MenuIcon from "@/components/svg/menu-icon.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn.util";
@@ -26,12 +23,12 @@ import { SearchResults, TrendingSection } from "@/components/search";
 import { useSearch } from "@/hooks/useSearch";
 import { useTrending } from "@/hooks/useTrending";
 import { SearchFilter, TrendingItem } from "@/types/search.types";
-import PinterestIcon from "@/components/svg/pinterest.svg";
 import { useDiscoverCreators } from "@/hooks/useDiscoverCreators";
 import { useDiscoverContent } from "@/hooks/useDiscoverContent";
 import { useAuthUserStore } from "@/store/auth-user.store";
 import type { DiscoverContentModel } from "@/types/discover.type";
 import { getContentCategory, filterByPlatform, filterByContentType, filterByDatePosted, sortByMetrics } from "@/lib/discover-filters";
+import { renderPlatformIcon, isValidUrl, normalizeDiscoverContent, mapProfileToProps } from "@/lib/card-helpers";
 import Link from "next/link";
 const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
 
@@ -138,33 +135,9 @@ const DiscoveryPage = () => {
 		[filteredDiscoverItems],
 	);
 
-	function renderPlatformIcon(platform: string, className?: string): React.ReactNode {
-		const cls = className ?? 'w-5 h-5 text-blue-600';
-		switch (platform) {
-			case 'facebook':
-				return <FacebookBlueIcon className={cls} />;
-			case 'youtube':
-				return <YoutubeRedIcon />;
-			case 'instagram':
-				return <InstagramColorIcon className={cls} />;
-			case 'pinterest':
-				return <PinterestIcon className={cls} />;
-			default:
-				return null;
-		}
-	}
-
-	function isValidUrl(url: string): boolean {
-		try {
-			const parsed = new URL(url);
-			return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-		} catch {
-			return false;
-		}
-	}
-
 	function renderContentFeedCard(item: DiscoverContentModel, titleLimit = 34) {
-		const validUrl = item.sourceUrl && isValidUrl(item.sourceUrl) ? item.sourceUrl : null;
+		const cardProps = normalizeDiscoverContent(item, titleLimit);
+		const validUrl = cardProps.sourceUrl && isValidUrl(cardProps.sourceUrl) ? cardProps.sourceUrl : null;
 		return (
 			<div
 				key={`${item.platform}-${item.id}`}
@@ -176,36 +149,8 @@ const DiscoveryPage = () => {
 				className={validUrl ? 'cursor-pointer' : ''}
 			>
 				<ContentFeedCard
-					imageSrc={item.imageUrl ?? undefined}
-					profilePicSrc={item.userProfileImage ?? '/icons/gaddr-logo-xs.svg'}
-					userName={item.userName}
-					userHandle={item.userHandle}
-					platformIcon={renderPlatformIcon(item.platform)}
-					textContent={
-						(() => {
-							const t = item.title?.trim() ?? '';
-							const d = item.description?.trim() ?? '';
-							if (!t && !d) return null;
-							return (
-								<>
-									{t && (
-										<span className="font-semibold block line-clamp-1">
-											{t.substring(0, titleLimit)}
-										</span>
-									)}
-									{d && (
-										<span className="text-sm text-muted-foreground block line-clamp-2">
-											{d}
-										</span>
-									)}
-								</>
-							);
-						})()
-					}
-					date={item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'none'}
-					views={item.views ?? 0}
-					likes={item.likes ?? 0}
-					comments={item.comments ?? 0}
+					{...cardProps}
+					platformIcon={renderPlatformIcon(cardProps.platform)}
 				/>
 			</div>
 		);
@@ -331,24 +276,12 @@ const DiscoveryPage = () => {
 					}}
 				>
 					{creatorState.profiles.map((creator) => {
-						const displayName = [creator.firstName, creator.lastName].filter(Boolean).join(" ").trim();
-						const isProfileAvailable = !!creator.userName;
+						const cardProps = mapProfileToProps(creator);
 
 						return (
 							<ProfileCard
 								key={creator.id}
-								userId={creator.id}
-								profilePicSrc={creator.profileImage ?? "/icons/gaddr-logo-xs.svg"}
-								userName={displayName || creator.userName}
-								userHandle={isProfileAvailable ? `@${creator.userName}` : ""}
-								category={creator.niche ?? "Creator"}
-								postCount={creator.totalPosts}
-								followerCount={creator.followersCount ?? 0}
-								followingCount={creator.followingCount}
-								linkedAccounts={creator.linkedAccounts ?? []}
-								profileHref={isProfileAvailable ? `/u/${creator.userName}` : undefined}
-								initialIsFollowing={creator.isFollowing ?? false}
-								isProfileAvailable={isProfileAvailable}
+								{...cardProps}
 							/>
 						);
 					})}

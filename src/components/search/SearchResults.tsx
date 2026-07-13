@@ -8,10 +8,8 @@ import ProfileCard from "@/components/card/PorfileCard";
 import { cn } from "@/utils/cn.util";
 import { PublicProfileModel } from "@/types/account/profile.type";
 import { hydrateFollowState } from "@/store/follow.store";
-import YoutubeRedIcon from "@/components/svg/Youtube.svg";
-import FacebookBlueIcon from "@/components/svg/facebook-blue.svg";
-import InstagramColorIcon from "@/components/svg/instagram-colored.svg";
-import PinterestIcon from "@/components/svg/pinterest.svg";
+import { renderPlatformIcon, isValidUrl, normalizeSearchResult, mapProfileToProps } from "@/lib/card-helpers";
+
 interface SearchResultsProps {
     results: SearchResult[];
     isLoading: boolean;
@@ -22,9 +20,6 @@ interface SearchResultsProps {
     className?: string;
 }
 
-/**
- * Loading Skeleton Component
- */
 const ResultSkeleton = ({ viewType = "grid" }: { viewType?: "grid" | "list" }) => (
     <div
         className={cn(
@@ -48,10 +43,6 @@ const ResultSkeleton = ({ viewType = "grid" }: { viewType?: "grid" | "list" }) =
     </div>
 );
 
-/**
- * SearchResults Component
- * Displays search results with loading and error states
- */
 export const SearchResults = ({
     results,
     isLoading,
@@ -70,15 +61,14 @@ export const SearchResults = ({
         });
     }, [results]);
 
-    // Loading State
     if (isLoading) {
         return (
             <div
                 className={cn(
-                    `grid gap-6 ${viewType === "grid"
+                    "grid gap-6",
+                    viewType === "grid"
                         ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                        : "grid-cols-1"
-                    }`,
+                        : "grid-cols-1",
                     className
                 )}
             >
@@ -89,7 +79,6 @@ export const SearchResults = ({
         );
     }
 
-    // Error State
     if (isError) {
         return (
             <div className={cn("flex flex-col items-center justify-center py-12", className)}>
@@ -118,7 +107,6 @@ export const SearchResults = ({
         );
     }
 
-    // Empty State
     if (!results || !Array.isArray(results) || results.length === 0) {
         return (
             <div
@@ -142,79 +130,78 @@ export const SearchResults = ({
 
     const firstContentIndex = results.findIndex((item) => item.type !== "profile");
 
-    // Results Grid/List
     return (
         <div
             className={cn(
-                `grid gap-6 ${viewType === "grid"
+                "grid gap-6",
+                viewType === "grid"
                     ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`,
+                    : "grid-cols-1",
                 className
             )}
         >
             {results.some((result) => result.type === "profile") && (
                 <h2 className="col-span-full text-lg font-semibold text-gray-900">Profiles</h2>
             )}
-            {Array.isArray(results) && results.map((result, index) => {
-                // If result is a profile
-                if (result.type === "profile") {
-                    const publicProfile = result.publicProfile as PublicProfileModel | undefined;
-                    const handle = publicProfile?.userName ?? result.author?.handle?.replace(/^@/, "");
-                    const isProfileAvailable = !!publicProfile?.userName;
-                    return (
-                        <ProfileCard
-                            key={result.id}
-                            userId={publicProfile?.id ?? result.author?.id ?? result.id}
-                            profilePicSrc={publicProfile?.profileImage || result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
-                            userName={result.author?.name || publicProfile?.userName || "Unknown"}
-                            userHandle={handle ? `@${handle}` : "@unknown"}
-                            category={publicProfile?.niche || result.description || "Content Creator"}
-                            postCount={publicProfile?.totalPosts ?? result.engagement?.views ?? 0}
-                            followerCount={publicProfile?.followersCount ?? result.engagement?.likes ?? 0}
-                            followingCount={publicProfile?.followingCount ?? 0}
-                            linkedAccounts={publicProfile?.linkedAccounts ?? []}                           
-                            profileHref={handle ? `/u/${handle}` : undefined}
-                            initialIsFollowing={publicProfile?.isFollowing ?? false}
-                            isProfileAvailable={isProfileAvailable}
-                        />
-                    );
-                }
+            {Array.isArray(results) &&
+                results.map((result, index) => {
+                    if (result.type === "profile") {
+                        const publicProfile = result.publicProfile as
+                            | PublicProfileModel
+                            | undefined;
 
-                // If result is a content feed item (post, video, reel)
-                const card = (
-                    <ContentFeedCard
-                        key={result.id}
-                        imageSrc={result.media?.url || result.media?.thumbnailUrl || "/icons/gaddr-logo-xs.svg"}
-                        profilePicSrc={result.author?.profileImage || "/icons/gaddr-logo-xs.svg"}
-                        userName={result.author?.name || "Unknown"}
-                        userHandle={result.author?.handle || "@unknown"}
-                        platformIcon={(() => {
-                          switch (result.platform) {
-                            case 'facebook': return <FacebookBlueIcon className="w-4 h-4" />;
-                            case 'youtube': return <YoutubeRedIcon />;
-                            case 'instagram': return <InstagramColorIcon className="w-4 h-4" />;
-                            case 'pinterest': return <PinterestIcon className="w-4 h-4" />;
-                            default: return <div className="text-xs text-gray-600">{result.platform}</div>;
-                          }
-                        })()}
-                        textContent={result.description || result.content || result.title || null}
-                        date={result.publishedAt ? new Date(result.publishedAt).toLocaleDateString() : ""}
-                        views={result.engagement?.views || 0}
-                        likes={result.engagement?.likes || 0}
-                        comments={result.engagement?.comments || 0}
-                    />
-                );
-                return index === firstContentIndex ? (
-                    <React.Fragment key={`content-section-${result.id}`}>
-                        <h2 className="col-span-full text-lg font-semibold text-gray-900">Contents</h2>
-                        {card}
-                    </React.Fragment>
-                ) : card;
-            })}
+                        const cardProps = mapProfileToProps(publicProfile, {
+                            id: result.author?.id ?? result.id,
+                            profileImage: result.author?.profileImage,
+                        });
+
+                        return (
+                            <ProfileCard
+                                key={result.id}
+                                {...cardProps}
+                            />
+                        );
+                    }
+
+                    const cardProps = normalizeSearchResult(result);
+                    const validUrl =
+                        cardProps.sourceUrl && isValidUrl(cardProps.sourceUrl) ? cardProps.sourceUrl : null;
+
+                    const card = (
+                        <div
+                            key={result.id}
+                            onClick={() => {
+                                if (validUrl) {
+                                    window.open(
+                                        validUrl,
+                                        "_blank",
+                                        "noopener,noreferrer"
+                                    );
+                                }
+                            }}
+                            className={validUrl ? "cursor-pointer" : ""}
+                        >
+                            <ContentFeedCard
+                                {...cardProps}
+                                platformIcon={renderPlatformIcon(cardProps.platform)}
+                            />
+                        </div>
+                    );
+
+                    return index === firstContentIndex ? (
+                        <React.Fragment key={`content-section-${result.id}`}>
+                            <h2 className="col-span-full text-lg font-semibold text-gray-900">
+                                Contents
+                            </h2>
+                            {card}
+                        </React.Fragment>
+                    ) : card;
+                })}
             {!Array.isArray(results) && (
                 <div className="col-span-full text-center py-8">
-                    <p className="text-red-600 font-semibold">Error: Invalid results format</p>
+                    <p className="text-red-600 font-semibold">
+                        Error: Invalid results format
+                    </p>
                 </div>
             )}
         </div>

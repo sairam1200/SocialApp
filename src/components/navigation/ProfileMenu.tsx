@@ -39,7 +39,7 @@ const deviceId = getDeviceIdOrNull();
 	const isProfileActive = user?.[ClaimTypes.UserName] ? pathname?.startsWith(`/u/${user?.[ClaimTypes.UserName]}`) : false;
 
 	const profileMenuItems = [
-		{ label: "Analytics", href: "/analytics", icon: ChartColumn },
+		// { label: "Analytics", href: "/analytics", icon: ChartColumn },
 		{ label: "Account Settings", href: "/settings", icon: Settings },
 		{ label: "Logout", href: null, icon: LogOut, action: () => setIsLogoutDialog(true) },
 	];

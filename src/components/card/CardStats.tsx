@@ -1,10 +1,16 @@
 import React from 'react';
-import { Eye, ThumbsUp, MessageCircle } from 'lucide-react';
+import { Eye, ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
+import { StatType, StatItem } from '@/lib/card-helpers';
+
+const ICONS: Record<StatType, React.ComponentType<{ size: number; className?: string }>> = {
+    views: Eye,
+    likes: ThumbsUp,
+    comments: MessageCircle,
+    shares: Share2,
+};
 
 interface CardStatsProps {
-    views?: number;
-    likes?: number;
-    comments?: number;
+    stats: StatItem[];
     isLiked: boolean;
     onLikeClick: () => void;
 }
@@ -16,65 +22,50 @@ const formatNumber = (num: number): string => {
     return num.toString();
 };
 
-const CardStats: React.FC<CardStatsProps> = ({ views, likes, comments, isLiked, onLikeClick }) => {
+const CardStats: React.FC<CardStatsProps> = ({ stats, isLiked, onLikeClick }) => {
 
-    const StatItem: React.FC<{
-        icon: React.ReactNode;
-        count: number;
-        clickable?: boolean;
+    const StatItemComponent: React.FC<{
+        stat: StatItem;
         color?: string;
-        onClick?: () => void
-    }> = ({ icon, count, clickable = false, color, onClick }) => {
+        onClick?: () => void;
+    }> = ({ stat, color, onClick }) => {
+        const Icon = ICONS[stat.type];
+        if (!Icon) return null;
 
-        const baseClasses = `flex items-center text-xs ${color || 'text-gray-500'} ${clickable ? 'cursor-pointer' : ''}`;
+        const baseClasses = `flex items-center text-xs ${color || 'text-gray-500'} ${stat.clickable ? 'cursor-pointer' : ''}`;
 
         return (
             <div
                 className={baseClasses}
                 onClick={onClick}
             >
-                {icon}
-                <span className="ml-1">{formatNumber(count)}</span>
+                <Icon
+                    size={16}
+                    className={stat.type === 'likes' && isLiked ? 'fill-current' : ''}
+                />
+                <span className="ml-1">{formatNumber(stat.value)}</span>
             </div>
         );
     };
 
     const baseColorClass = 'text-gray-600';
-    const thumbStrokeColor = '#6b7280';
 
     return (
         <div className="flex gap-4 py-2">
-            {(views ?? 0) > 0 && (
-                <StatItem
-                    icon={<Eye size={16} />}
-                    count={views!}
-                    color={baseColorClass}
-                />
-            )}
-
-            {(likes ?? 0) > 0 && (
-                <StatItem
-                    icon={
-                        <ThumbsUp
-                            size={16}
-                            fill={isLiked ? "#6b7280" : "none"}
-                            stroke={thumbStrokeColor}
-                        />
-                    }
-                    count={likes!}
-                    clickable
-                    color={baseColorClass}
-                    onClick={onLikeClick}
-                />
-            )}
-
-            {(comments ?? 0) > 0 && (
-                <StatItem
-                    icon={<MessageCircle size={16} />}
-                    count={comments!}
-                    color={baseColorClass}
-                />
-            )}
+            {stats
+                .filter((s) => s.value != null && s.value > 0)
+                .map((stat) => (
+                    <StatItemComponent
+                        key={stat.type}
+                        stat={stat}
+                        color={baseColorClass}
+                        onClick={
+                            stat.type === 'likes' && stat.clickable
+                                ? onLikeClick
+                                : undefined
+                        }
+                    />
+                ))}
         </div>
     );
 };
