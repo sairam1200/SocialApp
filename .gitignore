@@ -10,7 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 #sub_agents
-.opencode
+.opencode/
 
 # testing
 /coverage
