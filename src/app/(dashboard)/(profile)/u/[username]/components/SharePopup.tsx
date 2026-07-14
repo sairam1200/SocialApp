@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import CopyIcon from "@/components/svg/copy.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { cn } from "@/utils/cn.util";
 import { UserProfileType } from "@/types/account/profile.type";
 import { usePathname } from "next/navigation";
@@ -63,8 +63,8 @@ const SharePopup = ({ user, username }: { user: UserProfileType | undefined; use
 					<h2 className="font-bold text-sm">Share Profile</h2>
 				</div>
 				<div className="flex items-center gap-3 border border-[#E6E6E6] bg-[#F8F8F8] p-2 rounded-md mt-3">
-					<div className="relative w-8 h-8 rounded-full shadow-md shadow-[#6136FF40] overflow-hidden cursor-pointer group">
-						<Image src={user?.photo ?? "/images/avatar.svg"} alt="Avatar" fill className="object-cover" />
+					<div className="shadow-md shadow-[#6136FF40] rounded-full cursor-pointer group">
+						<UserAvatar src={user?.photo} alt="Avatar" size="sm" />
 					</div>
 					<div>
 						<h3 className="text-xs font-bold text-black-default">{`${user?.firstName} ${user?.lastName}`}</h3>

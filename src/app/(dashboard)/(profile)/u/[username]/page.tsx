@@ -15,6 +15,7 @@ import ArrowBackIcon from "@/components/svg/arrow_back.svg";
 import ProfileTabs from "./components/ProfileTabs";
 import SharePopup from "./components/SharePopup";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { UserProfileType } from "@/types/account/profile.type";
 import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
@@ -238,7 +239,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 									return (
 										<div key={account.id} className="flex items-center gap-1 text-xs">
 											<div className="relative w-7 h-7 rounded-full flex justify-center items-center bg-secondary mr-2">
-												<Image src={account?.profileImage || "/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
+												<UserAvatar src={account?.profileImage} alt="avatar" size="xs" />
 												{Icon && <div className="absolute -right-1 bottom-0 z-10 flex h-4 w-4 items-center justify-center">
 													<Icon className="w-full h-full" />
 												</div>}
@@ -270,7 +271,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 			)}
 
 			{openPhotoDialog && (
-				<ProfilePictureDialog open={openPhotoDialog} onClose={() => setOpenPhotoDialog(false)} user={data} />
+				<ProfilePictureDialog open={openPhotoDialog} onClose={() => setOpenPhotoDialog(false)} user={data} username={username} />
 			)}
 
 			<EditProfileDialog

@@ -1,6 +1,5 @@
 "use client";
 import { useState, ComponentType, SVGProps, useEffect } from "react";
-import Image from "next/image";
 import ArrowBack from "@/components/svg/arrow_back.svg";
 import PenIcon from "@/components/svg/pen.svg";
 import VerificationIcon from "@/components/svg/verification-badge-purple.svg";
@@ -10,6 +9,7 @@ import { useHttpContext } from "@/providers/HttpContextProvider";
 import { ClaimTypes } from "@/constants/globals";
 import { LinkedAccountType, ManualProfileType } from "@/types/account/profile.type";
 import { UserProfileType } from "@/types/account/profile.type";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import TiktokIcon from "@/components/svg/tiktok-black-circle.svg";
 import YoutubeIcon from "@/components/svg/youtube-red-circle.svg";
 import InstagramIcon from "@/components/svg/instagram-colored.svg";
@@ -143,7 +143,7 @@ export default function ProfilePage() {
 								return (
 									<div key={account.id} className="flex items-center gap-1 text-xs">
 										<div className="relative w-7 h-7 rounded-full flex justify-center items-center bg-secondary mr-2">
-											<Image src={account?.profileImage || "/images/avatar-placeholder.svg"} alt="avatar" fill className="object-cover" />
+											<UserAvatar src={account?.profileImage} alt="avatar" size="xs" />
 											{Icon && <Icon className="size-4 absolute -right-2 bottom-0 z-10" />}
 										</div>
 										<span>{account.username || "@"}</span>

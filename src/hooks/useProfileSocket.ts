@@ -41,6 +41,9 @@ export function useProfileSocket() {
         if (payload.updates.totalPosts !== undefined) {
           profile.totalPosts = payload.updates.totalPosts;
         }
+        if (payload.updates.photo !== undefined) {
+          profile.photo = payload.updates.photo;
+        }
         return profile;
       });
     };

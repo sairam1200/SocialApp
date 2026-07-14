@@ -11,11 +11,12 @@ import { ImageCrop, ImageCropApply, ImageCropContent, ImageCropReset } from "@/c
 import { UserPhotoPrivacy, UserProfileType } from "@/types/account/profile.type";
 import { apiClient } from "@/services/apiClient.service";
 import { toast } from "react-hot-toast";
-import axios from "axios";
+import { useUpdateProfileImage } from "@/hooks/api/user.hook";
 type DialogTypes = {
 	open: boolean;
 	onClose: () => void;
 	user: UserProfileType | undefined;
+	username: string;
 };
 
 const privacyOptions = [
@@ -33,7 +34,7 @@ const privacyOptions = [
 	},
 ];
 
-const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
+const ProfilePictureDialog = ({ open, onClose, user, username }: DialogTypes) => {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [croppedImage, setCroppedImage] = useState<string | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
@@ -46,6 +47,14 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 
 	const [loadingPrivacy, setLoadingPrivacy] =
 		useState<UserPhotoPrivacy | null>(null);
+
+	const updateProfileImageMutation = useUpdateProfileImage(username, {
+		onSuccess: () => {
+			setSelectedFile(null);
+			setCroppedImage(null);
+			onClose();
+		},
+	});
 	// Handle dropped file
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -106,29 +115,12 @@ const ProfilePictureDialog = ({ open, onClose, user }: DialogTypes) => {
 
 		setIsUploadingImage(true);
 		try {
-			// Convert base64 → File
 			const res = await fetch(croppedImage);
 			const blob = await res.blob();
 			const formData = new FormData();
+			formData.append("file", blob, "profile.jpg");
 
-			formData.append(
-				"file",
-				blob,
-				"profile.jpg"
-			);
-
-			const token = localStorage.getItem("accessToken");
-
-			return axios.patch(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}/account/profile-image`,
-				formData,
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				}
-			);
-
+			await updateProfileImageMutation.mutateAsync(formData);
 		} catch {
 			toast.error("Failed to upload image");
 		} finally {

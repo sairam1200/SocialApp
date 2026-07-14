@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronRight } from "lucide-react";
-import Image from "next/image";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { UserProfileType } from "@/types/account/profile.type";
 import { apiClient } from "@/services/apiClient.service";
 import toast from "react-hot-toast";
@@ -82,8 +82,8 @@ export default function EditProfileDialog({ open, onClose, openPhotoDialog, user
 					<Form className="space-y-3">
 						{/* Profile photo */}
 						<div className="flex items-center gap-4 cursor-pointer mb-5" onClick={openPhotoDialog}>
-							<div className="relative w-11 h-11 rounded-full shadow-md shadow-[#6136FF40] overflow-hidden group">
-								<Image src={user?.photo ?? "/images/avatar.svg"} alt="User avatar" fill className="object-cover" />
+							<div className="shadow-md shadow-[#6136FF40] rounded-full group">
+								<UserAvatar src={user?.photo} alt="User avatar" size="lg" />
 							</div>
 							<div className="flex flex-1 justify-between items-center gap-3">
 								<p className="flex flex-col gap-1">

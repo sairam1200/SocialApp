@@ -19,7 +19,7 @@ export interface StatItem {
 
 export interface CardContentProps {
   imageSrc?: string;
-  profilePicSrc: string;
+  profilePicSrc: string | null;
   userName: string;
   userHandle?: string;
   platform: string;
@@ -116,7 +116,7 @@ export function normalizeSearchResult(result: SearchResult): CardContentProps {
 
   return {
     imageSrc: result.media?.url || result.media?.thumbnailUrl,
-    profilePicSrc: result.author?.profileImage || "/icons/gaddr-logo-xs.svg",
+    profilePicSrc: result.author?.profileImage ?? null,
     userName: result.author?.name || "Unknown",
     userHandle: result.author?.handle || "@unknown",
     platform: result.platform,
@@ -137,7 +137,7 @@ export function normalizeDiscoverContent(
 
   return {
     imageSrc: item.imageUrl ?? undefined,
-    profilePicSrc: item.userProfileImage ?? "/icons/gaddr-logo-xs.svg",
+    profilePicSrc: item.userProfileImage ?? null,
     userName: item.userName,
     userHandle: item.userHandle,
     platform: item.platform,
@@ -154,7 +154,7 @@ export function normalizeDiscoverContent(
 
 export interface ProfileCardProps {
   userId?: string;
-  profilePicSrc: string;
+  profilePicSrc: string | null;
   userName: string;
   userHandle: string;
   category: string;
@@ -196,7 +196,7 @@ export function mapProfileToProps(
   return {
     userId: profile?.id ?? fallbacks?.id,
     profilePicSrc:
-      profile?.profileImage ?? fallbacks?.profileImage ?? "/icons/gaddr-logo-xs.svg",
+      profile?.profileImage ?? fallbacks?.profileImage ?? null,
     userName: displayName || userName || "Unknown",
     userHandle: isProfileAvailable ? `@${userName}` : "",
     category: profile?.niche ?? "Creator",

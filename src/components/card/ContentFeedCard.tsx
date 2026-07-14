@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { MoreVertical } from "lucide-react";
 import CardStats from "./CardStats";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { StatItem } from "@/lib/card-helpers";
 import { useEffect } from "react";
 interface ContentFeedCardProps {
@@ -28,7 +29,6 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	const [currentStats, setCurrentStats] = useState<StatItem[]>(stats);
 	const [isPostLiked, setIsPostLiked] = useState(false);
 	const [imageError, setImageError] = useState(false);
-	const [profileError, setProfileError] = useState(false);
 	const isVideo =
 		imageSrc?.toLowerCase().includes(".mp4") ||
 		imageSrc?.includes("video_dashinit") ||
@@ -101,21 +101,13 @@ useEffect(() => {
 					{/* User Info */}
 						<div className="flex items-start justify-between mb-3">
 						<div className="flex items-center">
-							{/* Profile Picture */}
+						{/* Profile Picture */}
 							<div className="relative mr-3 w-12 h-10 flex-shrink-0 overflow-visible">
-								{profileError ? (
-									<div className="w-10 h-10 rounded-full bg-gray-200" />
-								) : (
-									<Image
-										src={profilePicSrc || "/icons/gaddr-logo-xs.svg"}
-										alt={userName}
-										width={40}
-										height={40}
-										className="rounded-full object-cover"
-										unoptimized
-										onError={() => setProfileError(true)}
-									/>
-								)}
+								<UserAvatar
+									src={profilePicSrc}
+									alt={userName}
+									size="md"
+								/>
 								{/* Platform Icon Overlay */}
 								<div className="absolute
 		bottom-0
