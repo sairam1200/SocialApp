@@ -7,7 +7,7 @@ import { StatItem } from "@/lib/card-helpers";
 import { useEffect } from "react";
 interface ContentFeedCardProps {
 	imageSrc?: string;
-	profilePicSrc: string;
+	profilePicSrc: string | null;
 	userName: string;
 	userHandle?: string;
 	platformIcon: React.ReactNode;

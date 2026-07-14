@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import CopyIcon from "@/components/svg/copy.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

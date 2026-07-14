@@ -25,7 +25,7 @@ const platformIcons: Record<string, React.ElementType> = {
 };
 interface ProfileCardProps {
     userId?: string;
-    profilePicSrc: string;
+    profilePicSrc: string | null;
     userName: string;
     userHandle: string;
     category: string;

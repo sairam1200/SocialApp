@@ -1,5 +1,6 @@
 "use client";
 import { useState, ComponentType, SVGProps, useEffect } from "react";
+import Image from "next/image";
 import ArrowBack from "@/components/svg/arrow_back.svg";
 import PenIcon from "@/components/svg/pen.svg";
 import VerificationIcon from "@/components/svg/verification-badge-purple.svg";
