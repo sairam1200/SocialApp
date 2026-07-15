@@ -23,6 +23,7 @@ type MediaUploadProps = {
 	uploadUI?: "box" | "button";
 	iconScale?: string;
 	overrideId?: PlatformId;
+	createdUrlsRef?: React.MutableRefObject<Set<string>>;
 };
 
 const statusLabels: Record<string, string> = {
@@ -41,6 +42,7 @@ function MediaUpload({
 	uploadUI = "box",
 	iconScale = "scale-70",
 	overrideId,
+	createdUrlsRef: externalCreatedUrlsRef,
 }: MediaUploadProps) {
 	const fieldPath = overrideId ? `platformOverrides.${overrideId}.mediaFiles` : "baseContent.mediaFiles";
 	const mediaFiles =
@@ -52,15 +54,19 @@ function MediaUpload({
 	});
 	const [videoError, setVideoError] = useState("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const createdUrlsRef = useRef<Set<string>>(new Set());
+	const internalCreatedUrlsRef = useRef<Set<string>>(new Set());
+	const createdUrlsRef = externalCreatedUrlsRef ?? internalCreatedUrlsRef;
 	const uploadAbortMapRef = useRef<Map<string, AbortController>>(new Map());
+	const mediaFilesRef = useRef(mediaFiles);
+	mediaFilesRef.current = mediaFiles;
 
 	const updateMedia = useCallback(
 		(id: string, updates: Partial<MediaFile>) => {
-			const updated = mediaFiles.map((m) => (m.id === id ? { ...m, ...updates } : m));
+			const updated = mediaFilesRef.current.map((m) => (m.id === id ? { ...m, ...updates } : m));
+			mediaFilesRef.current = updated;
 			formik.setFieldValue(fieldPath, updated);
 		},
-		[fieldPath, formik, mediaFiles]
+		[fieldPath, formik]
 	);
 
 	const revokePreviewUrl = useCallback((url: string) => {
@@ -85,11 +91,12 @@ function MediaUpload({
 
 				updateMedia(media.id, {
 					serverUrl: result.url,
+					uploadId: result.uploadId,
+					r2Key: result.r2Key,
+					fileSize: result.fileSize,
 					uploadStatus: "completed",
 					uploadProgress: 100,
 				});
-
-				revokePreviewUrl(media.previewUrl);
 			} catch (err) {
 				if ((err as Error).name === "AbortError") return;
 				updateMedia(media.id, {
@@ -100,7 +107,7 @@ function MediaUpload({
 				uploadAbortMapRef.current.delete(media.id);
 			}
 		},
-		[updateMedia, revokePreviewUrl]
+		[updateMedia]
 	);
 
 	const processFiles = useCallback(
@@ -125,13 +132,15 @@ function MediaUpload({
 
 				const previewUrl = URL.createObjectURL(file);
 				createdUrlsRef.current.add(previewUrl);
+				const mediaId = `${file.name}-${Date.now()}-${Math.random()}`;
+				const uploadStatus = type === "video" ? "uploading" : undefined;
 				newMedia.push({
 					file,
 					previewUrl,
 					type,
-					id: `${file.name}-${Date.now()}-${Math.random()}`,
+					id: mediaId,
 					serverUrl: undefined,
-					uploadStatus: type === "video" ? "uploading" : undefined,
+					uploadStatus,
 					uploadProgress: 0,
 				});
 			});
@@ -142,6 +151,7 @@ function MediaUpload({
 
 			if (newMedia.length > 0) {
 				const updatedFiles = [...mediaFiles, ...newMedia];
+				mediaFilesRef.current = updatedFiles;
 				formik.setFieldValue(fieldPath, updatedFiles);
 
 				newMedia.forEach((media) => {
@@ -203,6 +213,7 @@ function MediaUpload({
 		const removed = mediaFiles.find((m) => m.id === id);
 		if (removed) revokePreviewUrl(removed.previewUrl);
 		const updated = [...mediaFiles].filter((media) => media.id !== id);
+		mediaFilesRef.current = updated;
 		formik.setFieldValue(fieldPath, updated);
 	};
 
@@ -215,19 +226,22 @@ function MediaUpload({
 	);
 
 	useEffect(() => {
-		const urls = createdUrlsRef.current;
 		const abortMap = uploadAbortMapRef.current;
+		const isShared = !!externalCreatedUrlsRef;
 		return () => {
 			abortMap.forEach((controller) => controller.abort());
 			abortMap.clear();
-			urls.forEach((url) => URL.revokeObjectURL(url));
-			urls.clear();
+			if (!isShared) {
+				const urls = internalCreatedUrlsRef.current;
+				urls.forEach((url) => URL.revokeObjectURL(url));
+				urls.clear();
+			}
 		};
-	}, []);
+	}, [externalCreatedUrlsRef]);
 
 	const videoSrc = (media: MediaFile): string => {
-		if (media.serverUrl) return media.serverUrl;
-		return media.previewUrl;
+		if (media.previewUrl) return media.previewUrl;
+		return media.serverUrl || "";
 	};
 
 	return (

@@ -1,6 +1,9 @@
 export interface UploadVideoResult {
   url: string;
   transcoded: boolean;
+  uploadId: string;
+  r2Key: string;
+  fileSize: number;
 }
 
 function getApiBaseUrl(): string {

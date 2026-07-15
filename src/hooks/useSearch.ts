@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/services/apiClient.service";
+import { queryKeys } from "@/lib/query-keys";
 import {
   SearchResult,
   PaginationTokens,
@@ -22,9 +24,6 @@ export interface UseSearchState {
   paginationTokens: PaginationTokens;
 }
 
-/**
- * Mock data generator for development/testing
- */
 const generateMockResults = (query: string, page: number = 1): SearchResult[] => {
   const mockTypes = ["post", "profile", "video", "reel"] as const;
   const mockPlatforms = ["twitter", "instagram", "facebook", "youtube", "tiktok"];
@@ -77,163 +76,39 @@ const generateMockResults = (query: string, page: number = 1): SearchResult[] =>
   return results;
 };
 
-/**
- * Custom hook for managing search functionality
- * Handles search queries, pagination, loading states, and error handling
- */
 export const useSearch = (options: UseSearchOptions = {}) => {
   const { debounceMs = 300, useMockData = false } = options;
 
-  const [state, setState] = useState<UseSearchState>({
-    results: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-    page: 1,
-    totalResults: 0,
-    hasNextPage: false,
-    paginationTokens: {},
-  });
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-
-  /**
-   * Perform search with given parameters
-   */
-  const search = useCallback(
-    async (
-      searchTerm: string,
-      platforms: string[],
-      filter?: SearchFilter,
-      page: number = 1
-    ) => {
-      if (!searchTerm.trim()) {
-        setState((prev) => ({
-          ...prev,
-          results: [],
-          totalResults: 0,
-          hasNextPage: false,
-        }));
-        return;
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: queryKeys.searchResults(searchTerm, page, 12),
+    queryFn: async () => {
+      if (useMockData) {
+        const mockResults = generateMockResults(searchTerm, page);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return { results: mockResults, totalResults: 100 };
       }
-
-      setState((prev) => ({ ...prev, isLoading: true, isError: false }));
-
-      try {
-        if (useMockData) {
-          // Use mock data
-          const mockResults = generateMockResults(searchTerm, page);
-
-          // Simulate network delay
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          // Use mock results directly
-          setState((prev) => ({
-            ...prev,
-            results: mockResults,
-            totalResults: 100,
-            page: page,
-            hasNextPage: page * 12 < 100,
-            paginationTokens: {},
-            isLoading: false,
-            isError: false,
-            error: null,
-          }));
-          return;
-        } else {
-          // Call actual API
-          const response = await apiClient.Search.getGlobalResults(searchTerm.trim(), page, 12);
-          const normalized = apiClient.Search.normalizeGlobalResults(response);
-
-          setState((prev) => ({
-            ...prev,
-            results: normalized.results,
-            totalResults: normalized.totalResults,
-            page: response.pagination.page,
-            hasNextPage: page * 12 < normalized.totalResults,
-            paginationTokens: {},
-            isLoading: false,
-            isError: false,
-            error: null,
-          }));
-          return;
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error("Search failed");
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          isError: true,
-          error,
-          results: [],
-        }));
-      }
+      const response = await apiClient.Search.getGlobalResults(searchTerm.trim(), page, 12);
+      const normalized = apiClient.Search.normalizeGlobalResults(response);
+      return { results: normalized.results, totalResults: normalized.totalResults, page: response.pagination.page };
     },
-    [state.paginationTokens, useMockData]
-  );
+    enabled: !!searchTerm.trim(),
+    placeholderData: (prev) => prev,
+  });
 
-  /**
-   * Debounced search - automatically called after typing pauses 
-   * issue timer doesnt reset on every call
-   * this is a problem because if user types and then unfocuses once the timer is set, the timer will still be active
-   */
+  useEffect(() => {
+    if (data) {
+      setTotalResults(data.totalResults);
+      setHasNextPage(page * 12 < data.totalResults);
+    }
+  }, [data, page]);
 
-
-  const debouncedSearch = useCallback(
-    (
-      searchTerm: string,
-      platforms: string[],
-      filter?: SearchFilter,
-      page: number = 1
-    ) => {
-
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
-      debounceTimerRef.current = setTimeout(() => {
-        search(searchTerm, platforms, filter, page);
-      }, debounceMs);
-
-    },
-    [search, debounceMs]
-  );
-
-  /**
-   * Go to next page
-   */
-  const nextPage = useCallback(
-    async (
-      searchTerm: string,
-      platforms: string[],
-      filter?: SearchFilter
-    ) => {
-      if (state.hasNextPage) {
-        await search(searchTerm, platforms, filter, state.page + 1);
-      }
-    },
-    [search, state.page, state.hasNextPage]
-  );
-
-  /**
-   * Go to previous page
-   */
-  const previousPage = useCallback(
-    async (
-      searchTerm: string,
-      platforms: string[],
-      filter?: SearchFilter
-    ) => {
-      if (state.page > 1) {
-        await search(searchTerm, platforms, filter, state.page - 1);
-      }
-    },
-    [search, state.page]
-  );
-
-  /**
-   * Cleanup debounce timer on unmount
-   */
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
@@ -242,8 +117,78 @@ export const useSearch = (options: UseSearchOptions = {}) => {
     };
   }, []);
 
+  const search = useCallback(
+    async (
+      term: string,
+      _platforms: string[],
+      _filter?: SearchFilter,
+      pageNum: number = 1
+    ) => {
+      if (!term.trim()) {
+        setSearchTerm("");
+        setPage(1);
+        setTotalResults(0);
+        setHasNextPage(false);
+        return;
+      }
+      setSearchTerm(term);
+      setPage(pageNum);
+    },
+    []
+  );
+
+  const debouncedSearch = useCallback(
+    (
+      term: string,
+      platforms: string[],
+      filter?: SearchFilter,
+      pageNum: number = 1
+    ) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        search(term, platforms, filter, pageNum);
+      }, debounceMs);
+    },
+    [search, debounceMs]
+  );
+
+  const nextPage = useCallback(
+    async (
+      term: string,
+      platforms: string[],
+      filter?: SearchFilter
+    ) => {
+      if (hasNextPage) {
+        await search(term, platforms, filter, page + 1);
+      }
+    },
+    [search, page, hasNextPage]
+  );
+
+  const previousPage = useCallback(
+    async (
+      term: string,
+      platforms: string[],
+      filter?: SearchFilter
+    ) => {
+      if (page > 1) {
+        await search(term, platforms, filter, page - 1);
+      }
+    },
+    [search, page]
+  );
+
   return {
-    ...state,
+    results: data?.results ?? [],
+    isLoading,
+    isError,
+    error: error instanceof Error ? error : null,
+    page,
+    totalResults,
+    hasNextPage,
+    paginationTokens: {},
     search,
     debouncedSearch,
     nextPage,

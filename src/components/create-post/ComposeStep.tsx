@@ -20,9 +20,10 @@ import { PlatformId } from "@/constants/platforms";
 type ComposeStepProps = {
 	formik: FormikProps<CreatePostFormValues>;
 	setActiveSearchModal: React.Dispatch<React.SetStateAction<"location" | "sound" | null>>;
+	createdUrlsRef?: React.MutableRefObject<Set<string>>;
 };
 
-function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
+function ComposeStep({ formik, setActiveSearchModal, createdUrlsRef }: ComposeStepProps) {
 	const baseContent = formik.values.baseContent;
 	const facebookPlatform = platformMap["facebook"];
 
@@ -80,7 +81,7 @@ function ComposeStep({ formik, setActiveSearchModal }: ComposeStepProps) {
 			</div>
 
 			<div>
-				<MediaUpload formik={formik} />
+				<MediaUpload formik={formik} createdUrlsRef={createdUrlsRef} />
 				{formik.touched.baseContent?.mediaFiles && typeof formik.errors.baseContent?.mediaFiles === "string" && (
 					<p className="text-sm text-destructive ml-1">{formik.errors.baseContent?.mediaFiles}</p>
 				)}

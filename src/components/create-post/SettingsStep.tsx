@@ -13,6 +13,7 @@ import { platformMap } from "@/constants/platforms";
 
 type SettingsStepProps = {
 	formik: FormikProps<CreatePostFormValues>;
+	createdUrlsRef?: React.MutableRefObject<Set<string>>;
 };
 
 const postOptions = [

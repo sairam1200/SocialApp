@@ -3,7 +3,7 @@ import type { DiscoverContentModel } from "@/types/discover.type";
 export type ContentTypeCategory = "feed_post" | "reels_shorts" | "live_stream" | "igtv_long_form";
 
 export function getContentCategory(item: DiscoverContentModel): ContentTypeCategory {
-  const t = item.type?.toLowerCase() || "";
+  const t = item?.type?.toLowerCase() || "";
 
   if (t.includes("live")) return "live_stream";
   if (t.includes("reel") || t.includes("short") || t === "animated_gif") return "reels_shorts";
@@ -23,7 +23,7 @@ export function filterByPlatform(items: DiscoverContentModel[], platforms: strin
 
 export function filterByContentType(items: DiscoverContentModel[], types: string[]): DiscoverContentModel[] {
   if (types.length === 0) return items;
-  return items.filter((item) => types.includes(getContentCategory(item)));
+  return items.filter((item) => item && types.includes(getContentCategory(item)));
 }
 
 export function filterByDatePosted(items: DiscoverContentModel[], datePosted: string): DiscoverContentModel[] {

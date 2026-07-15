@@ -5,6 +5,8 @@ const CHUNK_SIZE = 1024 * 1024;
 export interface ChunkedUploadResult {
   videoId: string;
   jobId: string;
+  uploadId: string;
+  r2Key: string;
   status: string;
   publishAt?: string;
 }
@@ -137,6 +139,8 @@ export function useChunkedUpload() {
             return {
               videoId: chunkData.videoId,
               jobId: chunkData.jobId,
+              uploadId: chunkData.uploadId,
+              r2Key: chunkData.r2Key,
               status: chunkData.status,
               publishAt: chunkData.publishAt,
             };
@@ -188,6 +192,8 @@ export function useChunkedUpload() {
         return {
           videoId: result.videoId,
           jobId: result.jobId,
+          uploadId: result.uploadId,
+          r2Key: result.r2Key,
           status: result.status,
           publishAt: result.publishAt,
         };

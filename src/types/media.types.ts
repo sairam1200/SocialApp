@@ -7,6 +7,9 @@ export type MediaFile = {
 	type: "image" | "video";
 	id: string;
 	serverUrl?: string;
+	uploadId?: string;
+	r2Key?: string;
+	fileSize?: number;
 	uploadStatus?: "local" | "uploading" | "checking" | "converting" | "completed" | "error";
 	uploadProgress?: number;
 	uploadError?: string;

@@ -27,6 +27,7 @@ type CustomizeStepProps = {
 	setActiveSearchModal: React.Dispatch<React.SetStateAction<"location" | "sound" | null>>;
 	customizePlatformId: PlatformId | null;
 	setCustomizePlatformId: React.Dispatch<React.SetStateAction<PlatformId | null>>;
+	createdUrlsRef?: React.MutableRefObject<Set<string>>;
 };
 
 const normalizeTag = (value: string) => {
@@ -41,6 +42,7 @@ function CustomizeStep({
 	setActiveSearchModal,
 	customizePlatformId,
 	setCustomizePlatformId,
+	createdUrlsRef,
 }: CustomizeStepProps) {
 	const selectedPlatforms = formik.values.platforms;
 	const [tagInputValue, setTagInputValue] = useState("");
@@ -79,6 +81,53 @@ function CustomizeStep({
 	const [mediaToPreview, setMediaToPreview] = useState<
 		MediaFile | undefined
 	>(effectiveValues.mediaFiles[0]);
+
+	const [shortsCompat, setShortsCompat] = useState<{
+		compatible: boolean;
+		message: string;
+	} | null>(null);
+
+	useEffect(() => {
+		if (effectiveValues.postType !== "short" || !effectiveValues.mediaFiles?.[0]) {
+			setShortsCompat(null);
+			return;
+		}
+		const media = effectiveValues.mediaFiles[0];
+		if (media.type !== "video") {
+			setShortsCompat({
+				compatible: false,
+				message: "Shorts requires a video file",
+			});
+			return;
+		}
+		const video = document.createElement("video");
+		video.preload = "metadata";
+		video.src = media.previewUrl;
+		video.onloadedmetadata = () => {
+			const w = video.videoWidth;
+			const h = video.videoHeight;
+			const isPortrait = h > w;
+			const ratio = h / w;
+			const ratioOk = ratio >= 1.4 && ratio <= 1.9;
+			const durationOk = (video.duration || 0) <= 60;
+			if (isPortrait && ratioOk && durationOk) {
+				setShortsCompat({
+					compatible: true,
+					message: "This video is already Shorts-compatible",
+				});
+			} else {
+				const reasons: string[] = [];
+				if (!isPortrait) reasons.push("not portrait");
+				if (!ratioOk) reasons.push(`aspect ratio ${ratio.toFixed(2)} (need 1.4–1.9)`);
+				if (!durationOk) reasons.push(`duration ${Math.round(video.duration)}s (max 60s)`);
+				setShortsCompat({
+					compatible: false,
+					message: `Will be converted to Shorts format: ${reasons.join(", ")}`,
+				});
+			}
+		};
+		video.onerror = () => setShortsCompat(null);
+	}, [effectiveValues.postType, effectiveValues.mediaFiles]);
 
 	const postTypeOptions = PLATFORM_POST_TYPES[activePlatformId].map(
 		(type) => ({
@@ -221,6 +270,7 @@ function CustomizeStep({
 									overrideId={activePlatformId}
 									mediaToEdit={mediaToPreview}
 									setMediaToEdit={(media) => media && setMediaToPreview(media)}
+									createdUrlsRef={createdUrlsRef}
 								/>
 							</div>
 							{getIn(formik.errors, `platformOverrides.${activePlatformId}.mediaFiles`) && (
@@ -251,6 +301,20 @@ function CustomizeStep({
 								}
 							/>
 						</div>
+
+						{/* Shorts Compatibility Indicator */}
+						{effectiveValues.postType === "short" && shortsCompat && (
+							<div
+								className={`text-xs px-3 py-2 rounded-md ${
+									shortsCompat.compatible
+										? "bg-green-50 text-green-700"
+										: "bg-blue-50 text-blue-700"
+								}`}
+							>
+								{shortsCompat.compatible ? "✓" : "↻"}{" "}
+								{shortsCompat.message}
+							</div>
+						)}
 
 						{/* YouTube: Title */}
 						{isYoutube && (

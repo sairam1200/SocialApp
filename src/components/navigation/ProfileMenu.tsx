@@ -26,6 +26,7 @@ function ProfileMenu({
 	contentProps?: PopoverContentProps;
 }) {
 	const { user } = useHttpContext();
+	const authUserPhoto = useAuthUserStore((s) => s.authUser?.photo);
 	const [open, setOpen] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const [isLogoutDialog, setIsLogoutDialog] = useState(false);
@@ -69,11 +70,11 @@ const deviceId = getDeviceIdOrNull();
 							className={cn("rounded-full cursor-pointer", isProfileActive && "bg-[#F0EBFF]", "hover:bg-[#F0EBFF]")}
 							title="Profile"
 						>
-							{user?.[ClaimTypes.ProfileImage] ? (
-								<Image fetchPriority="high" preload src={user?.[ClaimTypes.ProfileImage] as string} alt="User avatar" width={30} height={30} className="rounded-full" />
-							) : (
-								<AvatarIcon className="scale-75 text-[#0D0D0D]" />
-							)}
+						{authUserPhoto ? (
+							<Image fetchPriority="high" preload src={authUserPhoto} alt="User avatar" width={30} height={30} className="rounded-full" />
+						) : (
+							<AvatarIcon className="scale-75 text-[#0D0D0D]" />
+						)}
 						</button>
 					)}
 				</PopoverTrigger>

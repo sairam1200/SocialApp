@@ -11,11 +11,7 @@ function MyPostsTab() {
 	const { connectedPlatforms } = useConnectedPlatforms();
 	const { contents, loading } = useYoutubeDiscover({ enabled: connectedPlatforms.includes('youtube') });
 	const videoContents = contents.filter(
-
-		(item) =>
-			 item.type === "uploaded_video" 
-
-
+		(item) => item?.type === "uploaded_video"
 	);
 
 	if (loading) {

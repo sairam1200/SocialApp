@@ -249,11 +249,11 @@ export default function SignupPage() {
 								label={
 									<>
 										I agree{" "}
-										<Link href="" className="text-[#6400BF]">
+										<Link href="/terms" className="text-[#6400BF]">
 											Terms of Service
 										</Link>{" "}
 										and{" "}
-										<Link href="" className="text-[#6400BF]">
+										<Link href="/privacy-policy" className="text-[#6400BF]">
 											Privacy Policy
 										</Link>
 									</>

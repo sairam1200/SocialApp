@@ -134,4 +134,64 @@ export class IntegrationsService {
   async uploadMedia(@Body() body: FormData): Promise<{ url: string }> {
     return { url: "" };
   }
+
+  /** Submit content for publishing to a platform */
+  @Post<{ publishJobId: string; platform: string; status: string }>(
+    "/integrations/publish/content"
+  )
+  async publishContent(
+    @Body()
+    body: {
+      linkedAccountId: string;
+      platform: string;
+      uploadId: string;
+      title: string;
+      description?: string;
+      tags?: string[];
+      visibility?: 'public' | 'private' | 'unlisted';
+      publishAt?: string;
+      postType?: string;
+    }
+  ): Promise<{ publishJobId: string; platform: string; status: string }> {
+    return { publishJobId: "", platform: "", status: "" };
+  }
+
+  /** Get publish job status */
+  @Get<{
+    id: string;
+    platform: string;
+    status: string;
+    progress: number;
+    statusMessage?: string;
+    platformContentId?: string;
+    platformContentUrl?: string;
+    attempts: number;
+    lastError?: string;
+    nextRetryAt?: string;
+    createdAt: string;
+  }>("/integrations/publish/status/{publishJobId}")
+  async getPublishStatus(
+    @Path("publishJobId") publishJobId: string
+  ): Promise<{
+    id: string;
+    platform: string;
+    status: string;
+    progress: number;
+    statusMessage?: string;
+    platformContentId?: string;
+    platformContentUrl?: string;
+    attempts: number;
+    lastError?: string;
+    nextRetryAt?: string;
+    createdAt: string;
+  }> {
+    return {
+      id: "",
+      platform: "",
+      status: "",
+      progress: 0,
+      attempts: 0,
+      createdAt: "",
+    };
+  }
 }

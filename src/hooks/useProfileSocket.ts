@@ -46,6 +46,10 @@ export function useProfileSocket() {
         }
         return profile;
       });
+
+      if (payload.updates.photo !== undefined) {
+        useAuthUserStore.getState().updateAuthUser({ photo: payload.updates.photo as string | undefined });
+      }
     };
 
     notificationsSocket.on("profile-update", handler);

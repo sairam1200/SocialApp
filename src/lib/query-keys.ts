@@ -4,4 +4,5 @@ export const queryKeys = {
   discoverFeed: (userId?: string) => ["discover", "feed", userId] as const,
   searchResults: (query: string, page: number, limit: number) => ["search", "results", query, page, limit] as const,
   followStatus: (userId: string) => ["follow", "status", userId] as const,
+  publishStatus: (publishJobId: string) => ["publish", "status", publishJobId] as const,
 };
