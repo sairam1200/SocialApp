@@ -38,9 +38,9 @@ export function renderPlatformIcon(
         case "facebook":
             return <FacebookBlueIcon className={cls} />;
         case "youtube":
-            return <YoutubeRedIcon className={cls} />;
+            return <YoutubeRedIcon className="w-6 h-6 text-red-600" />;
         case "instagram":
-            return <InstagramColorIcon className={cls} />;
+            return <InstagramColorIcon className="w-6 h-6 text-red-600" />;
         case "pinterest":
             return <PinterestIcon className={cls} />;
         case "twitter":
