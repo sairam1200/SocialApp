@@ -6,6 +6,9 @@ import { PublicProfileModel } from "@/types/account/profile.type";
  * Based on actual multi-platform API response structure
  */
 
+/** Active search result type tab */
+export type SearchTypeTab = "profiles" | "contents" | "projects";
+
 /** Pagination tokens for different platforms */
 export interface PaginationTokens {
   youtube?: string;
@@ -37,7 +40,7 @@ export interface SearchRequest {
 
 export interface GlobalSearchSuggestion {
   id: string;
-  type: "user" | "userContent";
+  type: "user" | "userContent" | "project";
   label: string;
   userName?: string;
   href?: string;
@@ -90,7 +93,7 @@ export interface GlobalSearchResponse {
 /** Normalized search result item (after flattening platform-specific results) */
 export interface SearchResult {
   id: string;
-  type: "post" | "profile" | "video" | "reel" | "content" | "feed";
+  type: "post" | "profile" | "video" | "reel" | "content" | "feed" | "project";
   platform: string;
   title?: string;
   description?: string;
@@ -230,6 +233,31 @@ export interface NormalizedSearchResults {
   results: SearchResult[];
   paginationTokens?: PaginationTokens;
   totalResults: number;
+}
+
+/** Project search result from GET /api/v1/projects/search */
+export interface ProjectSearchResult {
+  id: number;
+  title: string;
+  description: string | null;
+  budget: string | null;
+  currency: string;
+  paymentType: string;
+  timeline: string | null;
+  skills: string[];
+  status: string;
+  projectType: string;
+  bountyAmount: string | null;
+  trialDuration: number | null;
+  hireOnCompletion: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Project search API response */
+export interface ProjectSearchResponse {
+  result: ProjectSearchResult[];
+  total: number;
 }
 
 /** Trending content item */

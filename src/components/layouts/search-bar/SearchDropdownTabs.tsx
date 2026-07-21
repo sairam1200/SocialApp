@@ -82,7 +82,7 @@ function SearchDropdownTabs({
 								onClick={() => onSuggestionClick(suggestion)}
 								className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-[#FAFAFA]"
 							>
-							{suggestion.type === "user"
+						{suggestion.type === "user"
 								? <PersonIcon className="h-5 w-5 shrink-0" />
 								: <SearchIcon className="h-5 w-5 shrink-0" />}
 								<span className="min-w-0">
@@ -90,6 +90,8 @@ function SearchDropdownTabs({
 									<span className="block truncate text-xs text-gray-neutral">
 										{suggestion.type === "user"
 											? suggestion.userName && `@${suggestion.userName}`
+											: suggestion.type === "project"
+											? "Project"
 											: suggestion.creatorName || "Content"}
 									</span>
 								</span>

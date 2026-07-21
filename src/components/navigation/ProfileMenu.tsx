@@ -12,8 +12,6 @@ import { getDeviceIdOrNull } from "@/utils/deviceId.util";
 import { logoutFn } from "@/utils/logout.utitl";
 import { cn } from "@/utils/cn.util";
 import { PopoverContentProps } from "@radix-ui/react-popover";
-import { useHttpContext } from "@/providers/HttpContextProvider";
-import { ClaimTypes } from "@/constants/globals";
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
@@ -25,19 +23,18 @@ function ProfileMenu({
 	triggerElement?: React.ReactNode;
 	contentProps?: PopoverContentProps;
 }) {
-	const { user } = useHttpContext();
-	const authUserPhoto = useAuthUserStore((s) => s.authUser?.photo);
+	const authUser = useAuthUserStore((s) => s.authUser);
 	const [open, setOpen] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const [isLogoutDialog, setIsLogoutDialog] = useState(false);
-const deviceId = getDeviceIdOrNull();
+	const deviceId = getDeviceIdOrNull();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { clearAuthUser } = useAuthUserStore();
 
-	const usernameHref = `/u/${user?.[ClaimTypes.UserName]}`;
+	const usernameHref = `/u/${authUser?.username}`;
 	const pathname = usePathname();
-	const isProfileActive = user?.[ClaimTypes.UserName] ? pathname?.startsWith(`/u/${user?.[ClaimTypes.UserName]}`) : false;
+	const isProfileActive = authUser?.username ? pathname?.startsWith(`/u/${authUser.username}`) : false;
 
 	const profileMenuItems = [
 		// { label: "Analytics", href: "/analytics", icon: ChartColumn },
@@ -70,8 +67,8 @@ const deviceId = getDeviceIdOrNull();
 							className={cn("rounded-full cursor-pointer", isProfileActive && "bg-[#F0EBFF]", "hover:bg-[#F0EBFF]")}
 							title="Profile"
 						>
-						{authUserPhoto ? (
-							<Image fetchPriority="high" preload src={authUserPhoto} alt="User avatar" width={30} height={30} className="rounded-full" />
+						{authUser?.photo ? (
+							<Image fetchPriority="high" loading="eager" src={authUser.photo} alt="User avatar" width={30} height={30} className="rounded-full" />
 						) : (
 							<AvatarIcon className="scale-75 text-[#0D0D0D]" />
 						)}
@@ -82,9 +79,9 @@ const deviceId = getDeviceIdOrNull();
 				<PopoverContent side="right" align="start" sideOffset={10} className="w-64 py-2 px-3" {...contentProps}>
 					<Link href={usernameHref} className="hover:bg-secondary p-2 rounded-sm block" onClick={() => setOpen(false)}>
 						<p className="font-semibold text-sm">
-							{user?.[ClaimTypes.FullName]}
+							{authUser?.fullName}
 						</p>
-						<p className="text-xs text-gray-neutral">@{user?.[ClaimTypes.UserName]}</p>
+						<p className="text-xs text-gray-neutral">@{authUser?.username}</p>
 					</Link>
 
 					<div className="border-t mt-2 space-y-1">

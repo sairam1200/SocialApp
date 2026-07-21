@@ -2,7 +2,7 @@
 
 import React from "react";
 import WarningIcon from "@/components/svg/warning-icon.svg";
-import { SearchResult } from "@/types/search.types";
+import { SearchResult, SearchTypeTab } from "@/types/search.types";
 import ContentFeedCard from "@/components/card/ContentFeedCard";
 import ProfileCard from "@/components/card/PorfileCard";
 import { cn } from "@/utils/cn.util";
@@ -12,6 +12,7 @@ import { renderPlatformIcon, isValidUrl, normalizeSearchResult, mapProfileToProp
 
 interface SearchResultsProps {
     results: SearchResult[];
+    searchType?: SearchTypeTab;
     isLoading: boolean;
     isError: boolean;
     error?: Error | null;
@@ -45,6 +46,7 @@ const ResultSkeleton = ({ viewType = "grid" }: { viewType?: "grid" | "list" }) =
 
 export const SearchResults = ({
     results,
+    searchType = "profiles",
     isLoading,
     isError,
     error,
@@ -108,6 +110,13 @@ export const SearchResults = ({
     }
 
     if (!results || !Array.isArray(results) || results.length === 0) {
+        const emptyMessages: Record<SearchTypeTab, { title: string; description: string }> = {
+            profiles: { title: "No profiles found", description: "Try searching with different keywords" },
+            contents: { title: "No content found", description: "Try searching with different keywords or filters" },
+            projects: { title: "No projects found", description: "Try searching with different keywords" },
+        };
+        const empty = emptyMessages[searchType];
+
         return (
             <div
                 className={cn(
@@ -119,16 +128,14 @@ export const SearchResults = ({
                     <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin opacity-50"></div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Results Found
+                    {empty.title}
                 </h3>
                 <p className="text-gray-600 text-center">
-                    Try searching with different keywords or filters
+                    {empty.description}
                 </p>
             </div>
         );
     }
-
-    const firstContentIndex = results.findIndex((item) => item.type !== "profile");
 
     return (
         <div
@@ -140,11 +147,8 @@ export const SearchResults = ({
                 className
             )}
         >
-            {results.some((result) => result.type === "profile") && (
-                <h2 className="col-span-full text-lg font-semibold text-gray-900">Profiles</h2>
-            )}
             {Array.isArray(results) &&
-                results.map((result, index) => {
+                results.map((result) => {
                     if (result.type === "profile") {
                         const publicProfile = result.publicProfile as
                             | PublicProfileModel
@@ -167,7 +171,7 @@ export const SearchResults = ({
                     const validUrl =
                         cardProps.sourceUrl && isValidUrl(cardProps.sourceUrl) ? cardProps.sourceUrl : null;
 
-                    const card = (
+                    return (
                         <div
                             key={result.id}
                             onClick={() => {
@@ -187,15 +191,6 @@ export const SearchResults = ({
                             />
                         </div>
                     );
-
-                    return index === firstContentIndex ? (
-                        <React.Fragment key={`content-section-${result.id}`}>
-                            <h2 className="col-span-full text-lg font-semibold text-gray-900">
-                                Contents
-                            </h2>
-                            {card}
-                        </React.Fragment>
-                    ) : card;
                 })}
             {!Array.isArray(results) && (
                 <div className="col-span-full text-center py-8">

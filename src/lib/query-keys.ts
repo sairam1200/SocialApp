@@ -3,6 +3,7 @@ export const queryKeys = {
   discoverCreators: (page: number, limit: number) => ["discover", "creators", page, limit] as const,
   discoverFeed: (userId?: string) => ["discover", "feed", userId] as const,
   searchResults: (query: string, page: number, limit: number) => ["search", "results", query, page, limit] as const,
+  searchProjects: (query: string, page: number, limit: number) => ["projects", "search", query, page, limit] as const,
   followStatus: (userId: string) => ["follow", "status", userId] as const,
   publishStatus: (publishJobId: string) => ["publish", "status", publishJobId] as const,
 };

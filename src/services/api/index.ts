@@ -6,3 +6,4 @@ export { SearchService } from "./search.service";
 export { YoutubeService } from "./youtube.service";
 export { FacebookService } from "./facebook.service";
 export { DiscoverService } from "./discover.service";
+export { ProjectService } from "./project.service";

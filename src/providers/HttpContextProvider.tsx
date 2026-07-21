@@ -1,6 +1,8 @@
 "use client";
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import { JwtPayload } from "@/types/jwtPayload.type";
+import { useAuthUserStore } from "@/store/auth-user.store";
+import { ClaimTypes } from "@/constants/globals";
 
 interface HttpContextValue {
   user: JwtPayload | null;
@@ -11,22 +13,37 @@ const HttpContextClient = createContext<HttpContextValue | null>(null);
 
 interface HttpContextProviderProps {
   children: ReactNode;
-  user: JwtPayload | null;
-  isAuthenticated: boolean;
 }
 
 export function HttpContextProvider({
   children,
-  user,
-  isAuthenticated,
 }: HttpContextProviderProps) {
+  const authUser = useAuthUserStore((s) => s.authUser);
+  const isAuth = useAuthUserStore((s) => s.isAuthenticated);
+
+  const user: JwtPayload | null = useMemo(() => {
+    if (!authUser) return null;
+    return {
+      [ClaimTypes.UserId]: authUser.id,
+      [ClaimTypes.Email]: authUser.email,
+      [ClaimTypes.UserName]: authUser.username,
+      [ClaimTypes.UserType]: authUser.userType ?? "",
+      [ClaimTypes.FullName]: authUser.fullName ?? "",
+      [ClaimTypes.GivenName]: authUser.firstName ?? "",
+      [ClaimTypes.FamilyName]: authUser.lastName ?? "",
+      [ClaimTypes.ProfileImage]: authUser.photo ?? "",
+      [ClaimTypes.SecurityStamp]: authUser.securityStamp ?? "",
+      [ClaimTypes.ConcurrencyStamp]: authUser.concurrencyStamp ?? "",
+      exp: 0,
+    } as JwtPayload;
+  }, [authUser]);
 
   const contextValue = useMemo(
     () => ({
       user,
-      isAuthenticated,
+      isAuthenticated: isAuth,
     }),
-    [user, isAuthenticated]
+    [user, isAuth]
   );
 
   return (

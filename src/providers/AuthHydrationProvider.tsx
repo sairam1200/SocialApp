@@ -24,7 +24,6 @@ export default function AuthHydrationProvider({
 }: AuthHydrationProviderProps) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const setAuthUser = useAuthUserStore((state) => state.setAuthUser);
 	const [hydrated, setHydrated] = useState(false);
 
 	const authUser: AuthUserType | null = useMemo(() => {
@@ -55,12 +54,13 @@ export default function AuthHydrationProvider({
 		};
 	}, [jwtUser, isAuthenticated]);
 
+	// Token refresh: update Zustand when jwtUser changes after initial load
 	useEffect(() => {
 		if (authUser) {
-			setAuthUser(authUser);
+			useAuthUserStore.setState({ authUser, isAuthenticated: true });
 		}
 		setHydrated(true);
-	}, [authUser, setAuthUser]);
+	}, [authUser]);
 
 	// Onboarding route guard (runs after hydration)
 	useEffect(() => {
