@@ -20,6 +20,7 @@ export type RegisterResponseType = ServiceResponse & {
   isEmailVerified: boolean;
   phoneNumber: string;
   photo: string;
+  accessToken?: string;
 };
 
 export type VerifyEmailRequestType = {

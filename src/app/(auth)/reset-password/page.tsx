@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthCard, AuthInput } from "@/components/authentication";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -37,6 +38,8 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,7 +106,7 @@ export default function ResetPasswordPage() {
         <form onSubmit={formik.handleSubmit} noValidate>
           <AuthInput
             label="Enter new password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Enter password..."
             required
@@ -114,6 +117,16 @@ export default function ResetPasswordPage() {
             placeholderIcon="/icons/password.svg"
             altText="password icon"
             labelClassName="text-[#1F222E] text-base font-bold mb-2"
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                onMouseDown={() => setShowPassword((p) => !p)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
           />
           <p className="text-xs text-start font-normal mb-2 mt-2 text-[#595959]">
             *Minimum 8 characters, including a capital letter and a number
@@ -121,7 +134,7 @@ export default function ResetPasswordPage() {
 
           <AuthInput
             label="Confirm new password"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             placeholder="Confirm password..."
             required
@@ -136,6 +149,16 @@ export default function ResetPasswordPage() {
             placeholderIcon="/icons/password.svg"
             altText="password icon"
             labelClassName="text-[#1F222E] text-base font-bold mb-2"
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                onMouseDown={() => setShowConfirmPassword((p) => !p)}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
           />
 
           {formik.status?.apiError && (

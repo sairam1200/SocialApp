@@ -32,7 +32,8 @@ import type { DiscoverContentModel } from "@/types/discover.type";
 import { getContentCategory, filterByPlatform, filterByContentType, filterByDatePosted, sortByMetrics } from "@/lib/discover-filters";
 import { renderPlatformIcon, isValidUrl, normalizeDiscoverContent, mapProfileToProps } from "@/lib/card-helpers";
 import Link from "next/link";
-const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos"];
+const tabs = ["All", "For you", "Profiles", "Posts", "Reels & Videos", "Projects"];
+const PROJECTS_TAB_INDEX = tabs.indexOf("Projects");
 const searchTypeTabs = ["Profiles", "Contents", "Projects"];
 
 const filterSections = [
@@ -91,6 +92,8 @@ const DiscoveryPage = () => {
 	const [profilesPage, setProfilesPage] = useState(1);
 	const [contentsPage, setContentsPage] = useState(1);
 	const [projectsPage, setProjectsPage] = useState(1);
+	const [activeBrowseTab, setActiveBrowseTab] = useState(0);
+	const [allProjectsPage, setAllProjectsPage] = useState(1);
 	const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 	const [filters, setFilters] = useState<Record<string, string | string[]>>({
 		contentType: [],
@@ -98,6 +101,8 @@ const DiscoveryPage = () => {
 		datePosted: "anytime",
 		monetization: [],
 	});
+
+	const isProjectsBrowseTab = !showSearchResults && activeBrowseTab === PROJECTS_TAB_INDEX;
 
 	const SEARCH_LIMIT = 12;
 
@@ -108,6 +113,13 @@ const DiscoveryPage = () => {
 		limit: SEARCH_LIMIT,
 		enabled: searchType === "projects" && showSearchResults && !!debouncedSearchQuery?.trim(),
 	});
+	const allProjectsState = useSearchProjects({
+		q: "",
+		page: allProjectsPage,
+		limit: SEARCH_LIMIT,
+		enabled: isProjectsBrowseTab,
+		allowEmpty: true,
+	});
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
 	const creatorState = useDiscoverCreators(12);
 
@@ -115,6 +127,9 @@ const DiscoveryPage = () => {
 	const profilesTotalPages = Math.ceil(searchState.profilesTotal / SEARCH_LIMIT);
 	const contentsTotalPages = Math.ceil(searchState.contentsTotal / SEARCH_LIMIT);
 	const projectsTotalPages = Math.ceil(projectState.totalResults / SEARCH_LIMIT);
+	const allProjectsTotalPages = Math.ceil(allProjectsState.totalResults / SEARCH_LIMIT);
+	const allProjectsHasNextPage = allProjectsPage < allProjectsTotalPages;
+	const allProjectsHasPreviousPage = allProjectsPage > 1;
 
 	const activePage = searchType === "projects" ? projectState.page : searchType === "profiles" ? profilesPage : contentsPage;
 	const activeTotalResults = searchType === "projects" ? projectState.totalResults : searchType === "profiles" ? searchState.profilesTotal : searchState.contentsTotal;
@@ -164,12 +179,12 @@ const DiscoveryPage = () => {
 	const forYouContent = useDiscoverContent({ userId: authUser?.id, enabled: !!authUser }); // "For You" — user's own content (auth-only)
 
 	const originalDiscoverItems: DiscoverContentModel[] = React.useMemo(
-		() => discoverContent.data?.pages.flatMap((p) => p.contents) ?? [],
+		() => discoverContent.data?.pages.flatMap((p) => p.contents).filter((item): item is DiscoverContentModel => !!item) ?? [],
 		[discoverContent.data],
 	);
 
 	const forYouContents: DiscoverContentModel[] = React.useMemo(
-		() => forYouContent.data?.pages.flatMap((p) => p.contents) ?? [],
+		() => forYouContent.data?.pages.flatMap((p) => p.contents).filter((item): item is DiscoverContentModel => !!item) ?? [],
 		[forYouContent.data],
 	);
 
@@ -631,6 +646,83 @@ const DiscoveryPage = () => {
 						{reelsAndShortsFeed.map((item) => renderContentFeedCard(item, 34))}
 					</div>
 				</TabPanel>
+				<TabPanel className="space-y-6">
+					<div className="space-y-6">
+						<div className="flex items-center justify-between">
+							<h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+							{!allProjectsState.isLoading && !allProjectsState.isError && (
+								<span className="text-sm text-gray-600">
+									{allProjectsState.totalResults} projects
+								</span>
+							)}
+						</div>
+
+						{allProjectsState.isLoading ? (
+							<div className={cn("grid gap-6", viewType === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
+								{[...Array(12)].map((_, i) => (
+									<div key={i} className="bg-white rounded-lg border border-[#E6E6E6] p-4 animate-pulse h-64">
+										<div className="flex gap-4 h-full">
+											<div className="w-16 h-16 bg-[#F0F0F0] rounded-lg shrink-0"></div>
+											<div className="flex-1 space-y-2">
+												<div className="h-4 bg-[#F0F0F0] rounded w-3/4"></div>
+												<div className="h-3 bg-[#F0F0F0] rounded w-1/2"></div>
+												<div className="h-3 bg-[#F0F0F0] rounded w-2/3"></div>
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						) : allProjectsState.isError ? (
+							<div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+								<AlertCircle className="h-8 w-8 text-red-500" />
+								<p className="text-sm text-gray-600">
+									{allProjectsState.error?.message ?? "Unable to load projects."}
+								</p>
+								<Button variant="secondary" onClick={allProjectsState.retry}>
+									Try again
+								</Button>
+							</div>
+						) : allProjectsState.projects.length === 0 ? (
+							<div className="flex flex-col items-center justify-center py-12">
+								<div className="rounded-full bg-gray-100 p-4 mb-4">
+									<div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin opacity-50"></div>
+								</div>
+								<h3 className="text-lg font-semibold text-gray-900 mb-2">No projects available yet</h3>
+								<p className="text-gray-600 text-center">Check back later for new projects</p>
+							</div>
+						) : (
+							<div className={cn("grid gap-6", viewType === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
+								{allProjectsState.projects.map((project) => (
+									<ProjectCard key={project.id} project={project} />
+								))}
+							</div>
+						)}
+
+						{!allProjectsState.isLoading && !allProjectsState.isError && allProjectsState.totalResults > 0 && (
+							<div className="flex items-center justify-center gap-4 mt-8">
+								<Button
+									onClick={() => setAllProjectsPage(allProjectsPage - 1)}
+									disabled={!allProjectsHasPreviousPage}
+									className="flex items-center gap-2"
+								>
+									<ChevronLeft className="w-4 h-4" />
+									Previous
+								</Button>
+								<span className="text-sm text-gray-600">
+									Page {allProjectsPage} of {allProjectsTotalPages}
+								</span>
+								<Button
+									onClick={() => setAllProjectsPage(allProjectsPage + 1)}
+									disabled={!allProjectsHasNextPage}
+									className="flex items-center gap-2"
+								>
+									Next
+									<ChevronRight className="w-4 h-4" />
+								</Button>
+							</div>
+						)}
+					</div>
+				</TabPanel>
 			</TabPanels>
 		);
 	};
@@ -649,7 +741,7 @@ const DiscoveryPage = () => {
 			</div> */}
 
 			{/* Trending Section - Show when not searching */}
-			{!showSearchResults && (
+			{!isProjectsBrowseTab && !showSearchResults && (
 				<div className="mb-8 lg:hidden">
 					<TrendingSection
 						items={trendingState.items}
@@ -662,12 +754,20 @@ const DiscoveryPage = () => {
 
 			<TabGroup
 				selectedIndex={showSearchResults ? searchTabIndex : undefined}
-				onChange={(index: number) => {
-					if (!showSearchResults) return;
+			onChange={(index: number) => {
+				if (showSearchResults) {
 					const tabKey = searchTypeTabs[index].toLowerCase() as SearchTypeTab;
 					setSearchType(tabKey);
 					updateUrlParams({ tab: tabKey, page: "1" });
-				}}
+				} else {
+					const wasProjectsTab = activeBrowseTab === PROJECTS_TAB_INDEX;
+					const isProjectsTab = index === PROJECTS_TAB_INDEX;
+					if (wasProjectsTab || isProjectsTab) {
+						setAllProjectsPage(1);
+					}
+					setActiveBrowseTab(index);
+				}
+			}}
 			>
 				<div className="flex flex-wrap gap-3 md:justify-between justify-baseline md:border-b md:border-[#E6E6E6]">
 					{showSearchResults ? (
@@ -725,7 +825,7 @@ const DiscoveryPage = () => {
 							<MenuIcon className="size-5" />
 						</Button>
 
-						{(!showSearchResults || searchType === "contents") && (
+						{!isProjectsBrowseTab && (!showSearchResults || searchType === "contents") && (
 							<div className="w-45">
 								<MultiSelect onValuesChange={setSelectedPlatforms}>
 									<MultiSelectTrigger className="w-full">
@@ -768,9 +868,9 @@ const DiscoveryPage = () => {
 					</div>
 
 					{/* Sidebar with Filters and Trending */}
-					<div className="hidden lg:block w-80 space-y-6">
+					<div className="hidden lg:block w-72 space-y-6">
 						{/* Filters Section */}
-						{!showSearchResults && (
+						{!isProjectsBrowseTab && !showSearchResults && (
 							<div className="px-5 bg-white rounded-lg border border-[#E6E6E6] p-5">
 								<h3 className="text-black-default font-semibold text-base mb-4">Filters</h3>
 								{filterSections.map((section) => (
@@ -805,7 +905,7 @@ const DiscoveryPage = () => {
 						)}
 
 						{/* Trending Section */}
-						{!showSearchResults && (
+						{!isProjectsBrowseTab && !showSearchResults && (
 							<TrendingSection
 								items={trendingState.items}
 								isLoading={trendingState.isLoading}
@@ -816,7 +916,7 @@ const DiscoveryPage = () => {
 					</div>
 
 					{/* Mobile Filters - Collapsed */}
-					{!showSearchResults && (
+					{!isProjectsBrowseTab && !showSearchResults && (
 						<div className="lg:hidden mt-5 px-5">
 							{filterSections.map((section) => (
 								<div key={section.key} className="mb-8">

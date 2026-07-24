@@ -106,6 +106,7 @@ export interface RefreshTokenParams {
 export interface RefreshTokenResult {
   success: boolean;
   message?: string;
+  accessToken?: string;
 }
 
 export async function refreshTokenAction(
@@ -198,6 +199,7 @@ export async function refreshTokenAction(
     return {
       success: true,
       message: "Token refreshed successfully",
+      accessToken: response.access_token,
     };
   } catch (error) {
     timer.end({ success: false, reason: 'exception', error: String(error) });

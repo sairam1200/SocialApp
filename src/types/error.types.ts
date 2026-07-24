@@ -6,5 +6,6 @@ export interface ApiErrorData {
   type?: string;
   title?: string;
   detail?: string;
+  message?: string;
   status?: number;
 }

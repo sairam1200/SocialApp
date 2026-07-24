@@ -10,12 +10,11 @@ export function parseApiError(error: ApiError): string {
     return data;
   }
 
-  // Case 2: backend returned object
+  // Case 2: backend returned object (RFC 7807 Problem Details)
   if (data && typeof data === "object") {
     return (
       data.title ||
-      data.detail ||
-      data.type ||
+      data.message ||
       error.message ||
       "An unexpected error occurred"
     );

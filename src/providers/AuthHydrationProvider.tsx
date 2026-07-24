@@ -54,17 +54,12 @@ export default function AuthHydrationProvider({
 		};
 	}, [jwtUser, isAuthenticated]);
 
-	// Token refresh: update Zustand when jwtUser changes after initial load
+	// Hydrate Zustand + onboarding route guard (single effect to prevent
+	// children rendering before the onboarding check completes).
 	useEffect(() => {
 		if (authUser) {
 			useAuthUserStore.setState({ authUser, isAuthenticated: true });
 		}
-		setHydrated(true);
-	}, [authUser]);
-
-	// Onboarding route guard (runs after hydration)
-	useEffect(() => {
-		if (!hydrated) return;
 
 		if (isAuthenticated) {
 			// Use localStorage JWT as the source of truth for onboardingStep
@@ -100,7 +95,9 @@ export default function AuthHydrationProvider({
 				return;
 			}
 		}
-	}, [hydrated, isAuthenticated, jwtUser, pathname, router]);
+
+		setHydrated(true);
+	}, [authUser, isAuthenticated, jwtUser, pathname, router]);
 
 	if (!hydrated) {
 		return <Preloader />;

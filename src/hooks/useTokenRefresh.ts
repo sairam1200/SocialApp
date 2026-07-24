@@ -8,6 +8,7 @@ import { PROTECTED_ROUTES } from "@/constants/routes";
 import { getWebSocketService } from "@/services/websocket.service";
 import { trackTokenRefresh, PerformanceTimer } from "@/utils/analytics.util";
 import { getDeviceIdOrNull } from "@/utils/deviceId.util";
+import { useAuthUserStore } from "@/store/auth-user.store";
 
 // Global state for token refresh coordination
 let tokenRefreshCallback: (() => Promise<void>) | null = null;
@@ -139,7 +140,7 @@ const refreshToken = async (reason: 'expired' | 'expiring_soon' | 'header_trigge
     if (result.success) {
       try {
         const wsService = getWebSocketService();
-        wsService.reconnectAllWithNewToken();
+        wsService.reconnectAllWithNewToken(result.accessToken);
         if (process.env.NODE_ENV === 'development') {
           console.log("[TokenRefresh] WebSocket reconnected with new token");
         }
@@ -222,6 +223,7 @@ export const useTokenRefresh = (skipInit: boolean = false) => {
       if (process.env.NODE_ENV === 'development') {
         console.log("DeviceId is missing but token exists. Session is invalid. Redirecting to login.");
       }
+      useAuthUserStore.getState().clearAuthUser();
       const redirectPath = isProtectedRoute(pathname) ? `?redirect=${encodeURIComponent(pathname)}` : "";
       await logoutFn(getDeviceIdOrNull());
       router.push(`/login${redirectPath}`);
@@ -243,6 +245,7 @@ export const useTokenRefresh = (skipInit: boolean = false) => {
         const updatedTokenStatus = await checkTokenStatus();
 
         if (updatedTokenStatus.isExpired || !updatedTokenStatus.hasToken) {
+          useAuthUserStore.getState().clearAuthUser();
           await logoutFn(getDeviceIdOrNull());
           if (isProtectedRoute(pathname)) {
             router.push(`/login?redirect=${encodeURIComponent(pathname)}`);

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/utils/cn.util";
 import { Button } from "@/components/ui/button";
 import { useHttpContextUser } from "@/providers/HttpContextProvider";
@@ -15,6 +16,7 @@ import ChangeEmailDialog from "@/components/dialog/profile-settings-dialogs/chan
 import { LinkedAccountType, ManualProfileType } from "@/types/account/profile.type";
 export default function GeneralSettingsPage() {
 	const user = useHttpContextUser();
+	const router = useRouter();
 	 
 
 	const [openDeleteGaddr, setOpenDeleteGaddr] = useState(false);
@@ -163,6 +165,9 @@ export default function GeneralSettingsPage() {
 				open={openChangeEmail}
 				onClose={() => setOpenChangeEmail(false)}
 				initialEmail={user?.[ClaimTypes.Email] ?? ""}
+				onSuccess={(newEmail) => {
+					router.push(`/confirm-email/${encodeURIComponent(newEmail)}`);
+				}}
 			/>
 
 			<DeleteGaddrMeSearchAccountDialog open={openDeleteGaddr} onClose={() => setOpenDeleteGaddr(false)} />

@@ -13,7 +13,7 @@ interface Props {
 
 export default function DeleteGaddrAccountDialog({ open, onClose }: Props) {
     const router = useRouter();
-    const { authUser } = useAuthUserStore();
+    const { authUser, clearAuthUser } = useAuthUserStore();
     const deleteAccount = useDeleteAccount();
 
    const handleDelete = async () => {
@@ -22,8 +22,7 @@ export default function DeleteGaddrAccountDialog({ open, onClose }: Props) {
     try {
         await deleteAccount.mutateAsync(authUser.id);
 
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("currentUser");
+        clearAuthUser();
 
         await deleteCookie("refresh_token");
 

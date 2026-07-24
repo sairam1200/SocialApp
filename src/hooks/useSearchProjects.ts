@@ -10,6 +10,7 @@ interface UseSearchProjectsParams {
   page?: number;
   limit?: number;
   enabled?: boolean;
+  allowEmpty?: boolean;
 }
 
 interface UseSearchProjectsReturn {
@@ -30,6 +31,7 @@ export const useSearchProjects = ({
   page = 1,
   limit = 20,
   enabled = true,
+  allowEmpty,
 }: UseSearchProjectsParams): UseSearchProjectsReturn => {
   const query = useQuery({
     queryKey: queryKeys.searchProjects(q ?? "", page, limit),
@@ -47,7 +49,7 @@ export const useSearchProjects = ({
         page,
       };
     },
-    enabled: enabled && !!q?.trim(),
+    enabled: enabled && (allowEmpty || !!q?.trim()),
     staleTime: 30 * 1000,
   });
 

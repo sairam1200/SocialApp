@@ -42,18 +42,13 @@ function extractInUse(resp: EmailInUseResponse): boolean | null {
   return null;
 }
 
-const FALLBACK_IP_ADDRESS = "0.0.0.0";
-
-// NOTE: Browsers can't reliably provide the user's public IP address.
-// Temporary placeholder:
-const getClientIpAddress = () => FALLBACK_IP_ADDRESS;
-
 export default function ChangeEmailDialog(props: {
   open: boolean;
   onClose: () => void;
   initialEmail?: string;
+  onSuccess?: (email: string) => void;
 }) {
-  const { open, onClose, initialEmail } = props;
+  const { open, onClose, initialEmail, onSuccess } = props;
 
   const [step, setStep] = useState<"edit" | "sent">("edit");
   const [email, setEmail] = useState("");
@@ -122,39 +117,26 @@ export default function ChangeEmailDialog(props: {
       onSuccess={(v) => {
         setEmail(v);
         setStep("sent");
+        onSuccess?.(v);
       }}
       onSubmit={async (v) => {
-        // POST /account/email/send-verification { email, userAgent, ipAddress }
         try {
-    await apiClient.User.updateEmail(v);
+          await apiClient.User.updateEmail(v);
+          return true;
+        } catch (error: unknown) {
+          const err = error as {
+            response?: { data?: { title?: string } };
+            message?: string;
+          };
 
-    await apiClient.Account.sendVerificationAsync({
-      email: v,
-      userAgent: navigator.userAgent,
-      ipAddress: getClientIpAddress(),
-    });
+          toast.error(
+            err.response?.data?.title ??
+            err.message ??
+            "Failed to update email"
+          );
 
-    return true;
-  } catch (error: unknown) {
-  const err = error as {
-    response?: {
-      data?: {
-        title?: string;
-      };
-    };
-    message?: string;
-  };
-
-  toast.error(
-    err.response?.data?.title ??
-    err.message ??
-    "Failed to update email"
-  );
-
-  return false;
-}
-  
-
+          return false;
+        }
       }}
     />
   );

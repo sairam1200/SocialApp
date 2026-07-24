@@ -22,6 +22,9 @@ export const useAuthUserStore = create<AuthUserStore>((set) => ({
 
     if (typeof window !== "undefined") {
       localStorage.removeItem("deviceId");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("pendingEmailChange");
     }
   },
 }));

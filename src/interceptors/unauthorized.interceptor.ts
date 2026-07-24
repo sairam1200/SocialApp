@@ -1,6 +1,7 @@
 import { ResponseInterceptorConfig } from "restfit";
 import { logoutFn } from "@/utils/logout.utitl";
 import { getDeviceIdOrNull } from "@/utils/deviceId.util";
+import { useAuthUserStore } from "@/store/auth-user.store";
 
 export const unauthorizedInterceptor: ResponseInterceptorConfig = {
   handler: (response) => {
@@ -17,6 +18,7 @@ export const unauthorizedInterceptor: ResponseInterceptorConfig = {
 
         if (currentPath.startsWith("/login")) return;
 
+        useAuthUserStore.getState().clearAuthUser();
         const redirectPath = `?redirect=${encodeURIComponent(currentPath)}`;
         void logoutFn(getDeviceIdOrNull()).then(() => {
           window.location.href = `/login${redirectPath}`;

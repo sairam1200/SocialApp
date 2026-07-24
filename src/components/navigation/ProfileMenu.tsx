@@ -67,8 +67,8 @@ function ProfileMenu({
 							className={cn("rounded-full cursor-pointer", isProfileActive && "bg-[#F0EBFF]", "hover:bg-[#F0EBFF]")}
 							title="Profile"
 						>
-						{authUser?.photo ? (
-							<Image fetchPriority="high" loading="eager" src={authUser.photo} alt="User avatar" width={30} height={30} className="rounded-full" />
+						{authUser? (
+							<Image fetchPriority="high" loading="eager" src={authUser.photo || "images/avatar.svg"} alt="User avatar" width={30} height={30} className="rounded-full" />
 						) : (
 							<AvatarIcon className="scale-75 text-[#0D0D0D]" />
 						)}

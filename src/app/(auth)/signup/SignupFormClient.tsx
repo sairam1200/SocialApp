@@ -5,12 +5,15 @@ import * as Yup from "yup";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthCard, AuthCheckbox, AuthInput } from "@/components/authentication";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Button } from "@/components/ui/button";
 import { getIpAddress } from "@/utils/ipAddress.util";
 import { apiClient } from "@/services/apiClient.service";
 import { RegisterResponseType } from "@/types/auth/signup.type";
+import { parseApiError } from "@/utils/api-error.util";
+import type { ApiError } from "@/types/error.types";
 
 interface SignupProps {
 	firstName: string;
@@ -50,6 +53,8 @@ export default function SignupPage() {
 	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [emailApiError, setEmailApiError] = useState<string | null>(null);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const lastCheckedEmail = useRef<string | null>(null);
 	const router = useRouter();
 	const [tsSize, setTsSize] = useState<"normal" | "compact" | "flexible">("flexible");
@@ -105,6 +110,9 @@ export default function SignupPage() {
 				);
 
 				if (response?.success) {
+					if (response.accessToken) {
+						localStorage.setItem("accessToken", response.accessToken);
+					}
 					toast.success("Your account has been created successfully!");
 					router.push(`/confirm-email/${values.email}`);
 					resetForm();
@@ -114,13 +122,12 @@ export default function SignupPage() {
 					setStatus({ apiError: errorMessage });
 				}
 			} catch (error) {
-				// Check if this is a 409 conflict (email already exists)
-				const axiosError = error as { response?: { status?: number; data?: { title?: string } } };
-				if (axiosError.response?.status === 409) {
-					const backendMsg = axiosError.response.data?.title || "This email is already registered.";
+				const apiErr = error as ApiError;
+				if (apiErr.response?.status === 409) {
+					const backendMsg = parseApiError(apiErr) || "This email is already registered.";
 					setEmailApiError(backendMsg);
 				} else {
-					const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+					const errorMessage = parseApiError(apiErr);
 					toast.error(errorMessage);
 					setStatus({ apiError: errorMessage });
 				}
@@ -214,34 +221,54 @@ export default function SignupPage() {
 							altText="email icon"
 						/>
 
-						<AuthInput
-							label="Password"
-							type="password"
-							name="password"
-							placeholder="Enter password..."
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.password}
-							error={formik.touched.password ? formik.errors.password : undefined}
-							placeholderIcon="/icons/password.svg"
-							altText="password icon"
-						/>
+					<AuthInput
+						label="Password"
+						type={showPassword ? "text" : "password"}
+						name="password"
+						placeholder="Enter password..."
+						onChange={formik.handleChange}
+						onBlur={formik.handleBlur}
+						value={formik.values.password}
+						error={formik.touched.password ? formik.errors.password : undefined}
+						placeholderIcon="/icons/password.svg"
+						altText="password icon"
+						rightElement={
+							<button
+								type="button"
+								tabIndex={-1}
+								className="text-gray-500 hover:text-gray-700 cursor-pointer"
+								onMouseDown={() => setShowPassword((p) => !p)}
+							>
+								{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+							</button>
+						}
+					/>
 						<p className="text-xs text-start font-normal mb-2 mt-2 text-[#595959]">
 							*Minimum 8 characters, including a capital letter and a number
 						</p>
 
-						<AuthInput
-							label="Re-type password"
-							type="password"
-							name="confirmPassword"
-							placeholder="Confirm password..."
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.confirmPassword}
-							error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}
-							placeholderIcon="/icons/password.svg"
-							altText="password icon"
-						/>
+					<AuthInput
+						label="Re-type password"
+						type={showConfirmPassword ? "text" : "password"}
+						name="confirmPassword"
+						placeholder="Confirm password..."
+						onChange={formik.handleChange}
+						onBlur={formik.handleBlur}
+						value={formik.values.confirmPassword}
+						error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}
+						placeholderIcon="/icons/password.svg"
+						altText="password icon"
+						rightElement={
+							<button
+								type="button"
+								tabIndex={-1}
+								className="text-gray-500 hover:text-gray-700 cursor-pointer"
+								onMouseDown={() => setShowConfirmPassword((p) => !p)}
+							>
+								{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+							</button>
+						}
+					/>
 
 						<div className=" mt-4 mb-2">
 							<AuthCheckbox

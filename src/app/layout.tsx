@@ -51,7 +51,7 @@ export default async function RootLayout({
 	const isAuthenticated = !!jwtUser && !!accessToken;
 	return (
 		<html lang="en">
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+			<body className={`${geistSans.variable} ${geistMono.variable} antialiased text-sm md:text-base xl:text-lg`}>
 				<AppProviders jwtUser={jwtUser} accessToken={accessToken} isAuthenticated={isAuthenticated}>
 					{children}
 				</AppProviders>

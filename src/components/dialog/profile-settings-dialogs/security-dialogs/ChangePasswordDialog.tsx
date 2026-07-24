@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import DialogContainer from "@/components/dialog/DialogContainer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,9 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
     const [newPassword, setNewPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [status, setStatus] = useState<StatusState>(null);
 
@@ -91,6 +95,9 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
         setConfirm("");
         setSubmitting(false);
         setStatus(null);
+        setShowCurrentPassword(false);
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
     }, [open]);
 
     function showError(text: string) {
@@ -195,12 +202,22 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
                             <LockIcon className="h-4 w-4" aria-hidden="true" />
                         </div>
                         <Input
-                            type="password"
+                            type={showCurrentPassword ? "text" : "password"}
                             placeholder="Enter current password..."
                             className="pl-10"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                             error={false}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    onMouseDown={() => setShowCurrentPassword((p) => !p)}
+                                >
+                                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            }
                         />
                     </div>
                 </div>
@@ -213,12 +230,22 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
                             <LockIcon className="h-4 w-4" aria-hidden="true" />
                         </div>
                         <Input
-                            type="password"
+                            type={showNewPassword ? "text" : "password"}
                             placeholder="Enter new password..."
                             className="pl-10"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             error={false}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    onMouseDown={() => setShowNewPassword((p) => !p)}
+                                >
+                                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            }
                         />
                     </div>
                 </div>
@@ -231,12 +258,22 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
                             <LockIcon className="h-4 w-4" aria-hidden="true" />
                         </div>
                         <Input
-                            type="password"
+                            type={showConfirmPassword ? "text" : "password"}
                             placeholder="Confirm password..."
                             className="pl-10"
                             value={confirm}
                             onChange={(e) => setConfirm(e.target.value)}
                             error={false}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    onMouseDown={() => setShowConfirmPassword((p) => !p)}
+                                >
+                                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            }
                         />
                     </div>
                 </div>

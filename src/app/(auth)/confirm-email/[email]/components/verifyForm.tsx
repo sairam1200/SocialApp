@@ -4,26 +4,29 @@ import { apiClient } from "@/services/apiClient.service";
 import { SendVerificationRequestType, VerifyEmailRequestType, VerifyEmailResponseType } from "@/types/auth/signup.type";
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
-import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { getIpAddress } from "@/utils/ipAddress.util";
+import ChangeEmailDialog from "@/components/dialog/profile-settings-dialogs/change-username-email/ChangeEmailDialog";
 
 const OTP_DURATION = 900; // seconds
 const OTP_EXPIRY_KEY = "otpExpiry";
 
 interface VerifyFormProps {
   email: string;
+  code?: string;
   onSuccess?: () => void;
 }
 
-export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
+export default function VerifyForm({ email, code, onSuccess }: VerifyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [isResendLoading, setIsResendLoading] = useState(false);
   const [hideTimer, setHideTimer] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [apiErrored, setApiErrored] = useState(false);
+  const [openChangeEmail, setOpenChangeEmail] = useState(false);
+  const [verificationTarget, setVerificationTarget] = useState(email);
   const router = useRouter();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
@@ -33,6 +36,17 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
     const remaining = Math.floor((Number(storedExpiry) - Date.now()) / 1000);
     return remaining > 0 ? remaining : 0;
   });
+
+  // Sync verification target when URL param changes (e.g. after email change + navigation)
+  useEffect(() => {
+    setVerificationTarget(email);
+    const expiryTime = Date.now() + OTP_DURATION * 1000;
+    sessionStorage.setItem(OTP_EXPIRY_KEY, expiryTime.toString());
+    setSecondsLeft(OTP_DURATION);
+    setInfoMessage(null);
+    setApiErrored(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email]);
 
   // Intialize OTP expiry on first load
   useEffect(() => {
@@ -61,6 +75,14 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
     inputRefs.current[0]?.focus();
   }, []);
 
+  // Auto-submit when code is provided via URL (email link click)
+  useEffect(() => {
+    if (code && code.length === 6 && /^\d{6}$/.test(code)) {
+      formik.setFieldValue("code", code.split(""));
+      setTimeout(() => formik.handleSubmit(), 100);
+    }
+  }, [code]);
+
   // Form state with formik
   const formik = useFormik<{ code: string[] }>({
     initialValues: { code: ["", "", "", "", "", ""] },
@@ -81,7 +103,7 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
       setIsLoading(true);
       const verificationCode = values.code.join("");
       const payload = {
-        email,
+        email: verificationTarget,
         code: verificationCode,
       } as VerifyEmailRequestType;
       try {
@@ -197,7 +219,7 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
     const payload: SendVerificationRequestType = {
       userAgent: navigator.userAgent,
       ipAddress,
-      email,
+      email: verificationTarget,
     };
 
     const result = await apiClient.Account.sendVerificationAsync(payload);
@@ -247,24 +269,7 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
       <h1 className="text-center text-2xl font-bold">Let&apos;s verify you</h1>
       <div className="text-center text-base text-[#595959]">
         <p>A verification code has been sent to your email</p>
-        <button
-          type="button"
-          onClick={() => router.push(`/confirm-email?email=${encodeURIComponent(email)}`)}
-          className=" mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#D6CBFF] px-3 py-1 text-sm font-medium text-[#512FB6] hover:bg-[#F6F3FF] hover:cursor-pointer transition"
-          aria-label="confirm email"
-        >
-          <span className="truncate max-w-[220px] hover:underline">{email}</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+        <span className="truncate max-w-[220px] hover:underline border-[#D6CBFF] px-3 py-1 text-sm font-medium text-[#512FB6] hover:bg-[#F6F3FF]  transition">{verificationTarget}</span>
       </div>
 
       <div className="flex justify-center gap-4 mt-8.5 mb-3 max-md:gap-2">
@@ -325,11 +330,26 @@ export default function VerifyForm({ email, onSuccess }: VerifyFormProps) {
       <div className="flex justify-center">
         <p className="text-xs font-semibold text-[#512FB6] py-[11px]">
           Can&apos;t access your email?{" "}
-          <Link href={"#"} className="underline">
-            Contact support
-          </Link>
+          <button
+            type="button"
+            onClick={() => setOpenChangeEmail(true)}
+            className="underline hover:text-[#3b1f8a] transition"
+          >
+            Change email
+          </button>
         </p>
       </div>
+
+      <ChangeEmailDialog
+        open={openChangeEmail}
+        onClose={() => setOpenChangeEmail(false)}
+        initialEmail={verificationTarget}
+        onSuccess={(newEmail) => {
+          localStorage.setItem("pendingEmailChange", newEmail);
+          sessionStorage.removeItem(OTP_EXPIRY_KEY);
+          router.push(`/confirm-email/${encodeURIComponent(newEmail)}`);
+        }}
+      />
     </div>
   );
 }
