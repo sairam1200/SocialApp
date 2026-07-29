@@ -10,12 +10,15 @@ export interface UseSearchOptions {
   page?: number;
   limit?: number;
   enabled?: boolean;
+  platforms?: string[];
 }
 
 export interface UseSearchState {
   results: SearchResult[];
+  totalResults: number;
   profilesTotal: number;
   contentsTotal: number;
+  projectsTotal: number;
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
@@ -25,13 +28,20 @@ export interface UseSearchState {
 }
 
 export const useSearch = (options: UseSearchOptions = {}) => {
-  const { debounceMs = 300, useMockData = false, page = 1, limit = 12, enabled = true } = options;
+  const {
+    debounceMs = 300,
+    useMockData = false,
+    page = 1,
+    limit = 12,
+    enabled = true,
+    platforms,
+  } = options;
 
   const [searchTerm, setSearchTerm] = useState("");
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isLoading, isFetching, isError, error } = useQuery({
-    queryKey: queryKeys.searchResults(searchTerm, page, limit),
+    queryKey: [...queryKeys.searchResults(searchTerm, page, limit), platforms],
     queryFn: async () => {
       if (useMockData) {
         const totalItems = 100;
@@ -44,18 +54,59 @@ export const useSearch = (options: UseSearchOptions = {}) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
         return {
           results: mockResults,
+          totalResults: totalItems,
           profilesTotal: 40,
           contentsTotal: 60,
+          projectsTotal: 0,
           page,
         };
       }
-      const response = await apiClient.Search.getGlobalResults(searchTerm.trim(), page, limit);
-      const normalized = apiClient.Search.normalizeGlobalResults(response);
+
+      const response = await apiClient.Search.searchUnifiedContent({
+        searchTerm: searchTerm.trim(),
+        platforms: platforms && platforms.length > 0 ? platforms : undefined,
+        page,
+        limit,
+      });
+
+      // TODO: REMOVE AFTER SEARCH DEBUGGING
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SEARCH DEBUG]');
+        console.log('API Success');
+        const allItems: any[] = [];
+        for (const [, items] of Object.entries(response.results)) {
+          allItems.push(...(items as any[]));
+        }
+        const p = allItems.filter((i: any) => (i.type || '').toLowerCase() === 'profile').length;
+        const c = allItems.filter((i: any) => (i.type || '').toLowerCase() !== 'profile' && (i.type || '').toLowerCase() !== 'project').length;
+        const pr = allItems.filter((i: any) => (i.type || '').toLowerCase() === 'project').length;
+        console.log(`Profiles: ${p}`);
+        console.log(`Contents: ${c}`);
+        console.log(`Projects: ${pr}`);
+        console.log(`Total: ${response.totalResults}`);
+        console.log('[SEARCH DEBUG]');
+        console.log(`Response received`);
+        console.log(`Length: ${allItems.length}`);
+      }
+
+      const normalized = apiClient.Search.normalizeHybridResults(response);
+
+      // TODO: REMOVE AFTER SEARCH DEBUGGING
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SEARCH DEBUG]');
+        console.log('Hook');
+        console.log(`Profiles: ${normalized.profilesTotal}`);
+        console.log(`Contents: ${normalized.contentsTotal}`);
+        console.log(`Projects: ${normalized.projectsTotal}`);
+      }
+
       return {
         results: normalized.results,
-        profilesTotal: response.pagination.profiles.total,
-        contentsTotal: response.pagination.contents.total,
-        page: response.pagination.page,
+        totalResults: response.totalResults ?? 0,
+        profilesTotal: normalized.profilesTotal,
+        contentsTotal: normalized.contentsTotal,
+        projectsTotal: normalized.projectsTotal,
+        page: response.page,
       };
     },
     enabled: enabled && !!searchTerm.trim(),
@@ -91,8 +142,10 @@ export const useSearch = (options: UseSearchOptions = {}) => {
 
   return {
     results: data?.results ?? [],
+    totalResults: data?.totalResults ?? 0,
     profilesTotal: data?.profilesTotal ?? 0,
     contentsTotal: data?.contentsTotal ?? 0,
+    projectsTotal: data?.projectsTotal ?? 0,
     isLoading,
     isFetching,
     isError,

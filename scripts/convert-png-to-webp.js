@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
-const pngDir = path.resolve(__dirname, "..", "public", "images");
+const pngDir = path.resolve(__dirname, "..", "public", "images" ,"png");
 const outDir = path.resolve(__dirname, "..", "public", "images");
 
 const extraSrc = path.resolve(__dirname, "..", "public", "images", "landing-bg-pattern.png");

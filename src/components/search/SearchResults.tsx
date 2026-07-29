@@ -5,10 +5,12 @@ import WarningIcon from "@/components/svg/warning-icon.svg";
 import { SearchResult, SearchTypeTab } from "@/types/search.types";
 import ContentFeedCard from "@/components/card/ContentFeedCard";
 import ProfileCard from "@/components/card/PorfileCard";
+import ProjectCard from "@/components/card/ProjectCard";
 import { cn } from "@/utils/cn.util";
 import { PublicProfileModel } from "@/types/account/profile.type";
 import { hydrateFollowState } from "@/store/follow.store";
 import { renderPlatformIcon, isValidUrl, normalizeSearchResult, mapProfileToProps } from "@/lib/card-helpers";
+import type { ProjectSearchResult } from "@/services/api/project.service";
 
 interface SearchResultsProps {
     results: SearchResult[];
@@ -44,6 +46,27 @@ const ResultSkeleton = ({ viewType = "grid" }: { viewType?: "grid" | "list" }) =
     </div>
 );
 
+function toProjectSearchResult(result: SearchResult): ProjectSearchResult {
+  const pm = (result.platformMetadata ?? {}) as Record<string, unknown>;
+  return {
+    id: parseInt(result.id, 10) || 0,
+    title: result.title ?? "",
+    description: (result.description ?? null) as string | null,
+    budget: (pm.budget as string | null) ?? null,
+    currency: (pm.currency as string) ?? "USD",
+    paymentType: (pm.paymentType as string) ?? "fixed",
+    timeline: (pm.timeline as string | null) ?? null,
+    skills: Array.isArray(pm.skills) ? (pm.skills as string[]) : [],
+    status: (pm.status as string) ?? "open",
+    projectType: (pm.projectType as string) ?? "open",
+    bountyAmount: (pm.bountyAmount as string | null) ?? null,
+    trialDuration: (pm.trialDuration as number | null) ?? null,
+    hireOnCompletion: (pm.hireOnCompletion as boolean) ?? false,
+    createdAt: result.publishedAt ?? new Date().toISOString(),
+    updatedAt: (pm.updatedAt as string | undefined) ?? result.publishedAt ?? new Date().toISOString(),
+  };
+}
+
 export const SearchResults = ({
     results,
     searchType = "profiles",
@@ -54,6 +77,21 @@ export const SearchResults = ({
     onRetry,
     className,
 }: SearchResultsProps) => {
+    // TODO: REMOVE AFTER SEARCH DEBUGGING
+    const DEBUG_SEARCH = typeof window !== 'undefined' && process.env.NODE_ENV === 'development';
+    React.useEffect(() => {
+        if (DEBUG_SEARCH && Array.isArray(results) && results.length > 0) {
+            const p = results.filter(r => r.type === "profile").length;
+            const c = results.filter(r => r.type !== "profile" && r.type !== "project").length;
+            const pr = results.filter(r => r.type === "project").length;
+            console.log('[SEARCH DEBUG]');
+            console.log('Rendering');
+            console.log(`Profiles: ${p}`);
+            console.log(`Contents: ${c}`);
+            console.log(`Projects: ${pr}`);
+        }
+    }, [results, DEBUG_SEARCH]);
+
     React.useEffect(() => {
         if (!Array.isArray(results)) return;
         results.forEach((result) => {
@@ -110,7 +148,7 @@ export const SearchResults = ({
     }
 
     if (!results || !Array.isArray(results) || results.length === 0) {
-        const emptyMessages: Record<SearchTypeTab, { title: string; description: string }> = {
+    const emptyMessages: Record<SearchTypeTab, { title: string; description: string }> = {
             profiles: { title: "No profiles found", description: "Try searching with different keywords" },
             contents: { title: "No content found", description: "Try searching with different keywords or filters" },
             projects: { title: "No projects found", description: "Try searching with different keywords" },
@@ -148,7 +186,18 @@ export const SearchResults = ({
             )}
         >
             {Array.isArray(results) &&
-                results.map((result) => {
+                results.map((result, index) => {
+                    const key = result.id ?? `result-${index}`;
+                    // TODO: REMOVE AFTER SEARCH DEBUGGING
+                    if (DEBUG_SEARCH) {
+                        const cardName = result.type === "profile" ? "ProfileCard" : result.type === "project" ? "ProjectCard" : "ContentCard";
+                        console.log('[SEARCH DEBUG]');
+                        console.log('Render');
+                        console.log(`id: ${result.id}`);
+                        console.log(`type: ${result.type}`);
+                        console.log(`Card: ${cardName}`);
+                    }
+
                     if (result.type === "profile") {
                         const publicProfile = result.publicProfile as
                             | PublicProfileModel
@@ -161,10 +210,15 @@ export const SearchResults = ({
 
                         return (
                             <ProfileCard
-                                key={result.id}
+                                key={key}
                                 {...cardProps}
                             />
                         );
+                    }
+
+                    if (result.type === "project") {
+                        const project = toProjectSearchResult(result);
+                        return <ProjectCard key={key} project={project} />;
                     }
 
                     const cardProps = normalizeSearchResult(result);
@@ -173,7 +227,7 @@ export const SearchResults = ({
 
                     return (
                         <div
-                            key={result.id}
+                            key={key}
                             onClick={() => {
                                 if (validUrl) {
                                     window.open(
@@ -192,12 +246,23 @@ export const SearchResults = ({
                         </div>
                     );
                 })}
+            {Array.isArray(results) && results.length === 0 && (
+                (() => {
+                    // TODO: REMOVE AFTER SEARCH DEBUGGING
+                    if (DEBUG_SEARCH) console.log('[SEARCH DEBUG] Skipped id: none Reason: No matching renderer');
+                    return null;
+                })()
+            )}
             {!Array.isArray(results) && (
                 <div className="col-span-full text-center py-8">
                     <p className="text-red-600 font-semibold">
                         Error: Invalid results format
                     </p>
                 </div>
+            )}
+            {/* TODO: REMOVE AFTER SEARCH DEBUGGING */}
+            {DEBUG_SEARCH && Array.isArray(results) && (
+                (() => { console.log('[SEARCH DEBUG]'); console.log(`Rendered Cards: ${results.length}`); return null; })()
             )}
         </div>
     );
