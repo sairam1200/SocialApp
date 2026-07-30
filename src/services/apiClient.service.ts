@@ -4,6 +4,8 @@ import { createApiService } from 'restfit';
 import { IntegrationsService } from "./api/integrations.service";
 import { OnboardingService } from "./onboarding.service";
 import { NewsletterService } from "./api/newsletter.service";
+import { BookmarkService } from "./api/bookmark.service";
+
 type ApiServiceMap = {
   Token: typeof TokenService;
   Account: typeof AccountService;
@@ -16,6 +18,7 @@ type ApiServiceMap = {
   Discover: typeof DiscoverService;
   Newsletter: typeof NewsletterService;
   Project: typeof ProjectService;
+  Bookmark: typeof BookmarkService;
 };
 
 export const apiClient = createApiService<ApiServiceMap>(
@@ -54,6 +57,7 @@ authorization: async () => {
     Discover: DiscoverService,
     Newsletter: NewsletterService,
     Project: ProjectService,
+    Bookmark: BookmarkService,
   }
 );
 

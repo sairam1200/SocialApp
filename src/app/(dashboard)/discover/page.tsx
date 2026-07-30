@@ -69,15 +69,6 @@ const filterSections = [
 			{ id: "anytime", label: "Anytime" },
 		],
 	},
-	/* {
-		title: "Monetization",
-		key: "monetization",
-		type: "checkbox",
-		options: [
-			{ id: "contains_ads", label: "Contains Ads" },
-			{ id: "non_monetized", label: "Non-Monetized" },
-		],
-	}, */
 ];
 
 const DiscoveryPage = () => {
@@ -123,7 +114,6 @@ const DiscoveryPage = () => {
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
 	const creatorState = useDiscoverCreators(12);
 
-	// Per-tab pagination state
 	const profilesTotalPages = Math.ceil(searchState.profilesTotal / SEARCH_LIMIT);
 	const contentsTotalPages = Math.ceil(searchState.contentsTotal / SEARCH_LIMIT);
 	const projectsTotalPages = Math.ceil(projectState.totalResults / SEARCH_LIMIT);
@@ -171,12 +161,10 @@ const DiscoveryPage = () => {
 		updateUrlParams({ page: String(prevPage) });
 	}, [searchType, activePage, activeHasPreviousPage, updateUrlParams]);
 
-	// Auth
 	const { authUser } = useAuthUserStore();
 
-	// Discover feed hooks (cursor-paginated)
-	const discoverContent = useDiscoverContent(); // "All" — public feed
-	const forYouContent = useDiscoverContent({ userId: authUser?.id, enabled: !!authUser }); // "For You" — user's own content (auth-only)
+	const discoverContent = useDiscoverContent();
+	const forYouContent = useDiscoverContent({ userId: authUser?.id, enabled: !!authUser });
 
 	const originalDiscoverItems: DiscoverContentModel[] = React.useMemo(
 		() => discoverContent.data?.pages.flatMap((p) => p.contents).filter((item): item is DiscoverContentModel => !!item) ?? [],
@@ -256,13 +244,16 @@ const DiscoveryPage = () => {
 			>
 				<ContentFeedCard
 					{...cardProps}
+					contentId={item.id}
+					platform={item.platform}
+					rawTitle={item.title ?? undefined}
+					sourceUrl={item.sourceUrl ?? undefined}
 					platformIcon={renderPlatformIcon(cardProps.platform)}
 				/>
 			</div>
 		);
 	}
 
-	// Trigger search when query or selected platforms change
 	const handleSearch = useCallback(
 		(query: string) => {
 			if (!query.trim()) {
@@ -296,13 +287,11 @@ const DiscoveryPage = () => {
 		return () => clearTimeout(timer);
 	}, [searchQuery]);
 
-	// Handle search input change
 	const handleSearchInputChange = (query: string) => {
 		setSearchQuery(query);
 		handleSearch(query);
 	};
 
-	// Sync search from URL query param (e.g., from header search bar)
 	useEffect(() => {
 		if (queryParam && queryParam !== searchQuery) {
 			setSearchQuery(queryParam);
@@ -310,7 +299,6 @@ const DiscoveryPage = () => {
 		}
 	}, [queryParam, searchQuery, handleSearch]);
 
-	// Reset search state when URL query param is removed (navigation away from search)
 	useEffect(() => {
 		if (!queryParam) {
 			setShowSearchResults(false);
@@ -321,7 +309,6 @@ const DiscoveryPage = () => {
 		}
 	}, [queryParam]);
 
-	// Sync tab and page from URL on mount
 	useEffect(() => {
 		const tabParam = searchParams.get("tab") as SearchTypeTab | null;
 		const pageParam = searchParams.get("page");
@@ -339,7 +326,6 @@ const DiscoveryPage = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Handle trending item click
 	const handleTrendingClick = (item: TrendingItem) => {
 		setSearchQuery(item.title);
 		handleSearch(item.title);
@@ -354,7 +340,6 @@ const DiscoveryPage = () => {
 				};
 			}
 
-			// checkbox logic
 			const currentValues = prev[sectionKey] as string[];
 			const updatedValues = currentValues?.includes(optionId)
 				? currentValues.filter((id) => id !== optionId)
@@ -447,7 +432,6 @@ const DiscoveryPage = () => {
 		);
 	};
 
-	// Render content based on search state
 	const renderContent = () => {
 		if (showSearchResults) {
 			const isTabFetching = searchType === "projects" ? projectState.isLoading : searchState.isFetching;
@@ -508,7 +492,6 @@ const DiscoveryPage = () => {
 						/>
 					)}
 
-					{/* Pagination Controls */}
 					{!isTabFetching && !isTabError && activeTotalResults > 0 && (
 						<div className="flex items-center justify-center gap-4 mt-8">
 							<Button
@@ -538,7 +521,6 @@ const DiscoveryPage = () => {
 			);
 		}
 
-		// Default discover view - Tabs
 		return (
 			<TabPanels className="flex-1 mt-5 text-gray-neutral text-sm">
 				<TabPanel className="space-y-6">
@@ -729,18 +711,6 @@ const DiscoveryPage = () => {
 
 	return (
 		<div className="mt-10">
-			{/* Newer Search Section with debounce and instant search render */}
-			{/* <div className="mb-8">
-				<SearchInput
-					value={searchQuery}
-					onChange={handleSearchInputChange}
-					onSearch={handleSearch}
-					isLoading={searchState.isLoading}
-					placeholder="Search content, creators, and trending topics..."
-				/>
-			</div> */}
-
-			{/* Trending Section - Show when not searching */}
 			{!isProjectsBrowseTab && !showSearchResults && (
 				<div className="mb-8 lg:hidden">
 					<TrendingSection
@@ -862,14 +832,11 @@ const DiscoveryPage = () => {
 				</div>
 
 				<div className="flex gap-6">
-					{/* Main Content */}
 					<div className="flex-1">
 						{renderContent()}
 					</div>
 
-					{/* Sidebar with Filters and Trending */}
 					<div className="hidden lg:block w-72 space-y-6">
-						{/* Filters Section */}
 						{!isProjectsBrowseTab && !showSearchResults && (
 							<div className="px-5 bg-white rounded-lg border border-[#E6E6E6] p-5">
 								<h3 className="text-black-default font-semibold text-base mb-4">Filters</h3>
@@ -904,7 +871,6 @@ const DiscoveryPage = () => {
 							</div>
 						)}
 
-						{/* Trending Section */}
 						{!isProjectsBrowseTab && !showSearchResults && (
 							<TrendingSection
 								items={trendingState.items}
@@ -915,7 +881,6 @@ const DiscoveryPage = () => {
 						)}
 					</div>
 
-					{/* Mobile Filters - Collapsed */}
 					{!isProjectsBrowseTab && !showSearchResults && (
 						<div className="lg:hidden mt-5 px-5">
 							{filterSections.map((section) => (
@@ -926,7 +891,6 @@ const DiscoveryPage = () => {
 											<label key={option.id} className={`flex items-center gap-3 ${option.disabled ? '' : 'cursor-pointer'}`}>
 												<input
 													type={section.type}
-													// name={section.type === "radio" ? section.key : undefined}
 													checked={
 														section.type === "radio"
 															? filters[section.key] === option.id

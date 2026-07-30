@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { MoreVertical } from "lucide-react";
 import CardStats from "./CardStats";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { StatItem } from "@/lib/card-helpers";
-import { useEffect } from "react";
+import BookmarkToggle from "@/components/bookmarks/BookmarkToggle";
+
 interface ContentFeedCardProps {
+	contentId: string;
 	imageSrc?: string;
 	profilePicSrc: string | null;
 	userName: string;
@@ -14,9 +15,13 @@ interface ContentFeedCardProps {
 	textContent: React.ReactNode;
 	date?: string;
 	stats: StatItem[];
+	platform?: string;
+	rawTitle?: string;
+	sourceUrl?: string;
 }
 
 const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
+	contentId,
 	imageSrc,
 	profilePicSrc,
 	userName,
@@ -25,14 +30,20 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	textContent,
 	date,
 	stats,
+	platform,
+	rawTitle,
+	sourceUrl,
 }) => {
 	const [currentStats, setCurrentStats] = useState<StatItem[]>(stats);
 	const [isPostLiked, setIsPostLiked] = useState(false);
 	const [imageError, setImageError] = useState(false);
+	const [isPortrait, setIsPortrait] = useState(false);
+
 	const isVideo =
 		imageSrc?.toLowerCase().includes(".mp4") ||
 		imageSrc?.includes("video_dashinit") ||
 		imageSrc?.includes("/video");
+
 	const handleLikeClick = () => {
 		setCurrentStats((prev) =>
 			prev.map((s) =>
@@ -44,6 +55,11 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 		setIsPostLiked((prev) => !prev);
 	};
 
+	const handleShareClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		// TODO: logica de share (later)
+	};
+
 	// Change to only text if thumbnail does not exist
 	const hasThumbnail = !!imageSrc;
 	const textFontSize = hasThumbnail ? "text-sm" : "text-base";
@@ -52,19 +68,19 @@ const ContentFeedCard: React.FC<ContentFeedCardProps> = ({
 	const hasStats = currentStats.some((s) => s.value != null && s.value > 0);
 	const cardClasses =
 		"flex bg-white rounded-xl shadow-lg overflow-hidden flex-col min-w-[225px] h-[440px]";
-    const [isPortrait, setIsPortrait] = useState(false);
 
-useEffect(() => {
-  if (!imageSrc) return;
+	useEffect(() => {
+		if (!imageSrc) return;
 
-  const img = new window.Image();
+		const img = new window.Image();
 
-  img.onload = () => {
-    setIsPortrait(img.height > img.width);
-  };
+		img.onload = () => {
+			setIsPortrait(img.height > img.width);
+		};
 
-  img.src = imageSrc;
-}, [imageSrc]);
+		img.src = imageSrc;
+	}, [imageSrc]);
+
 	return (
 		<div className={cardClasses}>
 			{/* Thumbnail */}
@@ -99,9 +115,9 @@ useEffect(() => {
 			<div className="p-4 flex flex-col flex-1 min-h-0">
 				<div className="flex-1 min-h-0 overflow-hidden">
 					{/* User Info */}
-						<div className="flex items-start justify-between mb-3">
+					<div className="flex items-start justify-between mb-3">
 						<div className="flex items-center">
-						{/* Profile Picture */}
+							{/* Profile Picture */}
 							<div className="relative mr-3 w-12 h-10 flex-shrink-0 overflow-visible">
 								<UserAvatar
 									src={profilePicSrc}
@@ -123,8 +139,25 @@ useEffect(() => {
 								<p className="text-gray-500 text-sm">{userHandle}</p>
 							</div>
 						</div>
-						{/* More Options Icon */}
-						<MoreVertical size={20} className="text-gray-400" />
+
+						{/* Share + Bookmark */}
+						<div className="flex items-center gap-3">
+							<button
+								onClick={handleShareClick}
+								aria-label="Share"
+								className="flex items-center justify-center hover:opacity-70 transition cursor-pointer"
+							>
+								<Image src="/icons/share.svg" alt="Share" width={16} height={16} />
+							</button>
+							<BookmarkToggle
+								contentId={contentId}
+								platform={platform}
+								title={rawTitle}
+								contentUrl={sourceUrl}
+								thumbnailUrl={imageSrc}
+								type="post"
+							/>
+						</div>
 					</div>
 
 					{/* Content Text */}

@@ -187,6 +187,7 @@ export const SearchResults = ({
                         >
                             <ContentFeedCard
                                 {...cardProps}
+                                contentId={result.id}
                                 platformIcon={renderPlatformIcon(cardProps.platform)}
                             />
                         </div>
