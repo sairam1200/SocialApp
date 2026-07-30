@@ -80,9 +80,7 @@ const DiscoveryPage = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [showSearchResults, setShowSearchResults] = useState(false);
 	const [searchType, setSearchType] = useState<SearchTypeTab>("profiles");
-	const [profilesPage, setProfilesPage] = useState(1);
-	const [contentsPage, setContentsPage] = useState(1);
-	const [projectsPage, setProjectsPage] = useState(1);
+	const [searchPage, setSearchPage] = useState(1);
 	const [activeBrowseTab, setActiveBrowseTab] = useState(0);
 	const [allProjectsPage, setAllProjectsPage] = useState(1);
 	const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -97,12 +95,13 @@ const DiscoveryPage = () => {
 
 	const SEARCH_LIMIT = 12;
 
-	const searchState = useSearch({ debounceMs: 120, useMockData: false, page: searchType === "projects" ? undefined : (searchType === "profiles" ? profilesPage : contentsPage), limit: SEARCH_LIMIT, enabled: searchType !== "projects" && showSearchResults });
-	const projectState = useSearchProjects({
-		q: showSearchResults ? debouncedSearchQuery : undefined,
-		page: projectsPage,
+	const searchState = useSearch({
+		debounceMs: 120,
+		useMockData: false,
+		page: searchPage,
 		limit: SEARCH_LIMIT,
-		enabled: searchType === "projects" && showSearchResults && !!debouncedSearchQuery?.trim(),
+		enabled: showSearchResults,
+		platforms: selectedPlatforms.length > 0 ? selectedPlatforms : undefined,
 	});
 	const allProjectsState = useSearchProjects({
 		q: "",
@@ -114,18 +113,14 @@ const DiscoveryPage = () => {
 	const trendingState = useTrending(selectedPlatforms || undefined, true);
 	const creatorState = useDiscoverCreators(12);
 
-	const profilesTotalPages = Math.ceil(searchState.profilesTotal / SEARCH_LIMIT);
-	const contentsTotalPages = Math.ceil(searchState.contentsTotal / SEARCH_LIMIT);
-	const projectsTotalPages = Math.ceil(projectState.totalResults / SEARCH_LIMIT);
+	const searchTotalPages = Math.ceil(searchState.totalResults / SEARCH_LIMIT);
+	const activeTotalResults = searchState.totalResults;
+	const activeHasNextPage = searchPage < searchTotalPages;
+	const activeHasPreviousPage = searchPage > 1;
+
 	const allProjectsTotalPages = Math.ceil(allProjectsState.totalResults / SEARCH_LIMIT);
 	const allProjectsHasNextPage = allProjectsPage < allProjectsTotalPages;
 	const allProjectsHasPreviousPage = allProjectsPage > 1;
-
-	const activePage = searchType === "projects" ? projectState.page : searchType === "profiles" ? profilesPage : contentsPage;
-	const activeTotalResults = searchType === "projects" ? projectState.totalResults : searchType === "profiles" ? searchState.profilesTotal : searchState.contentsTotal;
-	const activeTotalPages = searchType === "projects" ? projectsTotalPages : searchType === "profiles" ? profilesTotalPages : contentsTotalPages;
-	const activeHasNextPage = activePage < activeTotalPages;
-	const activeHasPreviousPage = activePage > 1;
 
 	const searchTabIndex = showSearchResults
 		? searchTypeTabs.findIndex((t) => t.toLowerCase() === searchType)
@@ -145,21 +140,17 @@ const DiscoveryPage = () => {
 
 	const handleNextPage = useCallback(() => {
 		if (!activeHasNextPage) return;
-		const nextPage = activePage + 1;
-		if (searchType === "profiles") setProfilesPage(nextPage);
-		else if (searchType === "contents") setContentsPage(nextPage);
-		else setProjectsPage(nextPage);
+		const nextPage = searchPage + 1;
+		setSearchPage(nextPage);
 		updateUrlParams({ page: String(nextPage) });
-	}, [searchType, activePage, activeHasNextPage, updateUrlParams]);
+	}, [searchPage, activeHasNextPage, updateUrlParams]);
 
 	const handlePreviousPage = useCallback(() => {
 		if (!activeHasPreviousPage) return;
-		const prevPage = activePage - 1;
-		if (searchType === "profiles") setProfilesPage(prevPage);
-		else if (searchType === "contents") setContentsPage(prevPage);
-		else setProjectsPage(prevPage);
+		const prevPage = searchPage - 1;
+		setSearchPage(prevPage);
 		updateUrlParams({ page: String(prevPage) });
-	}, [searchType, activePage, activeHasPreviousPage, updateUrlParams]);
+	}, [searchPage, activeHasPreviousPage, updateUrlParams]);
 
 	const { authUser } = useAuthUserStore();
 
@@ -222,12 +213,19 @@ const DiscoveryPage = () => {
 
 	const contentSearchResults = useMemo(() => {
 		if (!showSearchResults || searchType !== "contents") return [];
-		let results = searchState.results.filter((r) => r.type !== "profile");
+		let results = searchState.results.filter(
+			(r) => r.type !== "profile" && r.type !== "project",
+		);
 		if (selectedPlatforms.length > 0) {
 			results = results.filter((r) => selectedPlatforms.includes(r.platform));
 		}
 		return results;
 	}, [searchState.results, searchType, showSearchResults, selectedPlatforms]);
+
+	const projectSearchResults = useMemo(() => {
+		if (!showSearchResults || searchType !== "projects") return [];
+		return searchState.results.filter((r) => r.type === "project");
+	}, [searchState.results, searchType, showSearchResults]);
 
 	function renderContentFeedCard(item: DiscoverContentModel, titleLimit = 34) {
 		const cardProps = normalizeDiscoverContent(item, titleLimit);
@@ -271,9 +269,7 @@ const DiscoveryPage = () => {
 				}
 			}
 
-			setProfilesPage(1);
-			setContentsPage(1);
-			setProjectsPage(1);
+			setSearchPage(1);
 			searchState.debouncedSearch(query);
 			setShowSearchResults(true);
 		},
@@ -303,9 +299,7 @@ const DiscoveryPage = () => {
 		if (!queryParam) {
 			setShowSearchResults(false);
 			setSearchQuery("");
-			setProfilesPage(1);
-			setContentsPage(1);
-			setProjectsPage(1);
+			setSearchPage(1);
 		}
 	}, [queryParam]);
 
@@ -318,9 +312,7 @@ const DiscoveryPage = () => {
 		if (pageParam) {
 			const page = parseInt(pageParam, 10);
 			if (!isNaN(page) && page > 0) {
-				if (tabParam === "contents") setContentsPage(page);
-				else if (tabParam === "projects") setProjectsPage(page);
-				else setProfilesPage(page);
+				setSearchPage(page);
 			}
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -434,10 +426,16 @@ const DiscoveryPage = () => {
 
 	const renderContent = () => {
 		if (showSearchResults) {
-			const isTabFetching = searchType === "projects" ? projectState.isLoading : searchState.isFetching;
-			const isTabError = searchType === "projects" ? projectState.isError : searchState.isError;
-			const tabError = searchType === "projects" ? projectState.error : searchState.error;
-			const activeResults = searchType === "profiles" ? profileSearchResults : contentSearchResults;
+			const isTabFetching = searchState.isFetching;
+			const isTabError = searchState.isError;
+			const tabError = searchState.error;
+			const activeResults = searchType === "profiles"
+				? profileSearchResults
+				: searchType === "projects"
+					? projectSearchResults
+					: contentSearchResults;
+
+			const typeLabel = searchType === "projects" ? "results" : searchType;
 
 			return (
 				<div className="space-y-6">
@@ -446,52 +444,20 @@ const DiscoveryPage = () => {
 							Search Results for &quot;{searchQuery}&quot;
 						</h2>
 						<span className="text-sm text-gray-600">
-							{activeTotalResults} {searchType === "projects" ? "projects" : searchType === "profiles" ? "profiles" : "contents"}
+							{activeTotalResults} {typeLabel}
 						</span>
 					</div>
-					{searchType === "projects" ? (
-						isTabFetching ? (
-							<div className={cn("grid gap-6", viewType === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
-								{[...Array(12)].map((_, i) => (
-									<div key={i} className="bg-white rounded-lg border border-[#E6E6E6] p-4 animate-pulse h-64">
-										<div className="flex gap-4 h-full">
-											<div className="w-16 h-16 bg-[#F0F0F0] rounded-lg shrink-0"></div>
-											<div className="flex-1 space-y-2">
-												<div className="h-4 bg-[#F0F0F0] rounded w-3/4"></div>
-												<div className="h-3 bg-[#F0F0F0] rounded w-1/2"></div>
-												<div className="h-3 bg-[#F0F0F0] rounded w-2/3"></div>
-											</div>
-										</div>
-									</div>
-								))}
-							</div>
-						) : projectState.projects.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-12">
-								<div className="rounded-full bg-gray-100 p-4 mb-4">
-									<div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin opacity-50"></div>
-								</div>
-								<h3 className="text-lg font-semibold text-gray-900 mb-2">No projects found</h3>
-								<p className="text-gray-600 text-center">Try searching with different keywords</p>
-							</div>
-						) : (
-							<div className={cn("grid gap-6", viewType === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
-								{projectState.projects.map((project) => (
-									<ProjectCard key={project.id} project={project} />
-								))}
-							</div>
-						)
-					) : (
-						<SearchResults
-							results={activeResults}
-							searchType={searchType}
-							isLoading={isTabFetching}
-							isError={isTabError}
-							error={tabError}
-							viewType={viewType}
-							onRetry={() => handleSearch(searchQuery)}
-						/>
-					)}
+					<SearchResults
+						results={activeResults}
+						searchType={searchType}
+						isLoading={isTabFetching}
+						isError={isTabError}
+						error={tabError}
+						viewType={viewType}
+						onRetry={() => handleSearch(searchQuery)}
+					/>
 
+					{/* Pagination Controls */}
 					{!isTabFetching && !isTabError && activeTotalResults > 0 && (
 						<div className="flex items-center justify-center gap-4 mt-8">
 							<Button
@@ -504,7 +470,7 @@ const DiscoveryPage = () => {
 							</Button>
 
 							<span className="text-sm text-gray-600">
-								Page {activePage} of {activeTotalPages}
+								Page {searchPage} of {searchTotalPages}
 							</span>
 
 							<Button

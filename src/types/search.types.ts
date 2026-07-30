@@ -210,7 +210,7 @@ export interface YouTubeResult {
   nextPageToken?: string;
 }
 
-// ===== Unified API Response =====
+// ===== Unified API Response (legacy platform-specific format) =====
 export interface SearchResponse {
   query: string;
   platforms: string[];
@@ -223,6 +223,42 @@ export interface SearchResponse {
     [platform: string]: TwitterResult | InstagramResult | FacebookResult | YouTubeResult | undefined;
   };
   paginationTokens?: PaginationTokens;
+  totalResults: number;
+  page: number;
+  limit: number;
+}
+
+// ===== Unified Search Backend Response (POST /search — contentStreams corpus) =====
+export interface UnifiedSearchContentItem {
+  id: string;
+  platform: string;
+  externalId: string;
+  type: string;
+  subType: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  mediaUrl: string;
+  creatorName: string;
+  creatorUsername?: string;
+  creatorAvatar: string;
+  publishedAt: string;
+  engagement: {
+    viewCount?: number;
+    likeCount?: number;
+    commentCount?: number;
+    shareCount?: number;
+  };
+  score: number;
+  rank: number;
+  platformMetadata: Record<string, any>;
+}
+
+export interface UnifiedSearchResponse {
+  query: string;
+  platforms: string[];
+  results: Record<string, UnifiedSearchContentItem[]>;
+  paginationTokens: Record<string, string | null>;
   totalResults: number;
   page: number;
   limit: number;

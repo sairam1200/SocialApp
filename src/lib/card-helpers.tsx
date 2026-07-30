@@ -118,7 +118,7 @@ export function normalizeSearchResult(result: SearchResult): CardContentProps {
     imageSrc: result.media?.url || result.media?.thumbnailUrl,
     profilePicSrc: result.author?.profileImage ?? null,
     userName: result.author?.name || "Unknown",
-    userHandle: result.author?.handle || "@unknown",
+    userHandle: result.author?.handle,
     platform: result.platform,
     textContent: buildContentText(title, description),
     date,

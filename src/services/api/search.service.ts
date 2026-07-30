@@ -11,9 +11,26 @@ import {
   YouTubeContent,
   GlobalSearchResponse,
   GlobalSearchSuggestion,
+  UnifiedSearchResponse,
+  UnifiedSearchContentItem,
 } from "@/types/search.types";
 import { normalizePublicProfile } from "@/lib/normalizers/profile.normalizer";
 import { normalizeGlobalSearchContent } from "@/lib/normalizers/content.normalizer";
+import { normalizeHybridResults } from "@/lib/normalizers/search.normalizer";
+
+function mapUnifiedContentType(
+  type: string,
+  subType: string,
+): "post" | "profile" | "video" | "reel" | "content" | "feed" | "project" {
+  const t = type?.toLowerCase();
+  const s = subType?.toLowerCase();
+  if (t === "video" || s === "video") return "video";
+  if (s === "short" || s === "reel" || s === "shorts") return "reel";
+  if (t === "profile" || s === "channel" || s === "user") return "profile";
+  if (s === "post" || s === "feed") return "post";
+  if (s === "pin" || s === "image") return "content";
+  return "content";
+}
 
 export class SearchService {
   /**
@@ -225,5 +242,93 @@ export class SearchService {
       paginationTokens: response.paginationTokens,
       totalResults: response.totalResults,
     };
+  }
+
+  /**
+   * Search the unified content corpus (contentStreams)
+   * POST /search — same endpoint, routed by feature flag on backend
+   */
+  @Post<UnifiedSearchResponse>("/search")
+  async searchUnifiedContent(
+    @Body() body: {
+      searchTerm: string;
+      platforms?: string[];
+      page?: number;
+      limit?: number;
+      forceRefresh?: boolean;
+    }
+  ): Promise<UnifiedSearchResponse> {
+    return {
+      query: "",
+      platforms: [],
+      results: {},
+      paginationTokens: {},
+      totalResults: 0,
+      page: 1,
+      limit: 25,
+    };
+  }
+
+  /**
+   * Normalize unified search backend response into flat SearchResult array
+   * Maps backend field names (creatorName, viewCount, etc.) to frontend shapes
+   */
+  normalizeUnifiedContentResults(response: UnifiedSearchResponse): NormalizedSearchResults {
+    const results: SearchResult[] = [];
+
+    for (const [, items] of Object.entries(response.results)) {
+      for (const item of items) {
+        results.push({
+          id: item.id,
+          type: mapUnifiedContentType(item.type, item.subType),
+          platform: item.platform,
+          title: item.title,
+          description: item.description,
+          externalId: item.externalId,
+          url: item.platformMetadata?.sourceUrl ?? item.platformMetadata?.url,
+          publishedAt: item.publishedAt,
+          author: {
+            name: item.creatorName,
+            profileImage: item.creatorAvatar || undefined,
+          },
+          media: {
+            type: item.type === "video" ? "video" : "image",
+            thumbnailUrl: item.thumbnailUrl || undefined,
+            url: item.mediaUrl || undefined,
+          },
+          engagement: {
+            views: item.engagement?.viewCount ?? null,
+            likes: item.engagement?.likeCount ?? null,
+            comments: item.engagement?.commentCount ?? null,
+            shares: item.engagement?.shareCount ?? null,
+          },
+        });
+      }
+    }
+
+    return {
+      results,
+      totalResults: response.totalResults,
+      paginationTokens: response.paginationTokens ?? undefined,
+    };
+  }
+
+  /**
+   * Normalize hybrid search response (profiles + content + projects in one response)
+   * Dispatches to the correct normalizer based on each item's type field.
+   */
+  normalizeHybridResults(response: UnifiedSearchResponse): {
+    results: SearchResult[];
+    profilesTotal: number;
+    contentsTotal: number;
+    projectsTotal: number;
+  } {
+    const allItems: UnifiedSearchContentItem[] = [];
+
+    for (const [, items] of Object.entries(response.results)) {
+      allItems.push(...items);
+    }
+
+    return normalizeHybridResults(allItems);
   }
 }
