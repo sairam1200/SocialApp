@@ -191,7 +191,7 @@ export const platforms: Platform[] = [
 		urlPrefix: "https://linkedin.com/in/",
 		iconName: "LINKEDIN",
 		connected: false,
-		capabilities: { manualLink: true, oauth: true, importContent: false },
+		capabilities: { manualLink: true, oauth: true, importContent: true },
 		oauthStatus: "ready",
 	},
 ];
