@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-08-01",
+  "source": "Search Runtime Audit",
+  "version": 1,
+  "note": "written = metaData keys persisted by the platform importer/search fetch into ContentStream.metaData (raw provider keys). readBySearch = keys the unified pipeline (ContentStreamIndexService.normalizeMetaData + ContentStreamSearchRepository.toIndexDocument + ResponseAdapter) consumes. renderedByContentCard = keys that reach the frontend card props. 'unused' highlights metaData that is written but never read or rendered.",
+  "platforms": {
+    "youtube": {
+      "written": [
+        "description", "publishedAt", "thumbnails", "videoId", "isShort", "duration",
+        "viewCount", "likeCount", "commentCount", "thumbnailUrl", "thumbnail",
+        "channelId", "channelTitle", "youtubeUrl", "importedAt", "playlistId", "itemCount",
+        "statistics", "type", "channelName", "channelUsername", "channelProfileImage", "channelUrl",
+        "videoDescription"
+      ],
+      "readBySearch": [
+        "description", "thumbnailUrl", "thumbnail", "thumbnails.default.url", "publishedAt",
+        "channelId", "channelName", "channelUsername", "channelProfileImage", "channelUrl",
+        "viewCount", "likeCount", "commentCount", "youtubeUrl", "videoId"
+      ],
+      "renderedByContentCard": [
+        "description", "thumbnailUrl", "publishedAt", "channelName", "channelUsername",
+        "channelProfileImage", "viewCount", "likeCount", "commentCount", "youtubeUrl"
+      ],
+      "unused": ["isShort", "duration", "statistics", "itemCount", "playlistId", "videoDescription", "type"]
+    },
+    "instagram": {
+      "written": [
+        "caption", "mediaType", "mediaUrl", "permalink", "likeCount", "commentsCount",
+        "thumbnailUrl", "timestamp", "importedAt", "reach", "saved"
+      ],
+      "readBySearch": ["caption", "mediaUrl", "permalink", "thumbnailUrl", "timestamp", "username", "likeCount", "commentsCount"],
+      "renderedByContentCard": ["caption", "permalink", "thumbnailUrl", "timestamp", "likeCount", "commentsCount"],
+      "unused": ["mediaType", "reach", "saved", "mediaUrl (video asset, not rendered since thumbnail preferred)"]
+    },
+    "facebook": {
+      "written": [
+        "message", "permalink", "imageUrl", "createdTime", "analytics",
+        "importedAt"
+      ],
+      "readBySearch": ["message", "permalink", "imageUrl", "createdTime", "analytics.reactions", "analytics.comments", "analytics.shares"],
+      "renderedByContentCard": ["message", "permalink", "imageUrl", "createdTime", "analytics.reactions", "analytics.comments", "analytics.shares"],
+      "unused": ["analytics.engagement"]
+    },
+    "tiktok": {
+      "written": [
+        "description", "coverImageUrl", "shareUrl", "duration", "createTime", "stats",
+        "likeCount", "commentCount", "shareCount", "viewCount", "videoDescription",
+        "mediaUrl", "videoDuration", "height", "width"
+      ],
+      "readBySearch": [
+        "description", "videoDescription", "coverImageUrl", "shareUrl", "createTime",
+        "stats.likeCount", "stats.commentCount", "stats.shareCount", "stats.viewCount"
+      ],
+      "renderedByContentCard": ["description", "coverImageUrl", "shareUrl", "createTime", "likeCount", "commentCount", "shareCount", "viewCount"],
+      "unused": ["duration", "videoDuration", "height", "width", "mediaUrl (when coverImageUrl present)"]
+    },
+    "twitter": {
+      "written": [
+        "text", "mediaType", "mediaUrl", "thumbnailUrl", "timestamp", "importedAt",
+        "likeCount", "replyCount", "repostCount", "quoteCount", "editHistoryTweetIds"
+      ],
+      "readBySearch": ["text", "thumbnailUrl", "mediaUrl", "timestamp", "likeCount", "replyCount", "repostCount", "quoteCount"],
+      "renderedByContentCard": ["text", "thumbnailUrl", "timestamp", "likeCount", "replyCount", "repostCount"],
+      "unused": ["editHistoryTweetIds", "mediaType", "mediaUrl (video asset)"]
+    },
+    "linkedin": {
+      "written": [
+        "commentary", "author", "created", "lastModified", "visibility", "distribution",
+        "content", "activity", "impressions", "reactions", "comments", "shares", "text"
+      ],
+      "readBySearch": ["commentary", "commentary.text", "text.text", "author", "created", "lastModified", "activity"],
+      "renderedByContentCard": ["commentary", "author", "created"],
+      "unused": ["lastModified", "visibility", "distribution", "content", "activity", "impressions", "reactions (not in normalized engagement)"]
+    },
+    "reddit": {
+      "written": [
+        "description", "subreddit", "author", "score", "upvoteRatio", "numComments",
+        "url", "permalink", "createdUtc", "thumbnail", "selftext"
+      ],
+      "readBySearch": ["description", "selftext", "author", "score", "upvoteRatio", "numComments", "url", "permalink", "createdUtc", "thumbnail", "subreddit"],
+      "renderedByContentCard": ["description", "author", "permalink", "createdUtc", "thumbnail", "numComments", "score"],
+      "unused": ["subreddit", "upvoteRatio"]
+    },
+    "pinterest": {
+      "written": [
+        "description", "imageUrl", "boardId", "boardName", "link", "createdAt",
+        "note", "analytics", "importedAt"
+      ],
+      "readBySearch": ["description", "imageUrl", "boardId", "boardName", "link", "createdAt", "note", "analytics.impressions", "analytics.saves"],
+      "renderedByContentCard": ["description", "imageUrl", "link", "createdAt", "note"],
+      "unused": ["boardId", "analytics.impressions", "analytics.saves"]
+    },
+    "spotify": {
+      "written": [
+        "description", "artists", "images", "releaseDate", "popularity",
+        "name", "type", "externalUrls", "external_urls", "album", "durationMs",
+        "totalTracks", "owner", "uri", "href"
+      ],
+      "readBySearch": ["description", "artists", "images", "releaseDate", "popularity"],
+      "renderedByContentCard": ["description", "artists", "images", "releaseDate"],
+      "unused": ["popularity", "name", "type", "externalUrls", "external_urls", "album", "durationMs", "totalTracks", "owner", "uri", "href"]
+    },
+    "threads": {
+      "written": [],
+      "readBySearch": ["caption", "text", "thumbnailUrl", "timestamp", "username", "likeCount", "commentCount", "permalink"],
+      "renderedByContentCard": [],
+      "unused": [],
+      "note": "Threads API not yet available (placeholder search only). No importer writes metaData today."
+    },
+    "snapchat": {
+      "written": [],
+      "readBySearch": [],
+      "renderedByContentCard": [],
+      "unused": [],
+      "note": "Snapchat API has limited availability - fallback response only. No importer writes metaData today."
+    },
+    "behance": {
+      "written": [],
+      "readBySearch": [],
+      "renderedByContentCard": [],
+      "unused": [],
+      "note": "Behance has no official API - fallback response only. No importer writes metaData today."
+    }
+  }
+}

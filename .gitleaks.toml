@@ -1,0 +1,110 @@
+# gitleaks configuration — Gaddr Search & Me, Frontend
+#
+# Used by ./scripts/ci.sh. Mirrors the backend config so both repos agree on what
+# counts as a finding.
+#
+# The goal is a scanner people trust. One that reports 74 findings where all 74 are
+# React component names and build artifacts gets bypassed with --no-verify, which is
+# worse than having no scanner.
+#
+# Exemptions use the plural [[allowlists]] form throughout. Two reasons: gitleaks
+# refuses to load a config that carries both the deprecated singular [allowlist]
+# table and the plural one, and only the plural form takes `targetRules` and
+# `condition` — which is what lets an exemption be narrow enough to stay an
+# exemption instead of quietly becoming a blind spot.
+#
+# Changed something here? Run ./scripts/verify-gitleaks-allowlist.sh. A green scan is
+# not evidence that an edit to this file did what you meant; see the note below.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Build output, lockfiles, and public-by-design values"
+
+paths = [
+  # Build output — gitignored, regenerated, and the source of 72 of the 74
+  # false positives found on the first run.
+  '''^\.next/''',
+  '''^out/''',
+  '''^node_modules/''',
+  '''^coverage/''',
+  '''^\.vercel/''',
+
+  # Lockfiles: long integrity hashes, not credentials.
+  '''yarn\.lock$''',
+  '''package-lock\.json$''',
+
+  # Inlined base64 image data in SVG assets trips high-entropy rules.
+  '''^src/components/svg/.*\.svg$''',
+  '''^public/''',
+]
+
+regexes = [
+  # The default linkedin-client-id rule matched this import list:
+  #   import { FacebookPreview, InstagramPreview, LinkedInPreview, TwitterPreview }
+  # i.e. React component names, not a client ID. Restricted to PascalCase
+  # identifiers ending in a component-ish suffix, so a real ID still trips.
+  '''\b(LinkedIn|Twitter|Facebook|Instagram|Pinterest|Reddit|Youtube|Tiktok|Threads|Behance|Snapchat|Spotify)[A-Z][a-zA-Z]*\b''',
+
+  # NEXT_PUBLIC_* values are inlined into the client bundle by design — they are
+  # public, and treating them as secrets is a category error. The real rule is
+  # "never put a secret behind NEXT_PUBLIC_", which is enforced in review, not here.
+  '''NEXT_PUBLIC_[A-Z0-9_]+''',
+]
+
+[[allowlists]]
+# Verified false positive. `generic-api-key` fires on the identifier `key` next to a
+# quoted string, so this narrowing of a TypeScript union reads to it as an assignment:
+#
+#   if (key === "p95LatencyMs") {
+#
+# `p95LatencyMs` is a member of the exported EvaluationMetricKey union, not a
+# credential. The file holds no secret and predates this config (added in 10d0955).
+#
+# Scoped three ways, all of which must hold: the one rule, the named paths, and a
+# match that is literally a comparison against a known metric key. A real key in those
+# files — `const apiKey = "…"` — still trips the rule, and so does a metric key added
+# to the union without being added here. Failing closed on a new metric costs one line
+# in this file; failing open on a live credential does not have a comparable price.
+#
+# The key below is `condition`, not `matchCondition`. gitleaks ignores unknown config
+# keys silently, so the misspelling does not fail the run — it falls back to the "OR"
+# default, where the path alone exempts the file and every real key in it goes unseen.
+# Verified against ./scripts/verify-gitleaks-allowlist.sh, which exists because that
+# failure is invisible in a green scan.
+description = "EvaluationMetricKey comparisons in the evaluation admin UI"
+targetRules = ["generic-api-key"]
+condition = "AND"
+
+# The source file, plus the two documents that quote the offending line. Writing down
+# a false positive reproduces it, so the docs tripped the rule the moment they landed —
+# which is the path scoping working, not a reason to loosen the regex. The exemption is
+# still bound to the comparison shape in all three, so a planted key in any of them is
+# still caught, and the same comparison in a fourth file is not pre-approved.
+paths = [
+  '''^src/app/\(dashboard\)/admin/evaluation/evaluation-ui\.util\.ts$''',
+  '''^docs/SECRET_SCANNING\.md$''',
+  '''^docs/GATE_ROADMAP\.md$''',
+  '''^AGENT_LOG\.md$''',
+]
+
+regexTarget = "match"
+regexes = [
+  '''\bkey === "(precisionAt5|recallAt5|mrr|ndcgAt5|citationCoverage|factuality|safetyPassRate|p95LatencyMs)"''',
+]
+
+[[rules]]
+# Frontend-specific risk: a backend/server secret leaking into a client-visible
+# variable. These names must never appear with a NEXT_PUBLIC_ prefix.
+id = "gaddr-server-secret-exposed-to-client"
+description = "Server-side secret exposed via NEXT_PUBLIC_"
+regex = '''NEXT_PUBLIC_[A-Z0-9_]*(SECRET|PRIVATE_KEY|CLIENT_SECRET|SERVICE_ACCOUNT|PASSWORD|DB_|DATABASE_URL)'''
+tags = ["frontend", "exposure"]
+
+[[rules]]
+# Platform OAuth tokens must never reach the frontend at all.
+id = "gaddr-platform-token"
+description = "Social platform access token in frontend source"
+regex = '''\b(pina_[A-Za-z0-9]{40,}|ya29\.[A-Za-z0-9_-]{40,}|EAA[A-Za-z0-9]{40,})'''
+tags = ["oauth", "token"]

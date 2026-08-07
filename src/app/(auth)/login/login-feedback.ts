@@ -1,0 +1,1 @@
+export const LOGIN_SUCCESS_TOAST_DURATION_MS = 4_000;

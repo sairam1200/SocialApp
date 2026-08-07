@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-08-01",
+  "source": "Search Runtime Audit",
+  "version": 1,
+  "contentCard": {
+    "renderedFields": {
+      "title": {
+        "backendField": "SearchResult.title",
+        "frontendField": "item.title",
+        "componentProp": "textContent (title span, substring(0, 34))",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "spotify", "threads"]
+      },
+      "description": {
+        "backendField": "SearchResult.description (doc.description ?? platformMetadata.description)",
+        "frontendField": "item.description",
+        "componentProp": "textContent (description span, line-clamp-2)",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "spotify"]
+      },
+      "thumbnailUrl": {
+        "backendField": "SearchResult.thumbnailUrl",
+        "frontendField": "item.thumbnailUrl -> media.thumbnailUrl",
+        "componentProp": "imageSrc (thumbnailUrl preferred over mediaUrl)",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "tiktok", "pinterest", "facebook", "twitter", "reddit"]
+      },
+      "displayName": {
+        "backendField": "ResolvedCreatorIdentity.displayName",
+        "frontendField": "author.name (creator.displayName ?? item.creatorName)",
+        "componentProp": "userName",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "spotify", "threads"]
+      },
+      "handle": {
+        "backendField": "ResolvedCreatorIdentity.handle",
+        "frontendField": "author.handle (creator.handle ?? item.creatorUsername)",
+        "componentProp": "userHandle",
+        "status": "fallback",
+        "platforms": ["youtube", "instagram", "tiktok", "twitter", "linkedin", "reddit", "spotify", "threads"]
+      },
+      "profileImage": {
+        "backendField": "ResolvedCreatorIdentity.profileImage",
+        "frontendField": "author.profileImage (creator.profileImage ?? item.creatorAvatar)",
+        "componentProp": "profilePicSrc",
+        "status": "fallback",
+        "platforms": ["youtube", "tiktok"]
+      },
+      "verified": {
+        "backendField": "ResolvedCreatorIdentity.verified (hardcoded false on IMPORTED_METADATA path)",
+        "frontendField": "author.verified (creator.verified)",
+        "componentProp": "verified (VerifiedIcon)",
+        "status": "missing",
+        "platforms": []
+      },
+      "publishedAt": {
+        "backendField": "SearchResult.publishedAt",
+        "frontendField": "item.publishedAt",
+        "componentProp": "date (new Date(publishedAt).toLocaleDateString())",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "threads"]
+      },
+      "viewCount": {
+        "backendField": "SearchResult.engagement.viewCount",
+        "frontendField": "item.engagement.viewCount -> engagement.views",
+        "componentProp": "stats (views)",
+        "status": "present",
+        "platforms": ["youtube", "tiktok", "twitter"]
+      },
+      "likeCount": {
+        "backendField": "SearchResult.engagement.likeCount",
+        "frontendField": "item.engagement.likeCount -> engagement.likes",
+        "componentProp": "stats (likes, clickable)",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "threads"]
+      },
+      "commentCount": {
+        "backendField": "SearchResult.engagement.commentCount",
+        "frontendField": "item.engagement.commentCount -> engagement.comments",
+        "componentProp": "stats (comments)",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "threads"]
+      },
+      "shareCount": {
+        "backendField": "SearchResult.engagement.shareCount",
+        "frontendField": "item.engagement.shareCount -> engagement.shares",
+        "componentProp": "stats (shares)",
+        "status": "missing",
+        "platforms": ["facebook", "tiktok", "twitter", "linkedin", "threads"]
+      },
+      "sourceUrl": {
+        "backendField": "SearchResult.platformMetadata.sourceUrl ?? platformMetadata.url (no top-level field)",
+        "frontendField": "item.url (platformMetadata.sourceUrl ?? platformMetadata.url)",
+        "componentProp": "sourceUrl -> card onClick navigation (window.open, _blank)",
+        "status": "fallback",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "threads"]
+      },
+      "platform": {
+        "backendField": "SearchResult.platform (defaults to 'gaddr')",
+        "frontendField": "item.platform",
+        "componentProp": "platform (renderPlatformIcon; null icon for reddit/spotify/threads/snapchat/behance)",
+        "status": "present",
+        "platforms": ["youtube", "instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "pinterest", "spotify", "threads"]
+      }
+    }
+  }
+}
