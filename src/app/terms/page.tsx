@@ -445,6 +445,46 @@ export default function TermsOfServicePage() {
                 imposed by third-party platforms that may impact the features
                 available to you.
               </p>
+              <p className="text-foreground leading-relaxed">
+                YouTube connections use Google OAuth and the YouTube APIs. You
+                authorize Gaddr to read, import, analyze, publish, or manage
+                YouTube content only to the extent shown in the consent screen
+                and requested by the feature you use. You remain responsible
+                for your channel, content, permissions, and compliance with
+                the{" "}
+                <a
+                  href="https://www.youtube.com/t/terms"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  YouTube Terms of Service
+                </a>
+                , Google policies, and applicable law.
+              </p>
+              <p className="text-foreground leading-relaxed">
+                TikTok connections use TikTok Login Kit and Display APIs. You
+                authorize Gaddr to read your approved TikTok profile
+                information, statistics, and public videos for connection,
+                import, and Discover features. Gaddr does not request or store
+                your TikTok password. You remain responsible for your TikTok
+                account and content and must comply with TikTok&apos;s{" "}
+                <a
+                  href="https://www.tiktok.com/legal/terms-of-service"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  Terms of Service
+                </a>{" "}
+                and applicable policies.
+              </p>
+              <p className="text-foreground leading-relaxed">
+                You may disconnect a YouTube or TikTok account at any time
+                through Gaddr or the relevant platform. Platform availability,
+                authorization, review requirements, scopes, rate limits, and
+                API changes may affect or disable related Gaddr features.
+              </p>
             </CardSection>
 
             {/* ── Section 10 ── */}

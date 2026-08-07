@@ -345,6 +345,56 @@ export default function PrivacyPolicy() {
                   "userinfo.email and userinfo.profile to identify the Google account and display basic account or channel identity.",
                 ]}
               />
+              <SubHeading>TikTok API Services</SubHeading>
+              <p className="text-foreground leading-relaxed">
+                When you connect TikTok, Gaddr uses TikTok Login Kit and the
+                TikTok Display API only after you approve the OAuth request.
+                Depending on the approved app configuration, Gaddr may request
+                the following read-only permissions:
+              </p>
+              <CheckList
+                items={[
+                  "user.info.basic to identify your TikTok account and read your display name and avatar.",
+                  "user.info.profile to read profile links, bio information, and verification status.",
+                  "user.info.stats to read follower, following, likes, and video counts.",
+                  "video.list to read your public TikTok videos and related metadata for import and Discover features.",
+                ]}
+              />
+              <p className="text-foreground leading-relaxed">
+                Gaddr uses TikTok data only to connect your account, display
+                the profile information you request, import your public videos,
+                and provide Discover and related account features. We do not
+                sell TikTok data, request your TikTok password, or use TikTok
+                data for advertising, surveillance, or generalized profiling.
+                We do not disclose it except to service providers operating
+                Gaddr at your direction or when legally required.
+              </p>
+              <p className="text-foreground leading-relaxed">
+                You may disconnect TikTok through Gaddr settings or revoke
+                Gaddr&apos;s access in TikTok account settings. After
+                disconnection, Gaddr stops requesting new TikTok data and
+                deletes the stored TikTok authorization credentials. Imported
+                content may remain until you delete it or request its removal.
+                See TikTok&apos;s{" "}
+                <a
+                  href="https://www.tiktok.com/legal/privacy-policy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  Privacy Policy
+                </a>{" "}
+                and{" "}
+                <a
+                  href="https://www.tiktok.com/legal/terms-of-service"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  Terms of Service
+                </a>
+                .
+              </p>
               <p className="text-foreground leading-relaxed">
                 YouTube API data is used only to provide or improve these
                 user-facing Gaddr features. We do not sell YouTube data, use it
