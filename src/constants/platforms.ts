@@ -152,7 +152,7 @@ export const platforms: Platform[] = [
 		iconName: "TIKTOK",
 		connected: false,
 		capabilities: { manualLink: true, oauth: true, importContent: true },
-		oauthStatus: "no_credentials",
+		oauthStatus: "ready",
 	},
 	{
 		id: "pinterest",
